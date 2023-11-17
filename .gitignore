@@ -1,0 +1,12 @@
+*.bsp
+*.bpc
+*.tls
+*.tpc
+*.jld2
+*.png
+
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+/docs/build/
+/docs/Manifest.toml
