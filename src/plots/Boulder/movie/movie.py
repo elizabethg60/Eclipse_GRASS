@@ -3,7 +3,7 @@ import glob
 
 frames = []
 imgs = []
-for i in range(1,158):
+for i in range(1,147):
     imgs.append("projected_vel_{}.png".format(i))
 
 for i in imgs:

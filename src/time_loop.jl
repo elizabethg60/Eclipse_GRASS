@@ -1,130 +1,174 @@
-#parallel v1 multi-threading 
-function parallel_loop()
-        initial_N = 200
-        final_N = 375
-        N_steps = range(initial_N, final_N, step = 2)
-        N_steps = Int.(N_steps)
-        time_vector = Vector{Float64}(undef,size(N_steps)...) 
-        for i in 1:length(N_steps)
-            time_vector[i] = compute_rv_pa(N_steps[i], N_steps[i]*2, utc2et("2015-03-20T09:42:00"), 9.905548, 51.54548, 0.15, "optical")[3]                       
-        end
-        
-        @save "src/test/grid_parallel.jld2"
-        jldopen("src/test/grid_parallel.jld2", "a+") do file
-            file["N_steps"] = N_steps 
-            file["time_vector"] = time_vector
-        end
-end
-    
-function serial_loop()
-        initial_N = 200
-        final_N = 375
-        N_steps = range(initial_N, final_N, step = 2)
-        N_steps = Int.(N_steps)
-        time_vector = Vector{Float64}(undef,size(N_steps)...)
-        for i in 1:length(N_steps)
-            time_vector[i] = compute_rv(N_steps[i], N_steps[i]*2, utc2et("2015-03-20T09:42:00"), 0, 9.905548, 51.54548, 0.15, "optical")[3]
-        end
-        
-        @save "src/test/grid_serial.jld2"
-        jldopen("src/test/grid_serial.jld2", "a+") do file
-            file["N_steps"] = N_steps 
-            file["time_vector"] = time_vector
-        end
-end
-     
-#-------------------------------------------------------------------------------------
-    
-function gottingen_loop(lats::T, lons::T) where T
-    time_stamps = utc2et.(reiners_timestamps)
+function neid_loop(lats::T, lons::T) where T
+    """
+    computes RV for each timestamp for the NEID eclipse 
 
-    obs_lat = 51.54548 
-    obs_long = 9.905548
-    alt = 0.15
-
-    RV_list = Vector{Float64}(undef,size(time_stamps)...)
-    intensity_list = Vector{Float64}(undef,size(time_stamps)...)
-    for i in 1:length(time_stamps)
-        rv, intensity = compute_rv(lats, lons, time_stamps[i], i, obs_long, obs_lat, alt, "optical", obs = "Reiners")
-        RV_list[i] = rv
-        intensity_list[i] = intensity
-    end
-
-    @save "src/plots/Reiners/rv_intensity.jld2"
-    jldopen("src/plots/Reiners/rv_intensity.jld2", "a+") do file
-        file["RV_list"] = RV_list 
-        file["intensity_list"] = intensity_list
-        file["timestamps"] = et2utc.(time_stamps, "ISOC", 0)
-    end
-end
-
-function kitt_loop(lats::T, lons::T) where T
+    lats: number of latitude grid cells
+    lons: number of longitude grid cells
+    """
+    #convert from utc to et as needed by SPICE
     time_stamps = utc2et.(neid_timestamps)
 
+    #NEID location
     obs_lat = 31.9583 
-    obs_long = 360-111.5967  
+    obs_long = -111.5967  
     alt = 2.097938
 
-    RV_list = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
+    RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
-        rv, intensity = compute_rv(lats, lons, time_stamps[i], i, obs_long, obs_lat, alt, "optical", obs = "NEID")
-        RV_list[i] = rv
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical")
+        RV_list_no_cb[i] = RV_no_cb
+        RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
+        RA_list[i] = ra
+        dec_list[i] = dec
+        vel_no_cb[i] = projected_v_no_cb
+        vel_cb[i] = projected_v_cb
     end
 
-    @save "src/plots/NEID/rv_intensity.jld2"
-    jldopen("src/plots/NEID/rv_intensity.jld2", "a+") do file
-        file["RV_list"] = RV_list 
+    @save "src/plots/NEID/model_data.jld2"
+    jldopen("src/plots/NEID/model_data.jld2", "a+") do file
+        file["RV_list_no_cb"] = RV_list_no_cb 
+        file["RV_list_cb"] = RV_list_cb 
         file["intensity_list"] = intensity_list
-        file["timestamps"] = et2utc.(time_stamps, "ISOC", 0)
+        file["RA_list"] = RA_list
+        file["dec_list"] = dec_list
+        file["vel_no_cb"] = vel_no_cb
+        file["vel_cb"] = vel_cb
     end
 end
 
-function low_loop(lats::T, lons::T) where T
-    #array of timestamps 
-    time_stamps = utc2et.(expres_timestamps)
+function gottingen_loop(lats::T, lons::T) where T
+    """
+    computes RV for each timestamp for the gottingen eclipse 
+    """
+    #convert from utc to et as needed by SPICE
+    time_stamps = utc2et.(reiners_timestamps)
 
-    obs_lat = 34.744444
-    obs_long = 360-111.421944 
-    alt = 2.359152
+    #Gottingen location
+    obs_lat = 51.560583 
+    obs_long = 9.944333
+    alt = 0.201
 
-    RV_list = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
+    RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
-        rv, intensity = compute_rv(lats, lons, time_stamps[i], i, obs_long, obs_lat, alt, "optical", obs = "EXPRES")
-        RV_list[i] = rv
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical")
+        RV_list_no_cb[i] = RV_no_cb
+        RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
+        RA_list[i] = ra
+        dec_list[i] = dec
+        vel_no_cb[i] = projected_v_no_cb
+        vel_cb[i] = projected_v_cb
     end
 
-    @save "src/plots/EXPRES/rv_intensity.jld2"
-    jldopen("src/plots/EXPRES/rv_intensity.jld2", "a+") do file
-        file["RV_list"] = RV_list 
+    @save "src/plots/Reiners/model_data.jld2"
+    jldopen("src/plots/Reiners/model_data.jld2", "a+") do file
+        file["RV_list_no_cb"] = RV_list_no_cb 
+        file["RV_list_cb"] = RV_list_cb 
         file["intensity_list"] = intensity_list
-        file["timestamps"] = et2utc.(time_stamps, "ISOC", 0)
+        file["RA_list"] = RA_list
+        file["dec_list"] = dec_list
+        file["vel_no_cb"] = vel_no_cb
+        file["vel_cb"] = vel_cb
+    end
+end
+
+function expres_loop(lats::T, lons::T) where T
+    """
+    computes RV for each timestamp for the expres eclipse 
+    """
+    #convert from utc to et as needed by SPICE
+    time_stamps = utc2et.(expres_timestamps)
+
+    #EXPRES location
+    obs_lat = 34.744444
+    obs_long = -111.421944 
+    alt = 2.359152
+
+    RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+    intensity_list = Vector{Float64}(undef,size(time_stamps)...)
+    RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    #run compute_rv (serial) for each timestamp
+    for i in 1:length(time_stamps)
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical")
+        RV_list_no_cb[i] = RV_no_cb
+        RV_list_cb[i] = RV_cb
+        intensity_list[i] = intensity
+        RA_list[i] = ra
+        dec_list[i] = dec
+        vel_no_cb[i] = projected_v_no_cb
+        vel_cb[i] = projected_v_cb
+    end
+
+    @save "src/plots/EXPRES/model_data.jld2"
+    jldopen("src/plots/EXPRES/model_data.jld2", "a+") do file
+        file["RV_list_no_cb"] = RV_list_no_cb 
+        file["RV_list_cb"] = RV_list_cb 
+        file["intensity_list"] = intensity_list
+        file["RA_list"] = RA_list
+        file["dec_list"] = dec_list
+        file["vel_no_cb"] = vel_no_cb
+        file["vel_cb"] = vel_cb
     end
 end
 
 function boulder_loop(lats::T, lons::T) where T
-    #array of timestamps 
+    """
+    computes RV for each timestamp for the boulder eclipse 
+    """
+    #convert from utc to et as needed by SPICE
     time_stamps = utc2et.(boulder_timestamps)
 
+    #Boulder location
     obs_lat = 39.995380
-    obs_long = 360-105.262390
+    obs_long = -105.262390
     alt = 1.6523
 
-    RV_list = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
+    RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
+    #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
-        rv, intensity = compute_rv(lats, lons, time_stamps[i], i, obs_long, obs_lat, alt, "NIR", obs = "Boulder")
-        RV_list[i] = rv
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "NIR")
+        RV_list_no_cb[i] = RV_no_cb
+        RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
+        RA_list[i] = ra
+        dec_list[i] = dec
+        vel_no_cb[i] = projected_v_no_cb
+        vel_cb[i] = projected_v_cb
     end
 
-    @save "src/plots/Boulder/rv_intensity.jld2"
-    jldopen("src/plots/Boulder/rv_intensity.jld2", "a+") do file
-        file["RV_list"] = RV_list 
+    @save "src/plots/Boulder/model_data.jld2"
+    jldopen("src/plots/Boulder/model_data.jld2", "a+") do file
+        file["RV_list_no_cb"] = RV_list_no_cb 
+        file["RV_list_cb"] = RV_list_cb 
         file["intensity_list"] = intensity_list
-        file["timestamps"] = et2utc.(time_stamps, "ISOC", 0)
+        file["RA_list"] = RA_list
+        file["dec_list"] = dec_list
+        file["vel_no_cb"] = vel_no_cb
+        file["vel_cb"] = vel_cb
     end
 end

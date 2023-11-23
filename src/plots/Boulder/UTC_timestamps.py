@@ -1,4 +1,3 @@
-# from datetime import datetime, timedelta
 import numpy as np
 from datetime import datetime, timedelta
 data_time = np.loadtxt("Boulder_Data_bin.txt")[:, 0]

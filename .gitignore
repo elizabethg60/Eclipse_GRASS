@@ -2,8 +2,9 @@
 *.bpc
 *.tls
 *.tpc
-*.jld2
+*.jld2 
 *.png
+*.gif
 
 *.jl.cov
 *.jl.*.cov
