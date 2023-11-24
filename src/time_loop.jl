@@ -65,7 +65,7 @@ function gottingen_loop(lats::T, lons::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical")
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity

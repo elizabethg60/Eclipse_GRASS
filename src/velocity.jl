@@ -8,7 +8,7 @@ end
 function rotation_period(ϕ::T) where T 
     #prescription for differential rotation given a latitude value
     sinϕ = sin(ϕ)
-    return 360/(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4)
+    return 360/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
 end
 
 function v_scalar!(A:: Matrix, out:: Matrix)
@@ -19,7 +19,7 @@ function v_scalar!(A:: Matrix, out:: Matrix)
     out: matrix of scalar velocity value
     """
 	for i in 1:length(A)
-		out[i] = 0.9324*(2*π*sun_radius*cos(A[i]))/(rotation_period(A[i]))
+		out[i] = (2*π*sun_radius*cos(A[i]))/(rotation_period(A[i]))
 	end
 	return
 end
@@ -55,7 +55,7 @@ function v_vector(A::Matrix, B::Matrix, C::Matrix, out::Matrix)
     return
 end
 
-function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix)
+function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix, epoch)
     """
     determine projected velocity of each cell onto line of sight to observer - serial
 
@@ -66,8 +66,8 @@ function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb
     for i in 1:length(A)
         vel = [A[i][4],A[i][5],A[i][6]]
         angle = dot(B[i], vel) / (norm(B[i]) * norm(vel))
-        out_no_cb[i] = -(norm(vel) * angle)
-        out_cb[i] = -(norm(vel) * angle) + cb_velocity[i] 
+        out_no_cb[i] = (norm(vel) * angle)
+        out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
     end
     return 
 end

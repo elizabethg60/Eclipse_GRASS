@@ -47,14 +47,14 @@ function earth2patch_vectors(A::Matrix, b::Vector, out::Matrix)
     out: matrix of vectors of observer to each patch 
     """
     for i in 1:length(A)	
-        out[i] = (A[i] .- b)
+        out[i] = (b .- A[i])
     end
     return 
 end 
 
 function calc_mu(SP::Vector, OP::Vector)
     #determine mu value for each cell
-    return dot(OP, SP) / (norm(OP) * norm(SP))
+    return cos(π - acos(dot(OP, SP) / (norm(OP) * norm(SP))))
 end
 
 function calc_mu_grid!(A::Matrix, B::Matrix, out::Matrix)

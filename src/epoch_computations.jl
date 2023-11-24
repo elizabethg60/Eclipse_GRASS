@@ -1,4 +1,4 @@
-function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band; moon_r::Float64=moon_radius) where T 
+function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index; moon_r::Float64=moon_radius) where T 
     """
     compute rv for a given grid size and timestamp - serial 
     
@@ -40,7 +40,6 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band; moon_
     OP_bary = Matrix{Vector{Float64}}(undef,size(SP_bary)...)
     earth2patch_vectors(BP_bary, BO_bary, OP_bary)	
 
-
 #calculate mu for each patch
     mu_grid = Matrix{Float64}(undef,size(SP_bary)...)
     calc_mu_grid!(SP_bary, OP_bary, mu_grid) 
@@ -72,9 +71,9 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band; moon_
     convective_velocities = convective_blueshift_interpol.(mu_grid)
     projected_velocities_no_cb = Matrix{Float64}(undef,size(SP_bary)...)
     projected_velocities_cb = Matrix{Float64}(undef,size(SP_bary)...)
-    projected!(velocity_vector_ICRF, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities) 
+    projected!(velocity_vector_ICRF, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities, epoch) 
 
-
+    
 #determine patches that are blocked by moon 
     #calculate the distance between tile corner and moon
     distance = map(x -> calc_proj_dist2(x, OM_bary), OP_bary)
@@ -84,7 +83,7 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band; moon_
         LD_all = map(x -> quad_limb_darkening_NIR(x), mu_grid)
     end
     if band == "optical"
-        LD_all = map(x -> quad_limb_darkening_optical(x), mu_grid)
+        LD_all = map(x -> quad_limb_darkening_optical(x, index), mu_grid)
     end
 
     #get indices for visible patches
@@ -113,8 +112,9 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band; moon_
 #determine mean weighted velocity from sun given blocking from moon 
     mean_weight_v_no_cb = NaNMath.sum(LD_all .* dA_total_proj  .* (projected_velocities_no_cb)) / NaNMath.sum(LD_all .* dA_total_proj )
     mean_weight_v_cb = NaNMath.sum(LD_all .* dA_total_proj  .* (projected_velocities_cb)) / NaNMath.sum(LD_all .* dA_total_proj )
- #determine mean intensity 
-    mean_intensity = sum(view(LD_all .* dA_total_proj , idx1)) / length(view(LD_all .* dA_total_proj , idx1))
+#determine mean intensity 
+    mean_intensity = sum(view(LD_all, idx1)) / length(view(LD_all, idx1))
+
     
     #get ra and dec of solar grid patches
     OP_ra_dec = SPICE.recrad.(OP_bary)

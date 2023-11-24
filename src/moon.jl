@@ -14,12 +14,14 @@ function calc_proj_dist2(p1, p2)
     return (y1 - y2)^2 + (z1 - z2)^2
 end
 
-function quad_limb_darkening_optical(μ::T) where T
+function quad_limb_darkening_optical(μ::T, index) where T
     """
     limb darkening prescription for optical based on mu angle  
     """
     μ < zero(T) && return 0.0
-    return 0.28392 + 1.36896*μ - 1.75998*μ^2 + 2.22154*μ^3 - 1.56074*μ^4 + 0.44630*μ^5
+    I = 0.28392 + 1.36896*μ - 1.75998*μ^2 + 2.22154*μ^3 - 1.56074*μ^4 + 0.44630*μ^5
+    ext_factor = -(airmass[index]*ext_coef[index])/2.5
+    return I * 10^ext_factor
 end
 
 function quad_limb_darkening_NIR(μ::T) where T
