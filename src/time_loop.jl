@@ -11,7 +11,7 @@ function neid_loop(lats::T, lons::T) where T
     #NEID location
     obs_lat = 31.9583 
     obs_long = -111.5967  
-    alt = 2.097938
+    alt = 2.097938 
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
@@ -22,7 +22,7 @@ function neid_loop(lats::T, lons::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical")
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
@@ -108,7 +108,7 @@ function expres_loop(lats::T, lons::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical")
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
@@ -151,7 +151,7 @@ function boulder_loop(lats::T, lons::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "NIR")
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "NIR", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity

@@ -19,7 +19,7 @@ function v_scalar!(A:: Matrix, out:: Matrix)
     out: matrix of scalar velocity value
     """
 	for i in 1:length(A)
-		out[i] = (2*π*sun_radius*cos(A[i]))/(rotation_period(A[i]))
+		out[i] = (2*π*sun_radius*cos(A[i]))/(rotation_period(A[i])) 
 	end
 	return
 end
@@ -55,7 +55,7 @@ function v_vector(A::Matrix, B::Matrix, C::Matrix, out::Matrix)
     return
 end
 
-function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix, epoch)
+function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix, epoch, BP_bary)
     """
     determine projected velocity of each cell onto line of sight to observer - serial
 
@@ -64,9 +64,9 @@ function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb
     out: matrix of projected velocities
     """
     for i in 1:length(A)
-        vel = [A[i][4],A[i][5],A[i][6]]
-        angle = dot(B[i], vel) / (norm(B[i]) * norm(vel))
-        out_no_cb[i] = (norm(vel) * angle)
+        vel = [A[i][4],A[i][5],A[i][6]] 
+        angle = cos(π - acos(dot(B[i], vel) / (norm(B[i]) * norm(vel)))) 
+        out_no_cb[i] = (norm(vel) * angle)  #+ dot(spkssb(10,epoch,"J2000")[1:3], spkssb(399,epoch,"J2000")[4:6])/86.4 
         out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
     end
     return 

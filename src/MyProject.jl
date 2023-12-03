@@ -57,32 +57,19 @@ mu_values = reverse(file."mu")
 convective_blueshift_interpol = linear_interp(mu_values, blueshift_values)
 end 
 
-# 3. NEID Subtimestamps
-# 	*then for each midpoint timestamp sub time for 55 sec then get weighted (by intensity) mean for each midpoint
-# 	*check shape - if linear may be able to interpolate with small sample size within the 55sec (start with 5 sec)
-# 	*compare to exposure meter (already includes flux) - should be the same
-# 4. Add proper motion of Sun to get tilt in RVs that needs to be barycentric corrected 
-
 
 
 #Updates:
+#1. intensity no eclipse works - no geometry problem outside transit
+#2. intensity match: corrected distance calculation (no change), corrected weighting
+#3. RM curve residuals still do not match 
+    #all geometry officially confirmed
+    #must be missing something in velocity calculation that Reiners does not mention
+    #barycentric correction for each cell? not sure how barycorrpy is doing it - also doubt given didn't need airmass at each cell
+    #weighting?
+      
 #expanded resolution to 1000v2000 for NEID without moon and linear line did not converge but rather got smaller (note I did this with updated scalar velocity)
-#work on matching Reiners models 1 + 2 
-    #updated location information to that provided in paper
-    #using same exact differential rotation law + now added translation: vsynodic = 0.9324 vsidereal. 
-    #added their model for convective blueshift but something still wrong with basics of model one: 
-        #intensity does not match figure 1 
-            #using same exact limb darkening law and added extinction 
-                #something wrong with mu values? corrected to be using inner angle between vectors 
-                #could also be something wrong with extinction coefficient  
-
-                #hope: matching first figure 1 will result in corrected models 1 + 2 
+ 
+#hunt for CB model for 1565nm line for Boulder 
 
 
-
-
-
-
-
-
-               #(5) computed barycentric correction for each cell 

@@ -47,7 +47,7 @@ function earth2patch_vectors(A::Matrix, b::Vector, out::Matrix)
     out: matrix of vectors of observer to each patch 
     """
     for i in 1:length(A)	
-        out[i] = (b .- A[i])
+        out[i] = A[i] .- b
     end
     return 
 end 

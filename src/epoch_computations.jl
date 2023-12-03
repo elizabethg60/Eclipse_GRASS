@@ -29,8 +29,10 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
 
     #get vector from barycenter to observatory on Earth's surface
     BO_bary = earth_pv .+ EO_bary
+    #get vector from observer to Sun's center 
+    OS_bary = sun_pv - BO_bary 
     #get vector from observatory on earth's surface to moon center
-    OM_bary = moon_pv .- BO_bary
+    OM_bary = BO_bary .- moon_pv
     #get vector from barycenter to each patch on Sun's surface
     BP_bary = Matrix{Vector{Float64}}(undef,size(SP_bary)...)
     for i in eachindex(BP_bary)
@@ -52,7 +54,7 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     v_scalar!(lat_grid, v_scalar_grid)
     #convert v_scalar to from km/day m/s
     for i in eachindex(v_scalar_grid)
-        v_scalar_grid[i] = v_scalar_grid[i]/86.4
+        v_scalar_grid[i] = v_scalar_grid[i]/86.4  #+ (2*π*earth_radius*cos(deg2rad(obs_lat)))/86.4
     end
 
     #determine pole vector for each patch
@@ -71,7 +73,7 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     convective_velocities = convective_blueshift_interpol.(mu_grid)
     projected_velocities_no_cb = Matrix{Float64}(undef,size(SP_bary)...)
     projected_velocities_cb = Matrix{Float64}(undef,size(SP_bary)...)
-    projected!(velocity_vector_ICRF, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities, epoch) 
+    projected!(velocity_vector_ICRF, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities, epoch, BP_bary) 
 
     
 #determine patches that are blocked by moon 
@@ -88,34 +90,34 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
 
     #get indices for visible patches
     idx1 = mu_grid .> 0.0
-    idx3 = (idx1) .& (distance .> atan((moon_r)/norm(OM_bary))^2) 
+    idx3 = (idx1) .& (distance .> atan((moon_r)/norm(OM_bary))) 
     
     #calculating the area element dA for each tile
     ϕ = range(deg2rad(-90.0), deg2rad(90.0), length=lats)
     θ =range(0.0, deg2rad(360.0), length=lons)
     dA_sub = map(x -> calc_dA(sun_radius, x, step(ϕ), step(θ)), lat_grid)
     #get total projected, visible area of larger tile
-    dp_sub = map((x,y) -> abs(dot(x,y)), SP_bary, OP_bary) 
-    dA_total_proj = dA_sub .* dp_sub
+    dp_sub = map((x,y) -> abs(dot(x,y)), OP_bary, SP_bary) / norm(OS_bary)
+    dA_total_proj = dA_sub .* dp_sub 
 
-    #if no patches are visible, set mu, LD, projected velocity to zero 
-    for i in 1:length(idx3)
-        if idx3[i] == false
-            mu_grid[i] = NaN
-            LD_all[i] = 0.0
-            projected_velocities_no_cb[i] = NaN
-            projected_velocities_cb[i] = NaN
-        end
-    end
+    # #if no patches are visible, set mu, LD, projected velocity to zero 
+    # for i in 1:length(idx3)
+    #     if idx3[i] == false
+    #         #mu_grid[i] = NaN
+    #         LD_all[i] = 0.0
+    #         projected_velocities_no_cb[i] = 0.0
+    #         # projected_velocities_cb[i] = NaN
+    #     end
+    # end
+#determine mean intensity 
+    mean_intensity = sum(view(LD_all .* dA_total_proj, idx3)) / sum(view(dA_total_proj, idx1))  
 
 
 #determine mean weighted velocity from sun given blocking from moon 
-    mean_weight_v_no_cb = NaNMath.sum(LD_all .* dA_total_proj  .* (projected_velocities_no_cb)) / NaNMath.sum(LD_all .* dA_total_proj )
-    mean_weight_v_cb = NaNMath.sum(LD_all .* dA_total_proj  .* (projected_velocities_cb)) / NaNMath.sum(LD_all .* dA_total_proj )
-#determine mean intensity 
-    mean_intensity = sum(view(LD_all, idx1)) / length(view(LD_all, idx1))
+    mean_weight_v_no_cb = sum(view(LD_all .* dA_total_proj .* projected_velocities_no_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
+    mean_weight_v_cb =  sum(view(LD_all .* dA_total_proj .* projected_velocities_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
 
-    
+
     #get ra and dec of solar grid patches
     OP_ra_dec = SPICE.recrad.(OP_bary)
     return mean_weight_v_no_cb, mean_weight_v_cb, mean_intensity, rad2deg.(getindex.(OP_ra_dec,2)), rad2deg.(getindex.(OP_ra_dec,3)), projected_velocities_no_cb, projected_velocities_cb
