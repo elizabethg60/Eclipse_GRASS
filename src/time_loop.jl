@@ -73,8 +73,15 @@ function gottingen_loop(lats::T, lons::T) where T
         dec_list[i] = dec
         vel_no_cb[i] = projected_v_no_cb
         vel_cb[i] = projected_v_cb
-    end
 
+        # rv_bin = Vector{Float64}(undef,12)
+        # sample = utc2et.(reiners_finer_sample[i]) 
+        # for j in 1:12
+        #     rv_bin[j] = (compute_rv(lats, lons, sample[j], obs_long, obs_lat, alt, "optical", i)[1])
+        # end
+        # RV_list_no_cb[i] = mean(rv_bin)
+    end
+    print(length(RA_list))
     @save "src/plots/Reiners/model_data.jld2"
     jldopen("src/plots/Reiners/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 

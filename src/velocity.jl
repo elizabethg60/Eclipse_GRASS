@@ -1,4 +1,4 @@
-function lat_grid_fc(num_lats::Int=100, num_lon::Int=100)
+function lat_grid_fc(num_lats::Int=100, num_lon::Int=100) 
     #creates matrix of latitude values reflecting solar grid size - serial 
     ϕ = deg2rad.(range(-90.0, 90.0, length=num_lats))
     A = [ϕ for idx in 1:num_lon]
@@ -11,7 +11,7 @@ function rotation_period(ϕ::T) where T
     return 360/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
 end
 
-function v_scalar!(A:: Matrix, out:: Matrix)
+function v_scalar!(A:: Matrix, out:: Matrix) 
     """
     determines scalar velocity of each cell - serial
 
@@ -66,7 +66,7 @@ function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb
     for i in 1:length(A)
         vel = [A[i][4],A[i][5],A[i][6]] 
         angle = cos(π - acos(dot(B[i], vel) / (norm(B[i]) * norm(vel)))) 
-        out_no_cb[i] = (norm(vel) * angle)  #+ dot(spkssb(10,epoch,"J2000")[1:3], spkssb(399,epoch,"J2000")[4:6])/86.4 
+        out_no_cb[i] = (norm(vel) * angle) 
         out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
     end
     return 

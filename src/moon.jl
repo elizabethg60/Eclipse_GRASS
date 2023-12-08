@@ -8,13 +8,14 @@ function calc_proj_dist2(p1, p2)
     return pi - acos(dot(p1, p2)/(norm(p1)*norm(p2)))
 end
 
-function quad_limb_darkening_optical(μ::T, index) where T
+function quad_limb_darkening_optical(μ::T, index, zenith_angle) where T
     """
     limb darkening prescription for optical based on mu angle  
     """
     μ < zero(T) && return 0.0
     I = 0.28392 + 1.36896*μ - 1.75998*μ^2 + 2.22154*μ^3 - 1.56074*μ^4 + 0.44630*μ^5
-    ext_factor = -(airmass[index]*ext_coef[index])/2.5 
+    cell_airmass = 1/cosd(zenith_angle)
+    ext_factor =  -(airmass[index]*ext_coef[index])/2.5 #-(cell_airmass*ext_coef[index])/2.5
     return I * 10^ext_factor
 end
 

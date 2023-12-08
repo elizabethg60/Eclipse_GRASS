@@ -84,8 +84,10 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     if band == "NIR"
         LD_all = map(x -> quad_limb_darkening_NIR(x), mu_grid)
     end
+
+    zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist2(x, EO_bary), OP_bary))
     if band == "optical"
-        LD_all = map(x -> quad_limb_darkening_optical(x, index), mu_grid)
+        LD_all = map((x,y) -> quad_limb_darkening_optical(x, index, y), mu_grid, zenith_angle_matrix)
     end
 
     #get indices for visible patches
@@ -100,25 +102,22 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     dp_sub = map((x,y) -> abs(dot(x,y)), OP_bary, SP_bary) / norm(OS_bary)
     dA_total_proj = dA_sub .* dp_sub 
 
-    # #if no patches are visible, set mu, LD, projected velocity to zero 
-    # for i in 1:length(idx3)
-    #     if idx3[i] == false
-    #         #mu_grid[i] = NaN
-    #         LD_all[i] = 0.0
-    #         projected_velocities_no_cb[i] = 0.0
-    #         # projected_velocities_cb[i] = NaN
-    #     end
-    # end
+    #if no patches are visible, set mu, LD, projected velocity to zero 
+    for i in 1:length(idx3)
+        if idx3[i] == false
+            LD_all[i] = 0.0
+            projected_velocities_no_cb[i] = NaN
+        end
+    end
 #determine mean intensity 
     mean_intensity = sum(view(LD_all .* dA_total_proj, idx3)) / sum(view(dA_total_proj, idx1))  
 
-
 #determine mean weighted velocity from sun given blocking from moon 
-    mean_weight_v_no_cb = sum(view(LD_all .* dA_total_proj .* projected_velocities_no_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
+    mean_weight_v_no_cb = sum(view((mean_intensity .* dA_total_proj) .* projected_velocities_no_cb, idx3)) / sum(view(mean_intensity .* dA_total_proj, idx3))
     mean_weight_v_cb =  sum(view(LD_all .* dA_total_proj .* projected_velocities_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
 
-
-    #get ra and dec of solar grid patches
+#get ra and dec of solar grid patches
     OP_ra_dec = SPICE.recrad.(OP_bary)
+
     return mean_weight_v_no_cb, mean_weight_v_cb, mean_intensity, rad2deg.(getindex.(OP_ra_dec,2)), rad2deg.(getindex.(OP_ra_dec,3)), projected_velocities_no_cb, projected_velocities_cb
 end
