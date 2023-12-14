@@ -81,7 +81,6 @@ function gottingen_loop(lats::T, lons::T) where T
         # end
         # RV_list_no_cb[i] = mean(rv_bin)
     end
-    print(length(RA_list))
     @save "src/plots/Reiners/model_data.jld2"
     jldopen("src/plots/Reiners/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 

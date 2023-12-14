@@ -15,7 +15,7 @@ function quad_limb_darkening_optical(μ::T, index, zenith_angle) where T
     μ < zero(T) && return 0.0
     I = 0.28392 + 1.36896*μ - 1.75998*μ^2 + 2.22154*μ^3 - 1.56074*μ^4 + 0.44630*μ^5
     cell_airmass = 1/cosd(zenith_angle)
-    ext_factor =  -(airmass[index]*ext_coef[index])/2.5 #-(cell_airmass*ext_coef[index])/2.5
+    ext_factor =  -(cell_airmass*ext_coef[index])/2.5
     return I * 10^ext_factor
 end
 

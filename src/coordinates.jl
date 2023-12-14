@@ -34,6 +34,22 @@ function get_xyz_for_surface(ρ::T; num_lats::Int=100, num_lons::Int=100) where 
     θ = deg2rad.(range(0.0, 360.0, length=num_lons))'
     θe = range(deg2rad(0.0), deg2rad(360.0), length=num_lons)
     θc = get_grid_centers(θe)'
+    # # get latitude grid edges and centers
+    # N = num_lats
+    # ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=N+1)
+    # ϕc = get_grid_centers(ϕe)
+
+    # # number of longitudes in each latitude slice
+    # Nθ = get_Nθ.(ϕc, step(ϕe))
+
+    # # make longitude grid
+    # θe = zeros(N+1, maximum(Nθ)+1)
+    # θc = zeros(N, maximum(Nθ))
+    # for i in eachindex(Nθ)
+    #     edges = range(deg2rad(0.0), deg2rad(360.0), length=Nθ[i]+1)
+    #     θc[i, 1:Nθ[i]] .= get_grid_centers(edges)
+    #     θe[i, 1:Nθ[i]+1] .= collect(edges)
+    # end
     return get_xyz.(ρ, ϕc, θc)
 end 
 
@@ -67,10 +83,10 @@ end
 
 function calc_mu(SP::Vector, OP::Vector)
     #determine mu value for each cell
-    return cos(π - acos(dot(OP, SP) / (norm(OP) * norm(SP))))
+    return dot(OP, SP) / (norm(OP) * norm(SP)) #cos(π - acos(dot(OP, SP) / (norm(OP) * norm(SP))))
 end
 
-function calc_mu_grid!(A::Matrix, B::Matrix, out::Matrix)
+function calc_mu_grid!(A::Matrix, B::Vector, out::Matrix)
     """
     create matrix of mu values for each cell - serial
 
@@ -79,7 +95,7 @@ function calc_mu_grid!(A::Matrix, B::Matrix, out::Matrix)
     out: mu value between A and B
     """
     for i in 1:length(A)
-        out[i] = calc_mu(A[i], B[i])
+        out[i] = calc_mu(A[i], B)
         end
     return
 end	

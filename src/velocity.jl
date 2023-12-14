@@ -55,7 +55,7 @@ function v_vector(A::Matrix, B::Matrix, C::Matrix, out::Matrix)
     return
 end
 
-function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix, epoch, BP_bary)
+function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix, velocity_vector_earth_ICRF) 
     """
     determine projected velocity of each cell onto line of sight to observer - serial
 
@@ -64,9 +64,15 @@ function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb
     out: matrix of projected velocities
     """
     for i in 1:length(A)
-        vel = [A[i][4],A[i][5],A[i][6]] 
+        vel = [A[i][4],A[i][5],A[i][6]]
         angle = cos(π - acos(dot(B[i], vel) / (norm(B[i]) * norm(vel)))) 
-        out_no_cb[i] = (norm(vel) * angle) 
+    ###
+    ###ATTEMPT: converting earth's rotation velocity to vector to project onto line of sight 
+    ###
+        earth_vel = velocity_vector_earth_ICRF[4:6]
+        angle2 = cos(π - acos(dot(B[i], earth_vel) / (norm(B[i]) * norm(earth_vel)))) 
+
+        out_no_cb[i] = (norm(vel) * angle) #- (norm(earth_vel) * angle2) ATTEMPT - BC from barycorrpy
         out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
     end
     return 

@@ -30,7 +30,7 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     #get vector from barycenter to observatory on Earth's surface
     BO_bary = earth_pv .+ EO_bary
     #get vector from observer to Sun's center 
-    OS_bary = sun_pv - BO_bary 
+    OS_bary = BO_bary - sun_pv
     #get vector from observatory on earth's surface to moon center
     OM_bary = BO_bary .- moon_pv
     #get vector from barycenter to each patch on Sun's surface
@@ -42,9 +42,10 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     OP_bary = Matrix{Vector{Float64}}(undef,size(SP_bary)...)
     earth2patch_vectors(BP_bary, BO_bary, OP_bary)	
 
+
 #calculate mu for each patch
     mu_grid = Matrix{Float64}(undef,size(SP_bary)...)
-    calc_mu_grid!(SP_bary, OP_bary, mu_grid) 
+    calc_mu_grid!(SP_bary, OS_bary, mu_grid) 
 
 
 #determine velocity vectors
@@ -52,9 +53,20 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     lat_grid = lat_grid_fc(size(SP_bary)...)
     v_scalar_grid = Matrix{Float64}(undef,size(SP_bary)...)
     v_scalar!(lat_grid, v_scalar_grid)
+
+    ###
+    ###ATTEMPT: converting earth's rotation velocity to vector to project onto line of sight 
+    ###
+    earth_v_scalar = (2*π*earth_radius*cosd(obs_lat))/86.4
+    earth_pole_vector = EO_earth - [0.0, 0.0, EO_earth[3]]
+    temp = cross(earth_pole_vector, [0.0,0.0,earth_radius]) 
+    temp /= norm(temp)
+    temp *= earth_v_scalar
+    velocity_vector_earth = [EO_earth;temp]
+    velocity_vector_earth_ICRF = sxform("IAU_EARTH", "J2000", epoch) * velocity_vector_earth
     #convert v_scalar to from km/day m/s
     for i in eachindex(v_scalar_grid)
-        v_scalar_grid[i] = v_scalar_grid[i]/86.4  #+ (2*π*earth_radius*cos(deg2rad(obs_lat)))/86.4
+        v_scalar_grid[i] = v_scalar_grid[i]/86.4 #- (2*π*earth_radius*cosd(obs_lat))/86.4/2 #GIVEs BETTER MATCH - WHY?
     end
 
     #determine pole vector for each patch
@@ -73,7 +85,7 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     convective_velocities = convective_blueshift_interpol.(mu_grid)
     projected_velocities_no_cb = Matrix{Float64}(undef,size(SP_bary)...)
     projected_velocities_cb = Matrix{Float64}(undef,size(SP_bary)...)
-    projected!(velocity_vector_ICRF, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities, epoch, BP_bary) 
+    projected!(velocity_vector_ICRF, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities, velocity_vector_earth_ICRF)
 
     
 #determine patches that are blocked by moon 
@@ -84,8 +96,7 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     if band == "NIR"
         LD_all = map(x -> quad_limb_darkening_NIR(x), mu_grid)
     end
-
-    zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist2(x, EO_bary), OP_bary))
+    zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist2(x, EO_bary) + pi, OP_bary))
     if band == "optical"
         LD_all = map((x,y) -> quad_limb_darkening_optical(x, index, y), mu_grid, zenith_angle_matrix)
     end
@@ -95,9 +106,11 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     idx3 = (idx1) .& (distance .> atan((moon_r)/norm(OM_bary))) 
     
     #calculating the area element dA for each tile
-    ϕ = range(deg2rad(-90.0), deg2rad(90.0), length=lats)
-    θ =range(0.0, deg2rad(360.0), length=lons)
-    dA_sub = map(x -> calc_dA(sun_radius, x, step(ϕ), step(θ)), lat_grid)
+    ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=lats)
+    ϕc = get_grid_centers(ϕe)
+    θe = range(deg2rad(0.0), deg2rad(360.0), length=lons)
+    θc = get_grid_centers(θe) 
+    dA_sub = map(x -> calc_dA(sun_radius, x, step(ϕc), step(θc)), lat_grid)
     #get total projected, visible area of larger tile
     dp_sub = map((x,y) -> abs(dot(x,y)), OP_bary, SP_bary) / norm(OS_bary)
     dA_total_proj = dA_sub .* dp_sub 
@@ -109,11 +122,13 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
             projected_velocities_no_cb[i] = NaN
         end
     end
+
+
 #determine mean intensity 
     mean_intensity = sum(view(LD_all .* dA_total_proj, idx3)) / sum(view(dA_total_proj, idx1))  
 
 #determine mean weighted velocity from sun given blocking from moon 
-    mean_weight_v_no_cb = sum(view((mean_intensity .* dA_total_proj) .* projected_velocities_no_cb, idx3)) / sum(view(mean_intensity .* dA_total_proj, idx3))
+    mean_weight_v_no_cb = sum(view(LD_all .* dA_total_proj .* projected_velocities_no_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
     mean_weight_v_cb =  sum(view(LD_all .* dA_total_proj .* projected_velocities_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
 
 #get ra and dec of solar grid patches
