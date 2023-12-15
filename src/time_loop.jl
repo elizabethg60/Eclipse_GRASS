@@ -65,14 +65,15 @@ function gottingen_loop(lats::T, lons::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, intensity = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
-        RA_list[i] = ra
-        dec_list[i] = dec
-        vel_no_cb[i] = projected_v_no_cb
-        vel_cb[i] = projected_v_cb
+        # RA_list[i] = ra
+        # dec_list[i] = dec
+        # vel_no_cb[i] = projected_v_no_cb
+        # vel_cb[i] = projected_v_cb
+        #, ra, dec, projected_v_no_cb, projected_v_cb 
 
         # rv_bin = Vector{Float64}(undef,12)
         # sample = utc2et.(reiners_finer_sample[i]) 
@@ -87,10 +88,10 @@ function gottingen_loop(lats::T, lons::T) where T
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
         file["intensity_list"] = intensity_list
-        file["RA_list"] = RA_list
-        file["dec_list"] = dec_list
-        file["vel_no_cb"] = vel_no_cb
-        file["vel_cb"] = vel_cb
+        # file["RA_list"] = RA_list
+        # file["dec_list"] = dec_list
+        # file["vel_no_cb"] = vel_no_cb
+        # file["vel_cb"] = vel_cb
     end
 end
 

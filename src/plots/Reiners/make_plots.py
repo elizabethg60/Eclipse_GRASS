@@ -16,10 +16,10 @@ file = h5py.File("model_data.jld2", "r")
 RV_list_no_cb = file["RV_list_no_cb"][()] 
 RV_list_cb  = file["RV_list_cb"][()]
 intensity_list = file["intensity_list"][()]
-RA_list = file["RA_list"][()]
-dec_list = file["dec_list"][()]
-vel_no_cb = file["vel_no_cb"][()]
-vel_cb = file["vel_cb"][()]
+# RA_list = file["RA_list"][()]
+# dec_list = file["dec_list"][()]
+# vel_no_cb = file["vel_no_cb"][()]
+# vel_cb = file["vel_cb"][()]
 #data 
 f=open("Reiners_Data.txt","r")
 lines=f.readlines()[1:]

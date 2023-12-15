@@ -1,11 +1,11 @@
-function lat_grid_fc(num_lats::Int=100, num_lon::Int=100) 
-    #creates matrix of latitude values reflecting solar grid size - serial 
-    ϕ = deg2rad.(range(-90.0, 90.0, length=num_lats))
-    ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=num_lats+1)
-    ϕc = Vector(get_grid_centers(ϕe))
-    A = [ϕc for idx in 1:num_lon]
-    return hcat(A...)
-end 
+# function lat_grid_fc(num_lats::Int=100, num_lon::Int=100) 
+#     #creates matrix of latitude values reflecting solar grid size - serial 
+#     ϕ = deg2rad.(range(-90.0, 90.0, length=num_lats))
+#     ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=num_lats)
+#     ϕc = Vector(get_grid_centers(ϕe))
+#     A = [ϕc for idx in 1:num_lon]
+#     return hcat(A...)
+# end 
 
 function rotation_period(ϕ::T) where T 
     #prescription for differential rotation given a latitude value
@@ -13,7 +13,7 @@ function rotation_period(ϕ::T) where T
     return 360/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
 end
 
-function v_scalar!(A:: Matrix, out:: Matrix) 
+function v_scalar!(A, out) 
     """
     determines scalar velocity of each cell - serial
 
@@ -21,7 +21,7 @@ function v_scalar!(A:: Matrix, out:: Matrix)
     out: matrix of scalar velocity value
     """
 	for i in 1:length(A)
-		out[i] = (2*π*sun_radius*cos(A[i]))/(rotation_period(A[i])) 
+		out[i] = (2*π*sun_radius*cos(getindex(A[i],1)))/(rotation_period(getindex(A[i],1))) 
 	end
 	return
 end
@@ -49,14 +49,10 @@ function v_vector(A::Matrix, B::Matrix, C::Matrix, out::Matrix)
     out: matrix with xyz and velocity of each cell
     """
     for i in 1:length(A)
-        if B[i] == [0.0,0.0,0.0]
-            out[i] =  [0.0,0.0,0.0,0.0,0.0,0.0]
-        else
-            cross_product = cross(B[i], [0.0,0.0,sun_radius]) 
-            cross_product /= norm(cross_product)
-            cross_product *= C[i]
-            out[i] = [A[i];cross_product]
-        end
+        cross_product = cross(B[i], [0.0,0.0,sun_radius]) 
+        cross_product /= norm(cross_product)
+        cross_product *= C[i]
+        out[i] = [A[i];cross_product]
     end
     return
 end
@@ -71,20 +67,10 @@ function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb
     """
     for i in 1:length(A)
         vel = [A[i][4],A[i][5],A[i][6]]
-        if vel == [0.0,0.0,0.0]
-            out_no_cb[i] = NaN
-            out_cb[i] = NaN
-        else
-            angle = cos(π - acos(dot(B[i], vel) / (norm(B[i]) * norm(vel)))) 
-        ###
-        ###ATTEMPT: converting earth's rotation velocity to vector to project onto line of sight 
-        ###
-            # earth_vel = velocity_vector_earth_ICRF[4:6]
-            # angle2 = cos(π - acos(dot(B[i], earth_vel) / (norm(B[i]) * norm(earth_vel)))) 
+        angle = cos(π - acos(dot(B[i], vel) / (norm(B[i]) * norm(vel)))) 
 
-            out_no_cb[i] = (norm(vel) * angle) #- (norm(earth_vel) * angle2) ATTEMPT - BC from barycorrpy
-            out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
-        end
+        out_no_cb[i] = (norm(vel) * angle) 
+        out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
     end
     return 
 end
