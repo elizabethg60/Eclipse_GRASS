@@ -8,7 +8,11 @@ function get_xyz(ρ::T, ϕ::T, θ::T) where T
     y = ρ * cosϕ * sinθ
     z = ρ * sinϕ
 
-    return [x, y, z]
+    if θ == 0
+        return [0.0,0.0,0.0]
+    else
+        return [x, y, z]
+    end
 end
 
 function get_grid_centers(grid::StepRangeLen)
@@ -27,33 +31,33 @@ function get_xyz_for_surface(ρ::T; num_lats::Int=100, num_lons::Int=100) where 
     num_lats: number of latitude for grid
     num_lons: number of longitude for grid
     """
-    ϕ = deg2rad.(range(-90.0, 90.0, length=num_lats)) 
-    ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=num_lats)
-    ϕc = get_grid_centers(ϕe)
-
-    θ = deg2rad.(range(0.0, 360.0, length=num_lons))'
-    θe = range(deg2rad(0.0), deg2rad(360.0), length=num_lons)
-    θc = get_grid_centers(θe)'
-    # # get latitude grid edges and centers
-    # N = num_lats
-    # ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=N+1)
+    # ϕ = deg2rad.(range(-90.0, 90.0, length=num_lats)) 
+    # ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=num_lats)
     # ϕc = get_grid_centers(ϕe)
 
-    # # number of longitudes in each latitude slice
-    # Nθ = get_Nθ.(ϕc, step(ϕe))
+    # θ = deg2rad.(range(0.0, 360.0, length=num_lons))'
+    # θe = range(deg2rad(0.0), deg2rad(360.0), length=num_lons)
+    # θc = get_grid_centers(θe)'
+    # get latitude grid edges and centers
+    N = num_lats
+    ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=N+1) 
+    ϕc = get_grid_centers(ϕe)
+    
+    #number of longitudes in each latitude slice
+    Nθ = get_Nθ.(ϕc, step(ϕe))
 
-    # # make longitude grid
-    # θe = zeros(N+1, maximum(Nθ)+1)
-    # θc = zeros(N, maximum(Nθ))
-    # for i in eachindex(Nθ)
-    #     edges = range(deg2rad(0.0), deg2rad(360.0), length=Nθ[i]+1)
-    #     θc[i, 1:Nθ[i]] .= get_grid_centers(edges)
-    #     θe[i, 1:Nθ[i]+1] .= collect(edges)
-    # end
+    # make longitude grid
+    θe = zeros(N+1, maximum(Nθ)+1)
+    θc = zeros(N, maximum(Nθ))
+    for i in eachindex(Nθ)
+        edges = range(deg2rad(0.0), deg2rad(360.0), length=Nθ[i]+1)
+        θc[i, 1:Nθ[i]] .= get_grid_centers(edges)
+        θe[i, 1:Nθ[i]+1] .= collect(edges)
+    end
     return get_xyz.(ρ, ϕc, θc)
 end 
 
-function frame_transfer(A::Matrix, b::Matrix, out::Matrix)
+function frame_transfer(A::Matrix, b, out::Matrix)
     """
     transforms between frames - serial
     
@@ -76,14 +80,18 @@ function earth2patch_vectors(A::Matrix, b::Vector, out::Matrix)
     out: matrix of vectors of observer to each patch 
     """
     for i in 1:length(A)	
-        out[i] = A[i] .- b
+        if A[i] == [0.0,0.0,0.0]
+            out[i] = [0.0,0.0,0.0]
+        else
+            out[i] = A[i] .- b
+        end
     end
     return 
-end 
+end 	
 
 function calc_mu(SP::Vector, OP::Vector)
     #determine mu value for each cell
-    return dot(OP, SP) / (norm(OP) * norm(SP)) #cos(π - acos(dot(OP, SP) / (norm(OP) * norm(SP))))
+    return dot(OP, SP) / (norm(OP) * norm(SP)) 
 end
 
 function calc_mu_grid!(A::Matrix, B::Vector, out::Matrix)
@@ -100,7 +108,7 @@ function calc_mu_grid!(A::Matrix, B::Vector, out::Matrix)
     return
 end	
 
-function calc_dA(radius::T, ϕ::T, dϕ::T, dθ::T) where T
+function calc_dA(radius, ϕ, dϕ, dθ)
     """
     determines area of each cell
 

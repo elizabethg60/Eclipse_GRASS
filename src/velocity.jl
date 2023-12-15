@@ -1,7 +1,9 @@
 function lat_grid_fc(num_lats::Int=100, num_lon::Int=100) 
     #creates matrix of latitude values reflecting solar grid size - serial 
     ϕ = deg2rad.(range(-90.0, 90.0, length=num_lats))
-    A = [ϕ for idx in 1:num_lon]
+    ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=num_lats+1)
+    ϕc = Vector(get_grid_centers(ϕe))
+    A = [ϕc for idx in 1:num_lon]
     return hcat(A...)
 end 
 
@@ -47,15 +49,19 @@ function v_vector(A::Matrix, B::Matrix, C::Matrix, out::Matrix)
     out: matrix with xyz and velocity of each cell
     """
     for i in 1:length(A)
-        cross_product = cross(B[i], [0.0,0.0,sun_radius]) 
-        cross_product /= norm(cross_product)
-        cross_product *= C[i]
-        out[i] = [A[i];cross_product]
+        if B[i] == [0.0,0.0,0.0]
+            out[i] =  [0.0,0.0,0.0,0.0,0.0,0.0]
+        else
+            cross_product = cross(B[i], [0.0,0.0,sun_radius]) 
+            cross_product /= norm(cross_product)
+            cross_product *= C[i]
+            out[i] = [A[i];cross_product]
+        end
     end
     return
 end
 
-function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix, velocity_vector_earth_ICRF) 
+function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix) 
     """
     determine projected velocity of each cell onto line of sight to observer - serial
 
@@ -65,15 +71,20 @@ function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb
     """
     for i in 1:length(A)
         vel = [A[i][4],A[i][5],A[i][6]]
-        angle = cos(π - acos(dot(B[i], vel) / (norm(B[i]) * norm(vel)))) 
-    ###
-    ###ATTEMPT: converting earth's rotation velocity to vector to project onto line of sight 
-    ###
-        earth_vel = velocity_vector_earth_ICRF[4:6]
-        angle2 = cos(π - acos(dot(B[i], earth_vel) / (norm(B[i]) * norm(earth_vel)))) 
+        if vel == [0.0,0.0,0.0]
+            out_no_cb[i] = NaN
+            out_cb[i] = NaN
+        else
+            angle = cos(π - acos(dot(B[i], vel) / (norm(B[i]) * norm(vel)))) 
+        ###
+        ###ATTEMPT: converting earth's rotation velocity to vector to project onto line of sight 
+        ###
+            # earth_vel = velocity_vector_earth_ICRF[4:6]
+            # angle2 = cos(π - acos(dot(B[i], earth_vel) / (norm(B[i]) * norm(earth_vel)))) 
 
-        out_no_cb[i] = (norm(vel) * angle) #- (norm(earth_vel) * angle2) ATTEMPT - BC from barycorrpy
-        out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
+            out_no_cb[i] = (norm(vel) * angle) #- (norm(earth_vel) * angle2) ATTEMPT - BC from barycorrpy
+            out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
+        end
     end
     return 
 end

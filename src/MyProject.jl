@@ -77,3 +77,9 @@ end
 #1. make better plots, match colors with reiners & split model one and two 
 #2. sanity check with barycentric correction with barycorppy (sun"s center) and at surface 
 #5. get residuals for reiners intensity + model 
+
+
+#update gridding
+#all positions must be actual positions except the line of sight used for the zenith calculation which #should be apparent 
+#confirm all positions given by SPICE are actual positions
+#so in that case just need to transform the line of sight to an apparent position for the zenith #calculation
