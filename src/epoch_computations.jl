@@ -210,7 +210,7 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
         #determine mean weighted velocity from sun given blocking from moon 
 
             mean_weight_v_no_cb[i,j] = sum(view(LD_all .* dA_total_proj .* projected_velocities_no_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
-            mean_weight_v_cb[i,j] =  sum(view(LD_all .* dA_total_proj .* projected_velocities_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx1))
+            mean_weight_v_cb[i,j] =  sum(view(LD_all .* dA_total_proj .* projected_velocities_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
 
             mean_weight_v_earth_rot[i,j] = sum(view(v_earth_rot_proj .* LD_all .* dA_total_proj, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
             mean_weight_v_earth_orb[i,j] = sum(view(v_earth_orb_proj .* LD_all .* dA_total_proj, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
