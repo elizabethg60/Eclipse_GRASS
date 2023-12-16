@@ -65,6 +65,10 @@ function gottingen_loop(lats::T, lons::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv (serial) for each timestamp
     for i in 1:length(time_stamps)
+        print("\r i = " * string(i) * " of " * string(length(time_stamps)))
+        # if i != round(Int, length(time_stamps)/2)
+        #     continue
+        # end
         RV_no_cb, RV_cb, intensity = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
@@ -82,6 +86,7 @@ function gottingen_loop(lats::T, lons::T) where T
         # end
         # RV_list_no_cb[i] = mean(rv_bin)
     end
+    println()
 
     @save "src/plots/Reiners/model_data.jld2"
     jldopen("src/plots/Reiners/model_data.jld2", "a+") do file
@@ -93,6 +98,7 @@ function gottingen_loop(lats::T, lons::T) where T
         # file["vel_no_cb"] = vel_no_cb
         # file["vel_cb"] = vel_cb
     end
+    return nothing
 end
 
 function expres_loop(lats::T, lons::T) where T

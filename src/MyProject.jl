@@ -7,6 +7,7 @@ using NaNMath
 using Statistics
 using JLD2
 using CSV
+import PyPlot; plt = PyPlot; mpl = plt.matplotlib; plt.ioff()
 using DataFrames
 
 include("get_kernels.jl")

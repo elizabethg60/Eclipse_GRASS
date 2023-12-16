@@ -10,10 +10,11 @@
 function rotation_period(ϕ::T) where T 
     #prescription for differential rotation given a latitude value
     sinϕ = sin(ϕ)
-    return 360/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
+    # return 360/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
+    return 360.0/(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4)
 end
 
-function v_scalar!(A, out) 
+function v_scalar!(A, lon, out)
     """
     determines scalar velocity of each cell - serial
 
@@ -24,6 +25,10 @@ function v_scalar!(A, out)
 		out[i] = (2*π*sun_radius*cos(getindex(A[i],1)))/(rotation_period(getindex(A[i],1))) 
 	end
 	return
+end
+
+function v_scalar(lat, lon)
+    return (2π * sun_radius * cos(lat)) / rotation_period(lat)
 end
 
 function pole_vector_grid!(A::Matrix, out::Matrix)
