@@ -43,7 +43,7 @@ function linear_interp(xs::AA{T,1}, ys::AA{T,1}; bc::T=NaN) where T<:Float64
         elseif x >= last(xs)
             return last(ys)
         else
-            # TODO: pass "hint" to searchsorted first
+
             i = searchsortedfirst(xs, x) - 1
             i0 = clamp(i, firstindex(ys), lastindex(ys))
             i1 = clamp(i+1, firstindex(ys), lastindex(ys))
@@ -57,29 +57,3 @@ blueshift_values = reverse((file." blueshift")*1000)
 mu_values = reverse(file."mu")
 convective_blueshift_interpol = linear_interp(mu_values, blueshift_values)
 end 
-
-
-
-#Updates:
-#1. intensity no eclipse works - no geometry problem outside transit
-#2. intensity match: corrected distance calculation (no change), corrected weighting
-#3. RM curve residuals still do not match 
-    #all geometry officially confirmed
-    #must be missing something in velocity calculation that Reiners does not mention
-    #barycentric correction for each cell? not sure how barycorrpy is doing it - also doubt given didn"t need airmass at each cell
-    #weighting?
-      
-#hunt for CB model for 1565nm line for Boulder 
-
-
-
-
-#1. make better plots, match colors with reiners & split model one and two 
-#2. sanity check with barycentric correction with barycorppy (sun"s center) and at surface 
-#5. get residuals for reiners intensity + model 
-
-
-#update gridding
-#all positions must be actual positions except the line of sight used for the zenith calculation which #should be apparent 
-#confirm all positions given by SPICE are actual positions
-#so in that case just need to transform the line of sight to an apparent position for the zenith #calculation

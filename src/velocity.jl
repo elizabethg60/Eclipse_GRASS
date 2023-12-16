@@ -1,29 +1,12 @@
-# function lat_grid_fc(num_lats::Int=100, num_lon::Int=100) 
-#     #creates matrix of latitude values reflecting solar grid size - serial 
-#     ϕ = deg2rad.(range(-90.0, 90.0, length=num_lats))
-#     ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=num_lats)
-#     ϕc = Vector(get_grid_centers(ϕe))
-#     A = [ϕc for idx in 1:num_lon]
-#     return hcat(A...)
-# end 
-
 function rotation_period(ϕ::T) where T 
     #prescription for differential rotation given a latitude value
     sinϕ = sin(ϕ)
-    return 360/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
+    return 360.0/(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4)
 end
 
-function v_scalar!(A, out) 
-    """
-    determines scalar velocity of each cell - serial
-
-    A: matrix of latitudes
-    out: matrix of scalar velocity value
-    """
-	for i in 1:length(A)
-		out[i] = (2*π*sun_radius*cos(getindex(A[i],1)))/(rotation_period(getindex(A[i],1))) 
-	end
-	return
+function v_scalar(lat, lon)
+    #determines scalar velocity of each cell - serial
+    return (2π * sun_radius * cos(lat)) / rotation_period(lat)
 end
 
 function pole_vector_grid!(A::Matrix, out::Matrix)

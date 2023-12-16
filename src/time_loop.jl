@@ -1,9 +1,8 @@
-function neid_loop(lats::T, lons::T) where T
+function neid_loop(lats::T) where T
     """
     computes RV for each timestamp for the NEID eclipse 
 
     lats: number of latitude grid cells
-    lons: number of longitude grid cells
     """
     #convert from utc to et as needed by SPICE
     time_stamps = utc2et.(neid_timestamps)
@@ -20,9 +19,9 @@ function neid_loop(lats::T, lons::T) where T
     dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
-    #run compute_rv (serial) for each timestamp
+    #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
@@ -44,7 +43,7 @@ function neid_loop(lats::T, lons::T) where T
     end
 end
 
-function gottingen_loop(lats::T, lons::T) where T
+function gottingen_loop(lats::T) where T
     """
     computes RV for each timestamp for the gottingen eclipse 
     """
@@ -63,22 +62,21 @@ function gottingen_loop(lats::T, lons::T) where T
     dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
-    #run compute_rv (serial) for each timestamp
+    #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
-        # RA_list[i] = ra
-        # dec_list[i] = dec
-        # vel_no_cb[i] = projected_v_no_cb
-        # vel_cb[i] = projected_v_cb
-        #, ra, dec, projected_v_no_cb, projected_v_cb 
+        RA_list[i] = ra
+        dec_list[i] = dec
+        vel_no_cb[i] = projected_v_no_cb
+        vel_cb[i] = projected_v_cb
 
         # rv_bin = Vector{Float64}(undef,12)
         # sample = utc2et.(reiners_finer_sample[i]) 
         # for j in 1:12
-        #     rv_bin[j] = (compute_rv(lats, lons, sample[j], obs_long, obs_lat, alt, "optical", i)[1])
+        #     rv_bin[j] = (compute_rv(lats, sample[j], obs_long, obs_lat, alt, "optical", i)[1])
         # end
         # RV_list_no_cb[i] = mean(rv_bin)
     end
@@ -88,14 +86,14 @@ function gottingen_loop(lats::T, lons::T) where T
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
         file["intensity_list"] = intensity_list
-        # file["RA_list"] = RA_list
-        # file["dec_list"] = dec_list
-        # file["vel_no_cb"] = vel_no_cb
-        # file["vel_cb"] = vel_cb
+        file["RA_list"] = RA_list
+        file["dec_list"] = dec_list
+        file["vel_no_cb"] = vel_no_cb
+        file["vel_cb"] = vel_cb
     end
 end
 
-function expres_loop(lats::T, lons::T) where T
+function expres_loop(lats::T) where T
     """
     computes RV for each timestamp for the expres eclipse 
     """
@@ -114,9 +112,9 @@ function expres_loop(lats::T, lons::T) where T
     dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
-    #run compute_rv (serial) for each timestamp
+    #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
@@ -138,7 +136,7 @@ function expres_loop(lats::T, lons::T) where T
     end
 end
 
-function boulder_loop(lats::T, lons::T) where T
+function boulder_loop(lats::T) where T
     """
     computes RV for each timestamp for the boulder eclipse 
     """
@@ -157,9 +155,9 @@ function boulder_loop(lats::T, lons::T) where T
     dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
-    #run compute_rv (serial) for each timestamp
+    #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, lons, time_stamps[i], obs_long, obs_lat, alt, "NIR", i)
+        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity

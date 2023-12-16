@@ -1,6 +1,6 @@
 using Base.Iterators
 
-function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index; moon_r::Float64=moon_radius) where T 
+function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r::Float64=moon_radius) where T 
     """
     compute rv for a given grid size and timestamp - serial 
     
@@ -11,6 +11,7 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
     obs_lat: observer latitude
     alt: observer altitude
     """
+#disk gridding 
     # get latitude grid edges and centers
     disk_ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=lats+1)
     disk_ϕc = get_grid_centers(disk_ϕe)
@@ -25,29 +26,41 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
         disk_θe[i, 1:Nθ[i]+1] .= collect(edges)
     end
 
-    #query JPL horizons for E, S, M position (km) and velocities (km/s)
+
+#query JPL horizons for E, S, M position (km) and velocities (km/s)
     earth_pv = spkssb(399,epoch,"J2000")[1:3] 
     sun_pv = spkssb(10,epoch,"J2000")[1:3] 
     moon_pv = spkssb(301,epoch,"J2000")[1:3] 
+    earth_vel = spkssb(399,epoch,"J2000")[4:6]
+    sun_vel = spkssb(10,epoch,"J2000")[4:6]
 
-    Nsubgrid = maximum(Nθ)
-    dA_total_proj_mean = zeros(lats, Nsubgrid)
-    mean_intensity = zeros(lats, Nsubgrid)
-    mean_weight_v_no_cb = zeros(lats, Nsubgrid)
-    mean_weight_v_cb = zeros(lats, Nsubgrid)
-    LD_all_mean = zeros(lats, Nsubgrid)
+
+#allocate memory
+    dA_total_proj_mean = zeros(length(disk_ϕc), maximum(Nθ))
+    mean_intensity = zeros(length(disk_ϕc), maximum(Nθ))
+    mean_weight_v_no_cb = zeros(length(disk_ϕc), maximum(Nθ))
+    mean_weight_v_cb = zeros(length(disk_ϕc), maximum(Nθ))
+    mean_weight_v_earth_rot= zeros(length(disk_ϕc), maximum(Nθ))
+    mean_weight_v_earth_orb = zeros(length(disk_ϕc), maximum(Nθ))
+    ra_mean = zeros(length(disk_ϕc), maximum(Nθ))
+    de_mean = zeros(length(disk_ϕc), maximum(Nθ))
+
+
+#subgridding
+    Nsubgrid = 10
     for i in eachindex(disk_ϕc)
         for j in 1:Nθ[i]
-        # subdivide the tile
+        #subdivide the tile
             ϕe_sub = range(disk_ϕe[i], disk_ϕe[i+1], length=Nsubgrid+1)
             θe_sub = range(disk_θe[i,j], disk_θe[i,j+1], length=Nsubgrid+1)
             ϕc_sub = get_grid_centers(ϕe_sub)
             θc_sub = get_grid_centers(θe_sub)
             subgrid = Iterators.product(ϕc_sub, θc_sub)
-            
+
+
         #determine required position vectors
             #determine xyz stellar coordinates for lat/long grid
-            SP_sun = map(x -> get_xyz.(sun_radius, x...), subgrid) #get_xyz_for_surface(sun_radius, num_lats = lats, num_lons = lons)
+            SP_sun = map(x -> get_xyz.(sun_radius, x...), subgrid)
             #transform xyz stellar coordinates of grid from sun frame to ICRF
             SP_bary = Matrix{Vector{Float64}}(undef,size(SP_sun)...)
             frame_transfer(pxform("IAU_SUN", "J2000", epoch), SP_sun, SP_bary)
@@ -70,25 +83,20 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
             end
             #vectors from observatory on Earth's surface to each patch on Sun's surface
             OP_bary = Matrix{Vector{Float64}}(undef,size(SP_bary)...)
-            earth2patch_vectors(BP_bary, BO_bary, OP_bary)	
+            earth2patch_vectors(BP_bary, BO_bary, OP_bary)
 
 
         #calculate mu for each patch
             mu_grid = Matrix{Float64}(undef,size(SP_bary)...)
             calc_mu_grid!(SP_bary, OS_bary, mu_grid) 
+            all(mu_grid .< zero(T)) && continue
 
-            all(mu_grid .<= zero(T)) && continue
 
-        #determine velocity vectors
+        #determine sun velocity vectors
             #determine velocity scalar for each patch 
-            lat_grid = [Vector(ϕc_sub) for idx in 1:length(θc_sub)]
-            v_scalar_grid = Matrix{Float64}(undef,size(SP_bary)...)
-            v_scalar!(lat_grid, v_scalar_grid)
-
+            v_scalar_grid = map(x -> v_scalar(x...), subgrid)
             #convert v_scalar to from km/day m/s
-            for i in eachindex(v_scalar_grid)
-                v_scalar_grid[i] = (v_scalar_grid[i])/86.4 
-            end
+            v_scalar_grid ./= 86.4
 
             #determine pole vector for each patch
             pole_vector_grid = Matrix{Vector{Float64}}(undef,size(SP_sun)...)
@@ -108,7 +116,39 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
             projected_velocities_cb = Matrix{Float64}(undef,size(SP_bary)...)
             projected!(velocity_vector_ICRF, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities)
 
+
+        #determine earth velocity vectors
+            #determine velocity scalar for obs location
+            earth_v_scalar = (2*π*earth_radius*cosd(obs_lat))/86.4
+            #determine pole vector for obs location 
+            earth_pole_vector = EO_earth - [0.0, 0.0, EO_earth[3]]
+            #get velocity vector direction and set magnitude
+            temp = cross(earth_pole_vector, [0.0,0.0,earth_radius])
+            temp ./= norm(temp)
+            temp .*= earth_v_scalar
+            velocity_vector_earth = [EO_earth;temp]
+            #transform into ICRF frame 
+            velocity_vector_earth_ICRF = sxform("IAU_EARTH", "J2000", epoch) * velocity_vector_earth
+            velocity_vector_earth_ICRF = velocity_vector_earth_ICRF[4:6]
             
+            #project earth_rot velocity vector onto patches
+            v_earth_rot_proj = zeros(Nsubgrid, Nsubgrid)
+            for k in eachindex(v_earth_rot_proj)
+                B = OP_bary[k]
+                angle = cos(π - acos(dot(B, velocity_vector_earth_ICRF) / (norm(B) * norm(velocity_vector_earth_ICRF))))
+                v_earth_rot_proj[k] = norm(velocity_vector_earth_ICRF) * angle
+            end
+
+            #get relative orbital motion in m/s
+            v_delta = (sun_vel .- earth_vel) .* 1000
+            v_earth_orb_proj = zeros(Nsubgrid, Nsubgrid)
+            for k in eachindex(v_earth_orb_proj)
+                B = OP_bary[k]
+                angle = cos(π - acos(dot(B, v_delta) / (norm(B) * norm(v_delta))))
+                v_earth_orb_proj[k] = norm(v_delta) * angle
+            end
+
+
         #determine patches that are blocked by moon 
             #calculate the distance between tile corner and moon
             distance = map(x -> calc_proj_dist2(x, OM_bary), OP_bary)
@@ -127,39 +167,48 @@ function compute_rv(lats::T, lons::T, epoch, obs_long, obs_lat, alt, band, index
             idx1 = mu_grid .> 0.0
             idx3 = (idx1) .& (distance .> atan((moon_r)/norm(OM_bary))) 
             
-            #calculating the area element dA for each tile
-            dA_sub = map(x -> calc_dA(sun_radius, getindex(x,1), step(ϕe_sub), step(θe_sub)), subgrid)
+
+        #calculating the area element dA for each tile
+            dϕ = step(ϕe_sub) 
+            dθ = step(θe_sub) 
+            dA_sub = map(x -> calc_dA(sun_radius, getindex(x,1), dϕ, dθ), subgrid)
             #get total projected, visible area of larger tile
             dp_sub = map((x,y) -> abs(dot(x,y)), OP_bary, SP_bary) ./ (norm.(OP_bary) .* norm.(SP_bary))
             dA_total_proj = dA_sub .* dp_sub 
-
-            LD_all_mean[i,j] = mean(view(LD_all, idx3))
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
 
-            #if no patches are visible, set mu, LD, projected velocity to zero 
-            for i in 1:length(idx3)
-                if idx3[i] == false
-                    LD_all[i] = 0.0
-                    projected_velocities_no_cb[i] = NaN
-                end
-            end
-        #determine mean intensity 
-            mean_intensity[i,j] = sum(view(LD_all .* dA_total_proj, idx3)) / sum(view(dA_total_proj, idx1))  
+
+        #get ra and dec
+            OP_ra_dec = SPICE.recrad.(OP_bary)
+            ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
+            de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
+
+            #determine mean intensity 
+            mean_intensity[i,j] = mean(view(LD_all, idx3))  
+
 
         #determine mean weighted velocity from sun given blocking from moon 
-            mean_weight_v_no_cb[i,j] = sum(view(LD_all .* dA_total_proj .* projected_velocities_no_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
-            mean_weight_v_cb[i,j] =  sum(view(LD_all .* dA_total_proj .* projected_velocities_cb, idx3)) / sum(view(LD_all .* dA_total_proj, idx3))
+            mean_weight_v_no_cb[i,j] = mean(view(projected_velocities_no_cb, idx3))
+            mean_weight_v_cb[i,j] = mean(view(projected_velocities_cb, idx3)) 
+        
+            mean_weight_v_earth_rot[i,j] = mean(view(v_earth_rot_proj, idx3)) 
+            mean_weight_v_earth_orb[i,j] = mean(view(v_earth_orb_proj, idx3)) 
         end
     end
+    #index for correct lat / lon disk grid
     idx_grid = mean_intensity .> 0.0
 
-    #double weighting occuring? 
-    final_mean_intensity = sum(view(mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(dA_total_proj_mean, idx_grid)) 
+    #determine final mean intensity for disk grid
+    final_mean_intensity = sum(view(mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(dA_total_proj_mean) 
 
+    #determine final mean weighted velocity for disk grid
     final_weight_v_no_cb = sum(view(mean_intensity .* dA_total_proj_mean .* mean_weight_v_no_cb, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
-    final_weight_v_cb =  sum(view(mean_intensity .* dA_total_proj_mean .* mean_weight_v_cb, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
+    final_weight_v_no_cb -= mean(view(mean_weight_v_earth_rot, idx_grid)) #sum(view(mean_weight_v_earth_rot .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
+    final_weight_v_no_cb -= mean(view(mean_weight_v_earth_orb, idx_grid)) #sum(view(mean_weight_v_earth_orb .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
 
-    #return mean_weight_v_no_cb, mean_weight_v_cb, mean_intensity, rad2deg.(getindex.(OP_ra_dec,2)), rad2deg.(getindex.(OP_ra_dec,3)), projected_velocities_no_cb, projected_velocities_cb
-    return final_weight_v_no_cb, final_weight_v_cb, final_mean_intensity
+    final_weight_v_cb = sum(view(mean_intensity .* dA_total_proj_mean .* mean_weight_v_cb, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
+    final_weight_v_cb -= mean(view(mean_weight_v_earth_rot, idx_grid)) #sum(view(mean_weight_v_earth_rot .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
+    final_weight_v_cb -= mean(view(mean_weight_v_earth_orb, idx_grid)) #sum(view(mean_weight_v_earth_orb .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
 
+    return final_weight_v_no_cb, final_weight_v_cb, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb 
 end

@@ -12,31 +12,16 @@ function get_xyz(ρ::T, ϕ::T, θ::T) where T
 end
 
 function get_grid_centers(grid::StepRangeLen)
+    #determine centers of grid lat / long vectors
     start = first(grid) + 0.5 * step(grid)
     stop = last(grid) - 0.5 * step(grid)
     return range(start, stop, length=length(grid)-1)
 end
+
 function get_Nθ(ϕc, dϕ)
+    #determine number of lons for each lat slice
     return ceil(Int, 2π * cos(ϕc) / dϕ)
 end
-
-# function get_xyz_for_surface(ρ::T; num_lats::Int=100, num_lons::Int=100) where T
-#     """
-#     get grid of polar and azimuthal angles
-
-#     ρ: object radius
-#     num_lats: number of latitude for grid
-#     num_lons: number of longitude for grid
-#     """
-#     ϕ = deg2rad.(range(-90.0, 90.0, length=num_lats)) 
-#     ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=num_lats)
-#     ϕc = get_grid_centers(ϕe)
-
-#     θ = deg2rad.(range(0.0, 360.0, length=num_lons))'
-#     θe = range(deg2rad(0.0), deg2rad(360.0), length=num_lons)
-#     θc = get_grid_centers(θe)'
-#     return get_xyz.(ρ, ϕc, θc)
-# end 
 
 function frame_transfer(A::Matrix, b::Matrix, out::Matrix)
     """
