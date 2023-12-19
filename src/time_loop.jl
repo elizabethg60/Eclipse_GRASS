@@ -65,7 +65,7 @@ function gottingen_loop(lats::T) where T
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
         RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
-        RV_list_no_cb[i] = RV_no_cb
+        #RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         intensity_list[i] = intensity
         RA_list[i] = ra
@@ -73,12 +73,12 @@ function gottingen_loop(lats::T) where T
         vel_no_cb[i] = projected_v_no_cb
         vel_cb[i] = projected_v_cb
 
-        # rv_bin = Vector{Float64}(undef,12)
-        # sample = utc2et.(reiners_finer_sample[i]) 
-        # for j in 1:12
-        #     rv_bin[j] = (compute_rv(lats, sample[j], obs_long, obs_lat, alt, "optical", i)[1])
-        # end
-        # RV_list_no_cb[i] = mean(rv_bin)
+        rv_bin = Vector{Float64}(undef,12)
+        sample = utc2et.(reiners_finer_sample[i]) 
+        for j in 1:12
+            rv_bin[j] = (compute_rv(lats, sample[j], obs_long, obs_lat, alt, "optical", i)[1])
+        end
+        RV_list_no_cb[i] = mean(rv_bin)
     end
 
     @save "src/plots/Reiners/model_data.jld2"

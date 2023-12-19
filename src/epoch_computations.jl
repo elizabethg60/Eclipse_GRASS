@@ -166,7 +166,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             #get indices for visible patches
             idx1 = mu_grid .> 0.0
             idx3 = (idx1) .& (distance .> atan((moon_r)/norm(OM_bary))) 
-            
 
         #calculating the area element dA for each tile
             dϕ = step(ϕe_sub) 
@@ -210,5 +209,5 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     final_weight_v_cb -= mean(view(mean_weight_v_earth_rot, idx_grid)) #sum(view(mean_weight_v_earth_rot .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
     final_weight_v_cb -= mean(view(mean_weight_v_earth_orb, idx_grid)) #sum(view(mean_weight_v_earth_orb .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
 
-    return final_weight_v_no_cb, final_weight_v_cb, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb 
+    return final_weight_v_no_cb, final_weight_v_cb, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb
 end
