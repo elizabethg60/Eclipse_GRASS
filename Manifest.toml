@@ -522,7 +522,7 @@ uuid = "61eb1bfa-7361-4325-ad38-22787b887f55"
 version = "0.25.0"
 
 [[deps.GRASS]]
-deps = ["BenchmarkTools", "CSV", "CUDA", "CodecZlib", "CubicSplines", "DataFrames", "Dates", "Debugger", "Dierckx", "Distributed", "Distributions", "Downloads", "EchelleCCFs", "FFTW", "FITSIO", "FileIO", "Glob", "HDF5", "HypothesisTests", "ImageFiltering", "Interpolations", "JLD2", "LaTeXStrings", "LinearAlgebra", "LsqFit", "NaNMath", "OrderedCollections", "Peaks", "Pkg", "Polynomials", "PrecompileTools", "Random", "Revise", "SharedArrays", "SpecialFunctions", "StaticArrays", "Statistics", "StatsBase", "TOML", "Tar"]
+deps = ["BenchmarkTools", "CSV", "CUDA", "CodecZlib", "CubicSplines", "DataFrames", "Dates", "Debugger", "Dierckx", "Distributed", "Distributions", "Downloads", "EchelleCCFs", "FFTW", "FITSIO", "FileIO", "Glob", "HDF5", "HypothesisTests", "ImageFiltering", "Interpolations", "JLD2", "LaTeXStrings", "LinearAlgebra", "LsqFit", "NaNMath", "OrderedCollections", "Peaks", "Pkg", "Polynomials", "PrecompileTools", "Random", "Revise", "SPICE", "SharedArrays", "SpecialFunctions", "StaticArrays", "Statistics", "StatsBase", "TOML", "Tar"]
 path = "/Users/elizabethgonzalez/Desktop/GRASS/"
 uuid = "beaa24b3-4aa0-42b2-a8f3-c93b81cbd48b"
 version = "2.1.0-alpha"
