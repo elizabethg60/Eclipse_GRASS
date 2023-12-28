@@ -45,6 +45,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     ra_mean = zeros(length(disk_ϕc), maximum(Nθ))
     de_mean = zeros(length(disk_ϕc), maximum(Nθ))
 
+    mean_exti = zeros(length(disk_ϕc), maximum(Nθ))
+
 
 #subgridding
     Nsubgrid = 10
@@ -183,7 +185,10 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
 
             #determine mean intensity 
-            mean_intensity[i,j] = mean(view(LD_all, idx3))  
+            mean_intensity[i,j] = mean(view(LD_all, idx3)) 
+            
+            extin = map(x -> 10^(-((1/cosd(x))*ext_coef[index])/2.5), zenith_angle_matrix)
+            mean_exti[i,j] = mean(view(extin, idx3)) 
 
 
         #determine mean weighted velocity from sun given blocking from moon 
@@ -197,17 +202,21 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     #index for correct lat / lon disk grid
     idx_grid = mean_intensity .> 0.0
 
+    contrast = (mean_intensity / NaNMath.maximum(mean_intensity)).^0.1
+    brightness = mean_intensity .* mean_exti .* dA_total_proj_mean
+    cheapflux = sum(view(brightness, idx_grid))
+
     #determine final mean intensity for disk grid
-    final_mean_intensity = sum(view(mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(dA_total_proj_mean) 
+    final_mean_intensity = cheapflux #sum(view(mean_intensity .* mean_exti .* dA_total_proj_mean, idx_grid)) / sum(dA_total_proj_mean) 
 
     #determine final mean weighted velocity for disk grid
-    final_weight_v_no_cb = sum(view(mean_intensity .* dA_total_proj_mean .* mean_weight_v_no_cb, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
+    final_weight_v_no_cb = sum(view(contrast .* mean_weight_v_no_cb .* brightness, idx_grid)) / cheapflux #sum(view(mean_intensity .* mean_exti .* dA_total_proj_mean .* mean_weight_v_no_cb, idx_grid)) / sum(view(mean_intensity .* mean_exti .* dA_total_proj_mean, idx_grid))
     final_weight_v_no_cb -= mean(view(mean_weight_v_earth_rot, idx_grid)) #sum(view(mean_weight_v_earth_rot .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
-    final_weight_v_no_cb -= mean(view(mean_weight_v_earth_orb, idx_grid)) #sum(view(mean_weight_v_earth_orb .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
+    #final_weight_v_no_cb -= mean(view(mean_weight_v_earth_orb, idx_grid)) #sum(view(mean_weight_v_earth_orb .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
 
-    final_weight_v_cb = sum(view(mean_intensity .* dA_total_proj_mean .* mean_weight_v_cb, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
+    final_weight_v_cb = sum(view(contrast .* mean_weight_v_cb .* brightness, idx_grid)) / cheapflux#sum(view(mean_intensity .* mean_exti .* dA_total_proj_mean .* mean_weight_v_cb, idx_grid)) / sum(view(mean_intensity .* mean_exti .* dA_total_proj_mean, idx_grid))
     final_weight_v_cb -= mean(view(mean_weight_v_earth_rot, idx_grid)) #sum(view(mean_weight_v_earth_rot .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
-    final_weight_v_cb -= mean(view(mean_weight_v_earth_orb, idx_grid)) #sum(view(mean_weight_v_earth_orb .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
+    #final_weight_v_cb -= mean(view(mean_weight_v_earth_orb, idx_grid)) #sum(view(mean_weight_v_earth_orb .* mean_intensity .* dA_total_proj_mean, idx_grid)) / sum(view(mean_intensity .* dA_total_proj_mean, idx_grid))
 
     return final_weight_v_no_cb, final_weight_v_cb, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb
 end

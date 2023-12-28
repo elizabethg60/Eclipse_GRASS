@@ -1,11 +1,18 @@
 function rotation_period(ϕ::T) where T 
     #prescription for differential rotation given a latitude value
     sinϕ = sin(ϕ)
-    return 360.0/(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4)
+    return 360.0/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
 end
 
 function v_scalar(lat, lon)
     #determines scalar velocity of each cell - serial
+    # incl = 97.05
+    # sDincl = sin(deg2rad(incl))
+    # vproj = ((2π * sun_radius) / rotation_period(lat)) * sDincl
+    # veq = (2π * sun_radius) / (360) 
+    # dlaw = (0.9324*(14.713 - 2.396*(sin(lat))^2 - 1.787*(sin(lat))^4))
+    # clight = 299792.458
+    # return vproj / sqrt(1 .- (veq .* dlaw .* sDincl .* cos(lat))^2 /(clight*clight))
     return (2π * sun_radius * cos(lat)) / rotation_period(lat)
 end
 
