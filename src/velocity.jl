@@ -5,14 +5,12 @@ function rotation_period(ϕ::T) where T
 end
 
 function v_scalar(lat, lon)
-    #determines scalar velocity of each cell - serial
-    # incl = 97.05
-    # sDincl = sin(deg2rad(incl))
-    # vproj = ((2π * sun_radius) / rotation_period(lat)) * sDincl
+    #determines scalar velocity of each cell 
+    # vproj = ((2π * sun_radius) / rotation_period(lat)) * sDincl * (sun_radius * cos(lat) * cos(lon))
     # veq = (2π * sun_radius) / (360) 
     # dlaw = (0.9324*(14.713 - 2.396*(sin(lat))^2 - 1.787*(sin(lat))^4))
     # clight = 299792.458
-    # return vproj / sqrt(1 .- (veq .* dlaw .* sDincl .* cos(lat))^2 /(clight*clight))
+    # return vproj / sqrt(1 - (veq .* dlaw .* sDincl .* cos(lat))^2 /(clight*clight))
     return (2π * sun_radius * cos(lat)) / rotation_period(lat)
 end
 

@@ -26,6 +26,14 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
         disk_θe[i, 1:Nθ[i]+1] .= collect(edges)
     end
 
+    inclination = 97.05 
+    # create rotation matrix for inclination
+    iₛ = -deg2rad(90.0 - inclination)
+    R_x = [1.0 0.0 0.0; 
+           0.0 cos(iₛ) -sin(iₛ);  
+           0.0 sin(iₛ) cos(iₛ)]  
+
+
 
 #query JPL horizons for E, S, M position (km) and velocities (km/s)
     earth_pv = spkssb(399,epoch,"J2000")[1:3] 
@@ -64,7 +72,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             #determine xyz stellar coordinates for lat/long grid
             SP_sun = map(x -> get_xyz.(sun_radius, x...), subgrid)
             #transform xyz stellar coordinates of grid from sun frame to ICRF
-            SP_bary = Matrix{Vector{Float64}}(undef,size(SP_sun)...)
+            SP_bary =Matrix{Vector{Float64}}(undef,size(SP_sun)...)
             frame_transfer(pxform("IAU_SUN", "J2000", epoch), SP_sun, SP_bary)
 
             #determine xyz earth coordinates for lat/long of observatory
@@ -141,14 +149,14 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
                 v_earth_rot_proj[k] = norm(velocity_vector_earth_ICRF) * angle
             end
 
-            #get relative orbital motion in m/s
-            v_delta = (sun_vel .- earth_vel) .* 1000
-            v_earth_orb_proj = zeros(Nsubgrid, Nsubgrid)
-            for k in eachindex(v_earth_orb_proj)
-                B = OP_bary[k]
-                angle = cos(π - acos(dot(B, v_delta) / (norm(B) * norm(v_delta))))
-                v_earth_orb_proj[k] = norm(v_delta) * angle
-            end
+            # #get relative orbital motion in m/s
+            # v_delta = (sun_vel .- earth_vel) .* 1000
+            # v_earth_orb_proj = zeros(Nsubgrid, Nsubgrid)
+            # for k in eachindex(v_earth_orb_proj)
+            #     B = OP_bary[k]
+            #     angle = cos(π - acos(dot(B, v_delta) / (norm(B) * norm(v_delta))))
+            #     v_earth_orb_proj[k] = norm(v_delta) * angle
+            # end
 
 
         #determine patches that are blocked by moon 
@@ -196,7 +204,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             mean_weight_v_cb[i,j] = mean(view(projected_velocities_cb, idx3)) 
         
             mean_weight_v_earth_rot[i,j] = mean(view(v_earth_rot_proj, idx3)) 
-            mean_weight_v_earth_orb[i,j] = mean(view(v_earth_orb_proj, idx3)) 
+            #mean_weight_v_earth_orb[i,j] = mean(view(v_earth_orb_proj, idx3)) 
         end
     end
     #index for correct lat / lon disk grid

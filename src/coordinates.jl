@@ -5,8 +5,8 @@ function get_xyz(ρ::T, ϕ::T, θ::T) where T
 
     # now get cartesian coords
     x = ρ * cosϕ * cosθ 
-    y = ρ * cosϕ * sinθ
-    z = ρ * sinϕ
+    y = ρ * cosϕ * sinθ 
+    z = ρ * sinϕ 
 
     return [x, y, z]
 end

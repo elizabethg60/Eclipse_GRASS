@@ -83,25 +83,25 @@ axs[1].set_ylabel("Residuals")
 plt.savefig("rm_and_residuals_no_cb.png")
 plt.show()
 
-#rm curve
-linear_slope = (RV_list_cb[46]-RV_list_cb[0])/46
-fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
-axs[0].scatter(time[0:46], RV_list_cb[0:46] + (raw_rv[0:46] / (linear_slope*range(0,46) + RV_list_cb[0])), color = 'k', marker = "x", s = 15)
-axs[0].scatter(time[46:-1], raw_rv[46:-1], color = 'k', marker = "x", s = 15, label = "Reiners RVs")
-axs[0].plot(time, RV_list_cb, color = 'r', label = "Model - CB")
-axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-axs[0].set_xlabel("Time (UTC)")
-axs[0].set_ylabel("RV [m/s]")
-axs[0].legend()
-#residuals
-axs[1].scatter(time[0:46], RV_list_cb[0:46] + (raw_rv[0:46] / (linear_slope*range(0,46) + RV_list_cb[0])) - RV_list_cb[0:46], color = 'r', marker = "x", s = 1)
-axs[1].scatter(time[46:-1], raw_rv[46:-1] - RV_list_cb[46:-1], color = 'r', marker = "x", s = 1)
-axs[1].scatter(time_residuals_model2, residual_model2, color = 'k', marker = "x", s = 1)
-axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-axs[1].set_xlabel("Time (UTC)")
-axs[1].set_ylabel("Residuals")
-plt.savefig("rm_and_residuals_cb.png")
-plt.show()
+# #rm curve
+# linear_slope = (RV_list_cb[46]-RV_list_cb[0])/46
+# fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
+# axs[0].scatter(time[0:46], RV_list_cb[0:46] + (raw_rv[0:46] / (linear_slope*range(0,46) + RV_list_cb[0])), color = 'k', marker = "x", s = 15)
+# axs[0].scatter(time[46:-1], raw_rv[46:-1], color = 'k', marker = "x", s = 15, label = "Reiners RVs")
+# axs[0].plot(time, RV_list_cb, color = 'r', label = "Model - CB")
+# axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# axs[0].set_xlabel("Time (UTC)")
+# axs[0].set_ylabel("RV [m/s]")
+# axs[0].legend()
+# #residuals
+# axs[1].scatter(time[0:46], RV_list_cb[0:46] + (raw_rv[0:46] / (linear_slope*range(0,46) + RV_list_cb[0])) - RV_list_cb[0:46], color = 'r', marker = "x", s = 1)
+# axs[1].scatter(time[46:-1], raw_rv[46:-1] - RV_list_cb[46:-1], color = 'r', marker = "x", s = 1)
+# axs[1].scatter(time_residuals_model2, residual_model2, color = 'k', marker = "x", s = 1)
+# axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# axs[1].set_xlabel("Time (UTC)")
+# axs[1].set_ylabel("Residuals")
+# plt.savefig("rm_and_residuals_cb.png")
+# plt.show()
 
 #intensity
 fig = plt.figure()
