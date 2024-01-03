@@ -26,14 +26,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
         disk_θe[i, 1:Nθ[i]+1] .= collect(edges)
     end
 
-    inclination = 97.05 
-    # create rotation matrix for inclination
-    iₛ = -deg2rad(90.0 - inclination)
-    R_x = [1.0 0.0 0.0; 
-           0.0 cos(iₛ) -sin(iₛ);  
-           0.0 sin(iₛ) cos(iₛ)]  
-
-
 
 #query JPL horizons for E, S, M position (km) and velocities (km/s)
     earth_pv = spkssb(399,epoch,"J2000")[1:3] 
