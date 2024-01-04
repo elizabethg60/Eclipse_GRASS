@@ -104,16 +104,16 @@ plt.show()
 # plt.show()
 
 #intensity
-fig = plt.figure()
-ax1 = fig.add_subplot()
-ax1.plot(time, intensity_list/intensity_list[129], color = 'r', label = "model")
-ax1.scatter(time_flux_model1, flux_model1, color = 'k', label = "Reiners")
-ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-ax1.set_xlabel("Time (UTC)")
-ax1.set_ylabel("Relative Intensity")
-plt.legend()
-plt.savefig("intensity.png")
-plt.show()
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# ax1.plot(time, intensity_list/intensity_list[129], color = 'r', label = "model")
+# ax1.scatter(time_flux_model1, flux_model1, color = 'k', label = "Reiners")
+# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# ax1.set_xlabel("Time (UTC)")
+# ax1.set_ylabel("Relative Intensity")
+# plt.legend()
+# plt.savefig("intensity.png")
+# plt.show()
 
 # #projected solar velocities at each timestamp for eclipse movie
 # for i in range(1,len(vel_no_cb)):

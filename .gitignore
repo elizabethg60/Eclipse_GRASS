@@ -5,6 +5,7 @@
 *.jld2 
 *.png
 *.gif
+*.tf
 
 *.jl.cov
 *.jl.*.cov

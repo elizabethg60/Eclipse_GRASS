@@ -1,6 +1,6 @@
 function calc_proj_dist2(p1, p2)
     """
-    determines distance between moon and cell on solar grid 
+    determines distance in radians between moon and cell on solar grid
 
     p1: vector from observer to cell on solar grid
     p2: vector from observer to moon 

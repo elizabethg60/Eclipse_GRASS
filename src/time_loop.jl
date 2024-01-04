@@ -63,7 +63,9 @@ function gottingen_loop(lats::T) where T
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
-    for i in 1:length(time_stamps)
+    # for i in 1:length(time_stamps)
+    # @show length(time_stamps)
+    for i in 75:75
         RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
@@ -91,6 +93,7 @@ function gottingen_loop(lats::T) where T
         file["vel_no_cb"] = vel_no_cb
         file["vel_cb"] = vel_cb
     end
+    return nothing
 end
 
 function expres_loop(lats::T) where T

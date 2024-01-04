@@ -1,7 +1,8 @@
 function rotation_period(ϕ::T) where T 
     #prescription for differential rotation given a latitude value
     sinϕ = sin(ϕ)
-    return 360.0/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
+    # return 360.0/(0.9324*(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4))
+    return 360.0/(14.713 - 2.396*sinϕ^2 - 1.787*sinϕ^4)
 end
 
 function v_scalar(lat, lon)
@@ -12,6 +13,11 @@ function v_scalar(lat, lon)
     # clight = 299792.458
     # return vproj / sqrt(1 - (veq .* dlaw .* sDincl .* cos(lat))^2 /(clight*clight))
     return (2π * sun_radius * cos(lat)) / rotation_period(lat)
+
+    # p_eq = 360.0 / 14.713
+    # veq = 2π * sun_radius / p_eq / 86400.0
+    # sinϕ = sin(lat)
+    # return veq * (14.713 + 2.396*sinϕ^2 + 1.787*sinϕ^4) / 14.713
 end
 
 function pole_vector_grid!(A::Matrix, out::Matrix)
@@ -36,16 +42,33 @@ function v_vector(A::Matrix, B::Matrix, C::Matrix, out::Matrix)
     C: scalar velocity of each cell
     out: matrix with xyz and velocity of each cell
     """
-    for i in 1:length(A)
+    for i in eachindex(A)
         cross_product = cross(B[i], [0.0,0.0,sun_radius]) 
-        cross_product /= norm(cross_product)
-        cross_product *= C[i]
-        out[i] = [A[i];cross_product]
+        cross_product ./= norm(cross_product)
+        cross_product .*= C[i]
+        out[i] = cross_product
     end
     return
 end
 
-function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix) 
+function projected!(A::Matrix, B::Vector, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix)
+    """
+    determine projected velocity of each cell onto line of sight to observer - serial
+
+    A: matrix with xyz and velocity of each cell
+    B: matrix with line of sight from each cell to observer
+    out: matrix of projected velocities
+    """
+    for i in eachindex(A)
+        vel = A[i][4:6]
+        angle = dot(B, vel) / (norm(B) * norm(vel))
+        out_no_cb[i] = (norm(vel) * angle) 
+        out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
+    end
+    return 
+end
+
+function projected!(A::Matrix, B::Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix)
     """
     determine projected velocity of each cell onto line of sight to observer - serial
 
@@ -54,11 +77,11 @@ function projected!(A::Matrix, B:: Matrix, out_no_cb::Matrix, out_cb::Matrix, cb
     out: matrix of projected velocities
     """
     for i in 1:length(A)
-        vel = [A[i][4],A[i][5],A[i][6]]
-        angle = cos(π - acos(dot(B[i], vel) / (norm(B[i]) * norm(vel)))) 
+        vel = A[i][4:6]
+        angle = dot(B[i][1:3], vel) / (norm(B[i][1:3]) * norm(vel))
 
-        out_no_cb[i] = (norm(vel) * angle) 
-        out_cb[i] = (norm(vel) * angle) + cb_velocity[i] 
+        out_no_cb[i] = (norm(vel) * angle)
+        out_cb[i] = (norm(vel) * angle) + cb_velocity[i]
     end
-    return 
+    return
 end
