@@ -53,7 +53,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     # get light travel time corrected OS vector
     OS_bary, OS_lt, OS_dlt = spkltc(10, epoch, "J2000", lt_flag, BO_bary)
 
-    # get light travel time corrected OS vector
+    # get light travel time corrected ES vector
     ES_bary, ES_lt, ES_dlt = spkltc(10, epoch, "J2000", lt_flag, BE_bary)
 
     # get vector from observatory on earth's surface to moon center
@@ -90,7 +90,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
     # allocate more memory
     # vectors
-    SP_bary_pos = fill(Vector{Float64}(undef, 3), Nsubgrid, Nsubgrid)
     pole_vector_grid = fill(Vector{Float64}(undef, 3), Nsubgrid, Nsubgrid)
     SP_sun = fill(Vector{Float64}(undef, 6), Nsubgrid, Nsubgrid)
     SP_sun_pos = fill(Vector{Float64}(undef, 3), Nsubgrid, Nsubgrid)
@@ -98,16 +97,12 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     SP_bary = fill(Vector{Float64}(undef, 6), Nsubgrid, Nsubgrid)
     SP_bary_pos = fill(Vector{Float64}(undef, 3), Nsubgrid, Nsubgrid)
     SP_bary_vel = fill(Vector{Float64}(undef, 3), Nsubgrid, Nsubgrid)
-    BP_bary = fill(Vector{Float64}(undef, 6), Nsubgrid, Nsubgrid)
     OP_bary = fill(Vector{Float64}(undef, 6), Nsubgrid, Nsubgrid)
     # scalars
     mu_grid = zeros(Nsubgrid, Nsubgrid)
-    mu_grid_test = zeros(Nsubgrid, Nsubgrid)
     convective_velocities = zeros(Nsubgrid, Nsubgrid)
     projected_velocities_no_cb = zeros(Nsubgrid, Nsubgrid)
     projected_velocities_cb = zeros(Nsubgrid, Nsubgrid)
-    projected_velocities_no_cb_test = zeros(Nsubgrid, Nsubgrid)
-    projected_velocities_cb_test = zeros(Nsubgrid, Nsubgrid)
     distance = zeros(Nsubgrid, Nsubgrid)
     v_scalar_grid = zeros(Nsubgrid, Nsubgrid)
     v_earth_orb_proj = zeros(Nsubgrid, Nsubgrid)
@@ -148,13 +143,13 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             end
 
             #get vector from barycenter to each patch on Sun's surface
-            for k in eachindex(BP_bary)
+            for k in eachindex(OP_bary)
                 OP_bary[k] = OS_bary .+ SP_bary[k]
             end
 
             #calculate mu for each patch
             calc_mu_grid!(SP_bary, OP_bary, mu_grid)
-            # calc_mu_grid!(SP_bary, OS_bary, mu_grid_test)
+            # calc_mu_grid!(SP_bary, OS_bary[1:3], mu_grid)
 
             # move on if everything is off the grid
             all(mu_grid .< zero(T)) && continue
@@ -162,49 +157,20 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             #get projected velocity for each patch
             convective_velocities .= convective_blueshift_interpol.(mu_grid)
             projected!(SP_bary, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities)
-            # projected!(velocity_vector_ICRF, OS_bary, projected_velocities_no_cb_test, projected_velocities_cb_test, convective_velocities)
+            # projected!(SP_bary, OS_bary[1:3], projected_velocities_no_cb, projected_velocities_cb, convective_velocities)
 
             # convert from km/s to m/s
             projected_velocities_cb .*= 1000.0
             projected_velocities_no_cb .*= 1000.0
-            # projected_velocities_cb_test .*= 1000.0
-            # projected_velocities_no_cb_test .*= 1000.0
 
-            # # try the reiners et all velocities
-            # incl = 97.05
-            # phi    =  getindex.(subgrid, 2)
-            # theta  =  π/2 .- getindex.(subgrid, 1)
-            # rotang = -deg2rad(90.0 .- incl)
-            # xincl90 = sin.(theta) .* sin.(phi)
-            # yincl90 = cos.(theta)
-            # zincl90 = sin.(theta) .* cos.(phi)
-
-            # xproj =  xincl90
-            # yproj =  yincl90 .* cos(rotang) .+ zincl90 .* sin(rotang)
-            # zproj = -yincl90 .* sin(rotang) .+ zincl90 .* cos(rotang)
-
-            # v_hack = v_scalar_grid .* xproj .* sin(deg2rad(incl))
-
-            # incl = rad2deg(sun_angle)
-            # rotang = -deg2rad(90.0 .- incl)
-            # xincl90_2 = sin.(theta) .* sin.(phi)
-            # yincl90_2 = cos.(theta)
-            # zincl90_2 = sin.(theta) .* cos.(phi)
-
-            # xproj_2 =  xincl90_2
-            # yproj_2 =  yincl90_2 .* cos(rotang) .+ zincl90_2 .* sin(rotang)
-            # zproj_2 = -yincl90_2 .* sin(rotang) .+ zincl90_2 .* cos(rotang)
-
-            # v_redo = v_scalar_grid .* xproj_2 .* sin(deg2rad(incl))
-
-            # project earth_rot velocity vector onto patches
-            v_rot = EO_bary[4:6]
-            for k in eachindex(v_earth_rot_proj)
-                B = view(OP_bary[k], 1:3)
-                angle = dot(B, v_rot) / (norm(B) * norm(v_rot))
-                v_earth_rot_proj[k] = norm(v_rot) * angle
-            end
-            v_earth_rot_proj .*= 1000.0
+            # # project earth_rot velocity vector onto patches
+            # v_rot = EO_bary[4:6]
+            # for k in eachindex(v_earth_rot_proj)
+            #     B = view(OP_bary[k], 1:3)
+            #     angle = dot(B, v_rot) / (norm(B) * norm(v_rot))
+            #     v_earth_rot_proj[k] = norm(v_rot) * angle
+            # end
+            # v_earth_rot_proj .*= 1000.0
 
             #get relative orbital motion in m/s
             v_delta = OS_bary[4:6]
@@ -213,6 +179,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
                 angle = dot(B, v_delta) / (norm(B) * norm(v_delta))
                 v_earth_orb_proj[k] = norm(v_delta) * angle
             end
+            # convert from km/s to m/s
             v_earth_orb_proj .*= 1000.0
 
             #determine patches that are blocked by moon
@@ -242,9 +209,9 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             dθ = step(θe_sub) 
             dA_sub = map(x -> calc_dA(sun_radius, getindex(x,1), dϕ, dθ), subgrid)
             #get total projected, visible area of larger tile
-            dp_sub = map((x,y) -> abs(dot(x,y)), OP_bary, SP_bary) ./ (norm.(OP_bary) .* norm.(SP_bary))
-            dA_total_proj = dA_sub .* dp_sub
-            # dA_total_proj = dA_sub .* mu_grid
+            # dp_sub = map((x,y) -> abs(dot(x,y)), OP_bary, SP_bary) ./ (norm.(OP_bary) .* norm.(SP_bary))
+            # dA_total_proj = dA_sub .* dp_sub
+            dA_total_proj = dA_sub .* mu_grid
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
 
             #get ra and dec
@@ -275,7 +242,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             mean_weight_v_no_cb[i,j] = mean(view(projected_velocities_no_cb, idx3))
             mean_weight_v_cb[i,j] = mean(view(projected_velocities_cb, idx3)) 
         
-            mean_weight_v_earth_rot[i,j] = mean(view(v_earth_rot_proj, idx3))
+            # mean_weight_v_earth_rot[i,j] = mean(view(v_earth_rot_proj, idx3))
             mean_weight_v_earth_orb[i,j] = mean(view(v_earth_orb_proj, idx3))
         end
     end
