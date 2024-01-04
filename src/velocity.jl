@@ -43,7 +43,7 @@ function v_vector(A::Matrix, B::Matrix, C::Matrix, out::Matrix)
     out: matrix with xyz and velocity of each cell
     """
     for i in eachindex(A)
-        cross_product = cross(B[i], [0.0,0.0,sun_radius]) 
+        cross_product = cross([0.0,0.0,sun_radius], B[i])
         cross_product ./= norm(cross_product)
         cross_product .*= C[i]
         out[i] = cross_product

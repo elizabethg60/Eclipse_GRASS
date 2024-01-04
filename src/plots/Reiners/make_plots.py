@@ -133,7 +133,7 @@ plt.show()
 #     plt.clf()
 
 # #barycentric correction test: Sun center vs surface
-# vb, warnings, flag = get_BC_vel(JDUTC=time_julian, lat=51.560583 , longi=9.944333, alt=201, SolSystemTarget='Sun', predictive=False,zmeas=0.0)  
+# vb, warnings, flag = get_BC_vel(JDUTC=time_julian, lat=51.560583 , longi=9.944333, alt=201, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
 # fig = plt.figure()
 # ax1 = fig.add_subplot()
 # plt.scatter(time, vb, color = 'g', label = "BC using center")
