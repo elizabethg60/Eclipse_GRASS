@@ -57,21 +57,6 @@ function calc_mu(SP::AbstractArray{T,1}, OP::AbstractArray{T,1}) where T
     return dot(OP, SP) / (norm(OP) * norm(SP))
 end
 
-function calc_mu_grid!(A::Matrix, B::Vector, out::Matrix)
-    """
-    create matrix of mu values for each cell - serial
-
-    A: matrix of vectors from sun center to cell
-    B: matrix of vectors from observer to cell
-    out: mu value between A and B
-    """
-    for i in eachindex(A)
-        out[i] = calc_mu(view(A[i], 1:3), view(B, 1:3))
-        end
-    return
-end	
-
-
 function calc_mu_grid!(A::Matrix, B::Matrix, out::Matrix)
     """
     create matrix of mu values for each cell - serial

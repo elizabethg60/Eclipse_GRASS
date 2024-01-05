@@ -53,7 +53,7 @@ function linear_interp(xs::AA{T,1}, ys::AA{T,1}; bc::T=NaN) where T<:Float64
     return f
 end
 file = DataFrame(CSV.File("src/convective_blueshift.csv"))
-blueshift_values = reverse((file." blueshift")*1000)
+blueshift_values = reverse((file." blueshift"))
 mu_values = reverse(file."mu")
 convective_blueshift_interpol = linear_interp(mu_values, blueshift_values)
 end 

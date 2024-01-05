@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 mpl = plt.matplotlib 
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
+from astropy.time import Time
+from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 #read in data
 #model
@@ -20,16 +22,21 @@ vel_cb = file["vel_cb"][()]
 data_time = np.loadtxt("Boulder_Data_bin.txt")[:, 0]
 data_rv = np.loadtxt("Boulder_Data_bin.txt")[:, 1] * (1.565*10**(-6))
 time_stamps_data = []
+time_julian = []
 for i in data_time:
-    time_stamps_data.append(datetime.fromtimestamp(i) + timedelta(hours=4))
+    dt = datetime.fromtimestamp(i) + timedelta(hours=4)
+    time_stamps_data.append(dt)
+    time_julian.append((Time(dt)).jd)
+
+vb, warnings, flag = get_BC_vel(JDUTC=time_julian, lat=39.995380 , longi=-105.262390 , alt=165.23, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
 
 data_rv = np.array(data_rv)
 data_rv -= data_rv[-1]
 
-RV_list_no_cb = np.array(RV_list_no_cb)
+RV_list_no_cb = np.array(RV_list_no_cb + vb)
 RV_list_no_cb -= RV_list_no_cb[-1]
 
-RV_list_cb = np.array(RV_list_cb)
+RV_list_cb = np.array(RV_list_cb + vb)
 RV_list_cb -= RV_list_cb[-1]
 
 #rm curve 
