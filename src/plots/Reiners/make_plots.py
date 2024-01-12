@@ -28,11 +28,14 @@ lines=f.readlines()[1:]
 time=[]
 raw_rv = []
 time_julian = []
+# UTC_time = []
 for x in lines:
     dt = datetime.strptime("2015-03-20 {}".format((x.split()[1])), "%Y-%m-%d %H:%M:%S.%f")
     time.append(dt)
     time_julian.append((Time(dt)).jd)
     raw_rv.append(float(x.split()[4]))
+# for x in range(0,len(lines)):
+#     UTC_time.append((datetime.strptime("2015-03-20 {}".format((lines[x].split()[1])), "%Y-%m-%d %H:%M:%S.%f") + timedelta(seconds=float(50))))
 f.close()
 #reiners model one residuals and intensity 
 with open('model1_residuals.csv') as f:

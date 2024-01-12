@@ -1,9 +1,8 @@
 function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r::Float64=moon_radius) where T 
     """
-    compute rv for a given grid size and timestamp - serial 
+    compute rv for a given grid size and timestamp  
     
     lats: grid latitude size
-    lons: grid longitude size
     epoch: timestamp
     obs_long: observer longtiude
     obs_lat: observer latitude
@@ -48,8 +47,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
     # get light travel time corrected OS vector
     OS_bary, OS_lt, OS_dlt = spkltc(10, epoch, "J2000", lt_flag, BO_bary)
-    # get light travel time corrected ES vector
-    ES_bary, ES_lt, ES_dlt = spkltc(10, epoch, "J2000", lt_flag, BE_bary)
 
     # get vector from observatory on earth's surface to moon center
     OM_bary, OM_lt, OM_dlt = spkltc(301, epoch, "J2000", lt_flag, BO_bary)
@@ -57,16 +54,15 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     # get modified epch
     epoch_lt = epoch - OS_lt
 
-    # get vector for sun pole
-    sun_lat = deg2rad(90.0)
-    sun_lon = deg2rad(0.0)
-    sun_pole_sun = pgrrec("SUN", sun_lon, sun_lat, 0.0, sun_radius, 0.0)
-    sun_pole_bary = pxform("IAU_SUN", "J2000", epoch_lt) * sun_pole_sun
-
     # get rotation matrix for sun
     sun_rot_mat = pxform("IAU_SUN", "J2000", epoch_lt)
 
-    # compute inclination
+    # # get vector for sun pole
+    # sun_lat = deg2rad(90.0)
+    # sun_lon = deg2rad(0.0)
+    # sun_pole_sun = pgrrec("SUN", sun_lon, sun_lat, 0.0, sun_radius, 0.0)
+    # sun_pole_bary = pxform("IAU_SUN", "J2000", epoch_lt) * sun_pole_sun
+    # # compute inclination
     # v1 = sun_pole_bary
     # v2 = OS_bary[1:3]
     # sun_angle = 90.0 - rad2deg(acos(dot(v1, v2) / (norm(v1) * norm(v2))))
@@ -184,18 +180,26 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             dθ = step(θe_sub) 
             dA_sub = map(x -> calc_dA(sun_radius, getindex(x,1), dϕ, dθ), subgrid)
             #get total projected, visible area of larger tile
+            # dp_sub = map((x,y) -> abs(dot(x[1:3],y[1:3])), OP_bary, SP_bary) ./ map((x,y) -> norm(x[1:3]) * norm(y[1:3]), OP_bary, SP_bary)
+            # dA_total_proj = dA_sub .* dp_sub 
             dA_total_proj = dA_sub .* mu_grid
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
 
+
         #get ra and dec
-            OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_bary])
-            ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
-            de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
+            # x_mean = mean(view(getindex.(OP_bary,1), idx3))
+            # y_mean = mean(view(getindex.(OP_bary,2), idx3))
+            # z_mean = mean(view(getindex.(OP_bary,3), idx3))
+            # dis_var, ra_mean[i,j], de_mean[i,j] = recrad([x_mean, y_mean, z_mean])
+
+            # OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_bary])
+            # ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
+            # de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
 
         #determine mean intensity
             mean_intensity[i,j] = mean(view(LD_all, idx3)) 
             #extinction 
-            zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist2(x, EO_bary), OP_bary))
+            zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist2(x[1:3], EO_bary[1:3]), OP_bary))
             extin = map(x -> 10^(-((1/cosd(x))*ext_coef[index])/2.5), zenith_angle_matrix)
             mean_exti[i,j] = mean(view(extin, idx3)) 
 
@@ -225,3 +229,9 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
     return final_weight_v_no_cb, final_weight_v_cb, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb
 end
+
+#Thursday 1/11 To Do:
+#2. change geometry under assumption that far away to see if residuals match then (may include 50 sec now)
+#3. attempts at debugging GRASS - otherwise plan to meet with Michael
+
+# * start reporting RMS
