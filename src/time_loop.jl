@@ -48,8 +48,8 @@ function gottingen_loop(lats::T) where T
     computes RV for each timestamp for the gottingen eclipse 
     """
     #convert from utc to et as needed by SPICE
-    time_stamps = utc2et.(reiners_timestamps)
-    #time_stamps = utc2et.(reiners_50)
+    #time_stamps = utc2et.(reiners_timestamps)
+    time_stamps = utc2et.(reiners_50)
 
     #Gottingen location
     obs_lat = 51.560583 
