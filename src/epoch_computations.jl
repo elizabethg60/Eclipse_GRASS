@@ -192,6 +192,9 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             # z_mean = mean(view(getindex.(OP_bary,3), idx3))
             # dis_var, ra_mean[i,j], de_mean[i,j] = recrad([x_mean, y_mean, z_mean])
 
+            #needs to be OP_earth instead of OP_bary 
+            #OP_earth = sxform("J2000", "ITRF93", epoch) 
+
             # OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_bary])
             # ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
             # de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
