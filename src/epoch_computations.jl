@@ -187,15 +187,13 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
 
         #get ra and dec
-            # x_mean = mean(view(getindex.(OP_bary,1), idx3))
-            # y_mean = mean(view(getindex.(OP_bary,2), idx3))
-            # z_mean = mean(view(getindex.(OP_bary,3), idx3))
-            # dis_var, ra_mean[i,j], de_mean[i,j] = recrad([x_mean, y_mean, z_mean])
+            # OP_earth = map(x -> sxform("J2000", "ITRF93", epoch) * x, OP_bary)
+            # # x_mean = mean(view(getindex.(OP_earth,1), idx3))
+            # # y_mean = mean(view(getindex.(OP_earth,2), idx3))
+            # # z_mean = mean(view(getindex.(OP_earth,3), idx3))
+            # # dis_var, ra_mean[i,j], de_mean[i,j] = recrad([x_mean, y_mean, z_mean])
 
-            #needs to be OP_earth instead of OP_bary 
-            #OP_earth = sxform("J2000", "ITRF93", epoch) 
-
-            # OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_bary])
+            # OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_earth])
             # ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
             # de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
 
@@ -232,9 +230,3 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
     return final_weight_v_no_cb, final_weight_v_cb, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb
 end
-
-#Thursday 1/11 To Do:
-#2. change geometry under assumption that far away to see if residuals match then (may include 50 sec now)
-#3. attempts at debugging GRASS - otherwise plan to meet with Michael
-
-# * start reporting RMS
