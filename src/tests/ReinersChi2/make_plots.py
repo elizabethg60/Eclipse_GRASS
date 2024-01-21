@@ -47,6 +47,7 @@ for sec in range(63,64):
     file = h5py.File("model_data_{}.jld2".format(sec), "r")
     RV_list_no_cb = file["RV_list_no_cb"][()] 
     RV_list_cb  = file["RV_list_cb"][()]
+    RV_list_cb_new  = file["RV_list_cb_new"][()]
     timestamps = file["timestamps"][()]
     model_time = []
     for i in timestamps:
@@ -60,6 +61,9 @@ for sec in range(63,64):
 
     RV_list_cb = np.array(RV_list_cb)
     RV_list_cb -= RV_list_cb[-1]
+
+    RV_list_cb_new = np.array(RV_list_cb_new)
+    RV_list_cb_new -= RV_list_cb_new[-1]
 
     f_obs=np.array(raw_rv)
     stf_obs=np.std(raw_rv)
@@ -104,6 +108,25 @@ for sec in range(63,64):
     rms_cb = round(np.sqrt((np.nansum((raw_rv - RV_list_cb)**2))/len(raw_rv - RV_list_cb)),2)
     axs[0].text(model_time[-20], -400, "RMS {}".format(rms_cb))
     plt.savefig("{}_cb.png".format(sec))
+    plt.show()
+
+    #rm curve
+    fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
+    axs[0].scatter(model_time, raw_rv, color = 'k', marker = "x", s = 15, label = "Reiners RVs")
+    axs[0].plot(model_time, RV_list_cb_new, color = 'r', label = "Model - CB")
+    axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    axs[0].set_xlabel("Time (UTC)")
+    axs[0].set_ylabel("RV [m/s]")
+    axs[0].legend()
+    #residuals
+    axs[1].scatter(model_time, raw_rv - RV_list_cb_new, color = 'r', marker = "x", s = 1)
+    axs[1].scatter(time_residuals_model2[21:-19], residual_model2[21:-19], color = 'k', marker = "x", s = 1)
+    axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    axs[1].set_xlabel("Time (UTC)")
+    axs[1].set_ylabel("Residuals")
+    rms_cb_new = round(np.sqrt((np.nansum((raw_rv - RV_list_cb_new)**2))/len(raw_rv - RV_list_cb_new)),2)
+    axs[0].text(model_time[-20], -400, "RMS {}".format(rms_cb_new))
+    plt.savefig("{}_cb_new.png".format(sec))
     plt.show()
 
 # min_chi2 = min(chi2_array)

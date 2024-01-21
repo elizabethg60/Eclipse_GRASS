@@ -39,7 +39,7 @@ function v_vector(A::Matrix, B::Matrix, C::Matrix, out::Matrix)
     return
 end
 
-function projected!(A::Matrix, B::Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_velocity::Matrix)
+function projected!(A::Matrix, B::Matrix, out_no_cb::Matrix, out_cb::Matrix, out_cb_new::Matrix, mu::Matrix, cb_velocity::Matrix)
     """
     determine projected velocity of each cell onto line of sight to observer - serial
 
@@ -53,6 +53,10 @@ function projected!(A::Matrix, B::Matrix, out_no_cb::Matrix, out_cb::Matrix, cb_
 
         out_no_cb[i] = (norm(vel) * angle)
         out_cb[i] = (norm(vel) * angle) + cb_velocity[i]
+        #[0.27, 0.325, 12., 0.11]
+        #a/(1+exp(−b ∗ (x−c)))+d 0.27/(1+exp(-0.325*(mu[i]-12)))+0.11 
+        new_cb_model = 0.27 * (2/(1+exp((mu[i]-0.325)*12))-1) + 0.11
+        out_cb_new[i] = (norm(vel) * angle) + new_cb_model
     end
     return
 end

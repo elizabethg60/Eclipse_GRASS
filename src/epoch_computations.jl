@@ -76,6 +76,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     mean_intensity = zeros(length(disk_ϕc), maximum(Nθ))
     mean_weight_v_no_cb = zeros(length(disk_ϕc), maximum(Nθ))
     mean_weight_v_cb = zeros(length(disk_ϕc), maximum(Nθ))
+    mean_weight_v_cb_new = zeros(length(disk_ϕc), maximum(Nθ))
     mean_weight_v_earth_orb = zeros(length(disk_ϕc), maximum(Nθ))
     ra_mean = zeros(length(disk_ϕc), maximum(Nθ))
     de_mean = zeros(length(disk_ϕc), maximum(Nθ))
@@ -93,6 +94,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     convective_velocities = zeros(Nsubgrid, Nsubgrid)
     projected_velocities_no_cb = zeros(Nsubgrid, Nsubgrid)
     projected_velocities_cb = zeros(Nsubgrid, Nsubgrid)
+    projected_velocities_cb_new = zeros(Nsubgrid, Nsubgrid)
     distance = zeros(Nsubgrid, Nsubgrid)
     v_scalar_grid = zeros(Nsubgrid, Nsubgrid)
     v_earth_orb_proj = zeros(Nsubgrid, Nsubgrid)
@@ -141,10 +143,11 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
         #get projected velocity for each patch
             convective_velocities .= convective_blueshift_interpol.(mu_grid)
-            projected!(SP_bary, OP_bary, projected_velocities_no_cb, projected_velocities_cb, convective_velocities)
+            projected!(SP_bary, OP_bary, projected_velocities_no_cb, projected_velocities_cb, projected_velocities_cb_new, mu_grid, convective_velocities)
             # convert from km/s to m/s
             projected_velocities_cb .*= 1000.0
             projected_velocities_no_cb .*= 1000.0
+            projected_velocities_cb_new .*= 1000.0
 
         #get relative orbital motion in m/s
             v_delta = OS_bary[4:6]
@@ -206,7 +209,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
         #determine mean weighted velocity from sun given blocking from moon
             mean_weight_v_no_cb[i,j] = mean(view(projected_velocities_no_cb, idx3))
-            mean_weight_v_cb[i,j] = mean(view(projected_velocities_cb, idx3)) 
+            mean_weight_v_cb[i,j] = mean(view(projected_velocities_cb, idx3))
+            mean_weight_v_cb_new[i,j] = mean(view(projected_velocities_cb_new, idx3)) 
             mean_weight_v_earth_orb[i,j] = mean(view(v_earth_orb_proj, idx3))
         end
     end
@@ -228,5 +232,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     final_weight_v_cb = sum(view(contrast .* mean_weight_v_cb .* brightness, idx_grid)) / cheapflux
     final_weight_v_cb += mean(view(mean_weight_v_earth_orb, idx_grid)) 
 
-    return final_weight_v_no_cb, final_weight_v_cb, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb
+    final_weight_v_cb_new = sum(view(contrast .* mean_weight_v_cb_new .* brightness, idx_grid)) / cheapflux
+    final_weight_v_cb_new += mean(view(mean_weight_v_earth_orb, idx_grid)) 
+
+    return final_weight_v_no_cb, final_weight_v_cb, final_weight_v_cb_new, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb
 end
