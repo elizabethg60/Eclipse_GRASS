@@ -180,3 +180,36 @@ function boulder_loop(lats::T) where T
         file["vel_cb"] = vel_cb
     end
 end
+
+function chi2(lats::T) where T
+    #Gottingen location
+    obs_lat = 51.560583 
+    obs_long = 9.944333
+    alt = 0.201
+
+    seconds = range(61,80,step=1)
+    for sec in seconds
+        time_stamps_string = Vector{String}(undef,size(reiners_eclipse)...) 
+        for i in 1:length(time_stamps_string)
+            time_stamps_string[i] = Dates.format(Dates.DateTime(reiners_eclipse[i], "yyyy-mm-ddTHH:MM:SS.ss") + Dates.Second(sec), "yyyy-mm-ddTHH:MM:SS.ss")
+        end
+        time_stamps = utc2et.(time_stamps_string)
+
+        RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
+        RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+        #run compute_rv for each timestamp
+        for i in 1:length(time_stamps)
+            RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+            RV_list_no_cb[i] = RV_no_cb
+            RV_list_cb[i] = RV_cb
+        end
+
+        @save "src/tests/ReinersChi2/model_data_$(sec).jld2"
+        jldopen("src/tests/ReinersChi2/model_data_$(sec).jld2", "a+") do file
+            file["RV_list_no_cb"] = RV_list_no_cb 
+            file["RV_list_cb"] = RV_list_cb 
+            file["timestamps"] = time_stamps_string
+        end
+    end
+    return nothing
+end
