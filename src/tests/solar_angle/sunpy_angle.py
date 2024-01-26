@@ -99,46 +99,46 @@ def solar_orientation(location, time="now", coordinates="altaz"):
 
 #-------------------------------------------------------------
 
-# from astropy.coordinates import EarthLocation
-# obs_lat = 39.995380
-# obs_long = -105.262390
-# alt = 1.6523
-# location = EarthLocation.from_geodetic(obs_long, obs_lat, alt)
-# from datetime import datetime, timedelta, timezone
-# initial_epoch = datetime(2023,10,14,15,0,0, tzinfo=timezone.utc)
-# final_epoch = datetime(2023,10,14,18,10,0, tzinfo=timezone.utc)
-# solar_orientation_altaz = []
-# solar_orientation_equat = []
-# sunpy_angle = []
-# timestamp = []
-# import sunpy.coordinates
-# while initial_epoch < final_epoch:
-#     solar_orientation_altaz.append(solar_orientation(location, time = initial_epoch, coordinates="altaz")[0].degree)
-#     solar_orientation_equat.append(solar_orientation(location, time = initial_epoch, coordinates="equat")[0].degree)
-#     sunpy_angle.append(sunpy.coordinates.sun.orientation(location, time = initial_epoch).degree)
-#     timestamp.append(initial_epoch)
-#     initial_epoch  = initial_epoch + timedelta(minutes=5)
-# import matplotlib.pyplot as plt
-# import matplotlib.dates as mdates
-# mpl = plt.matplotlib 
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# ax1.scatter(timestamp, sunpy_angle, label = "sunpy - Φ")
-# ax1.scatter(timestamp, solar_orientation_altaz, label = "solar_orientation - altaz", s = 5)
+from astropy.coordinates import EarthLocation
+obs_lat = 39.995380
+obs_long = -105.262390
+alt = 1.6523
+location = EarthLocation.from_geodetic(obs_long, obs_lat, alt)
+from datetime import datetime, timedelta, timezone
+initial_epoch = datetime(2023,10,14,15,0,0, tzinfo=timezone.utc)
+final_epoch = datetime(2023,10,14,18,10,0, tzinfo=timezone.utc)
+solar_orientation_altaz = []
+solar_orientation_equat = []
+sunpy_angle = []
+timestamp = []
+import sunpy.coordinates
+while initial_epoch < final_epoch:
+    solar_orientation_altaz.append(solar_orientation(location, time = initial_epoch, coordinates="altaz")[0].degree)
+    solar_orientation_equat.append(solar_orientation(location, time = initial_epoch, coordinates="equat")[0].degree)
+    sunpy_angle.append(sunpy.coordinates.sun.orientation(location, time = initial_epoch).degree)
+    timestamp.append(initial_epoch)
+    initial_epoch  = initial_epoch + timedelta(minutes=5)
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+mpl = plt.matplotlib 
+fig = plt.figure()
+ax1 = fig.add_subplot()
+ax1.scatter(timestamp, sunpy_angle, label = "sunpy - Φ")
+ax1.scatter(timestamp, solar_orientation_altaz, label = "solar_orientation - altaz", s = 5)
 
-# #SPICE
-# spice_angle_array = [[26.130000000000003], [26.130000000000003], [26.13000000000002], [26.129999999999992], [26.130000000000003], [26.13000000000002], [26.13000000000002], [26.129999999999992], [26.129999999999992], [26.13000000000002], [26.13000000000002], [26.13000000000003], [26.13000000000002], [26.129999999999992], [26.13000000000002], [26.13000000000003], [26.129999999999992], [26.129999999999992], [26.130000000000003], [26.129999999999992], [26.130000000000003], [26.13000000000002], [26.130000000000003], [26.129999999999974], [26.129999999999992], [26.13000000000002], [26.13000000000002], [26.129999999999992], [26.129999999999992], [26.130000000000003], [26.130000000000003], [26.13000000000002], [26.13000000000002], [26.129999999999992], [26.129999999999992], [26.13000000000002], [26.13000000000002], [26.129999999999992]]
-# spice_angle = []
-# for i in range(0,len(spice_angle_array)):
-#     spice_angle.append(-(spice_angle_array[i][0]))
-# ax1.scatter(timestamp, spice_angle, label = "SPICE - Φ")
-# ax1.scatter(timestamp, solar_orientation_equat, label = "solar_orientation - equat", s = 5)
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# plt.xlabel("Time")
-# plt.ylabel("Angle")
-# plt.legend()
-# plt.savefig("tilt_confirmed.png")
-# plt.show()
+#SPICE
+spice_angle_array = [[26.130000000000003], [26.130000000000003], [26.13000000000002], [26.129999999999992], [26.130000000000003], [26.13000000000002], [26.13000000000002], [26.129999999999992], [26.129999999999992], [26.13000000000002], [26.13000000000002], [26.13000000000003], [26.13000000000002], [26.129999999999992], [26.13000000000002], [26.13000000000003], [26.129999999999992], [26.129999999999992], [26.130000000000003], [26.129999999999992], [26.130000000000003], [26.13000000000002], [26.130000000000003], [26.129999999999974], [26.129999999999992], [26.13000000000002], [26.13000000000002], [26.129999999999992], [26.129999999999992], [26.130000000000003], [26.130000000000003], [26.13000000000002], [26.13000000000002], [26.129999999999992], [26.129999999999992], [26.13000000000002], [26.13000000000002], [26.129999999999992]]
+spice_angle = []
+for i in range(0,len(spice_angle_array)):
+    spice_angle.append(-(spice_angle_array[i][0]))
+ax1.scatter(timestamp, spice_angle, label = "SPICE - Φ")
+ax1.scatter(timestamp, solar_orientation_equat, label = "solar_orientation - equat", s = 5)
+ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+plt.xlabel("Time")
+plt.ylabel("Angle")
+plt.legend()
+plt.savefig("tilt_confirmed.png")
+plt.show()
 
 #-------------------------------------------------------------
 from astropy.coordinates import EarthLocation
@@ -226,3 +226,5 @@ plt.title("Φ - solid line, θ - dashed line")
 plt.legend()
 plt.savefig("tilt_evolution.png")
 plt.show()
+
+print()
