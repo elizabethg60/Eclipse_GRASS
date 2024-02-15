@@ -14,16 +14,19 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     disk_ϕe = range(deg2rad(-90.0), deg2rad(90.0), length=lats+1)
     disk_ϕc = get_grid_centers(disk_ϕe)
     # number of longitudes in each latitude slice
-    Nθ = get_Nθ.(disk_ϕc, step(disk_ϕe))
+    Nθ = get_Nθ.(disk_ϕc, step(disk_ϕe)) #sum gives number of patches
     # make longitude grid
     disk_θe = zeros(lats+1, maximum(Nθ)+1)
     disk_θc = zeros(lats, maximum(Nθ))
     for i in eachindex(Nθ)
         edges = range(deg2rad(0.0), deg2rad(360.0), length=Nθ[i]+1)
-        disk_θc[i, 1:Nθ[i]] .= get_grid_centers(edges)
+        # edges = range(0.0, 2π, length=Nθ[i]+1)
+        # # offset by plus/minus half step size
+        # alpha = rand(Uniform(-step(edges/2), step(edges)/2),1)[1]
+        # edges = collect(edges) .+ alpha
+        disk_θc[i, 1:Nθ[i]] .= get_grid_centers(edges) #get_grid_centers_offset
         disk_θe[i, 1:Nθ[i]+1] .= collect(edges)
     end
-
 
 # collect geometry vectors 
     # query JPL horizons for E, S, M position (km) and velocities (km/s)
@@ -70,7 +73,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
 
     # set size of subgrid
-    Nsubgrid = 10
+    Nsubgrid = 20
 # allocate memory
     dA_total_proj_mean = zeros(length(disk_ϕc), maximum(Nθ))
     mean_intensity = zeros(length(disk_ϕc), maximum(Nθ))
@@ -110,6 +113,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             θc_sub = get_grid_centers(θe_sub)
             subgrid = Iterators.product(ϕc_sub, θc_sub)
 
+            
         #determine required position vectors
             #determine xyz stellar coordinates for lat/long grid
             SP_sun_pos .= map(x -> pgrrec("SUN", getindex(x,2), getindex(x,1), 0.0, sun_radius, 0.0), subgrid)
@@ -138,6 +142,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
         #calculate mu for each patch
             calc_mu_grid!(SP_bary, OP_bary, mu_grid)
+            #mu_grid = map(x -> sqrt(1-((x[1]^2+x[2]^2)/sun_radius^2)), SP_bary)
             # move on if everything is off the grid
             all(mu_grid .< zero(T)) && continue
             

@@ -13,6 +13,7 @@ from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 #read in data
 #model
+#file = h5py.File("Resolution/model_data100_20sub.jld2", "r")
 file = h5py.File("model_data.jld2", "r")
 RV_list_no_cb = file["RV_list_no_cb"][()] 
 RV_list_cb  = file["RV_list_cb"][()]

@@ -9,6 +9,7 @@ using JLD2
 using CSV
 using DataFrames
 using Dates
+using Distributions
 
 include("get_kernels.jl")
 include("epoch_computations.jl")

@@ -14,6 +14,7 @@ function neid_loop(lats::T) where T
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
     RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
@@ -21,9 +22,10 @@ function neid_loop(lats::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
+        RV_list_cb_new[i] = RV_cb_new
         intensity_list[i] = intensity
         RA_list[i] = ra
         dec_list[i] = dec
@@ -35,6 +37,7 @@ function neid_loop(lats::T) where T
     jldopen("src/plots/NEID/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
+        file["RV_list_cb_new"] = RV_list_cb_new
         file["intensity_list"] = intensity_list
         file["RA_list"] = RA_list
         file["dec_list"] = dec_list
@@ -118,6 +121,7 @@ function expres_loop(lats::T) where T
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
     RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
@@ -125,9 +129,10 @@ function expres_loop(lats::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
+        RV_list_cb_new[i] = RV_cb_new
         intensity_list[i] = intensity
         RA_list[i] = ra
         dec_list[i] = dec
@@ -139,6 +144,7 @@ function expres_loop(lats::T) where T
     jldopen("src/plots/EXPRES/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
+        file["RV_list_cb_new"] = RV_list_cb_new
         file["intensity_list"] = intensity_list
         file["RA_list"] = RA_list
         file["dec_list"] = dec_list
@@ -161,6 +167,7 @@ function boulder_loop(lats::T) where T
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
     RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
@@ -168,9 +175,10 @@ function boulder_loop(lats::T) where T
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
+        RV_list_cb_new[i] = RV_cb_new
         intensity_list[i] = intensity
         RA_list[i] = ra
         dec_list[i] = dec
@@ -182,6 +190,7 @@ function boulder_loop(lats::T) where T
     jldopen("src/plots/Boulder/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
+        file["RV_list_cb_new"] = RV_list_cb_new
         file["intensity_list"] = intensity_list
         file["RA_list"] = RA_list
         file["dec_list"] = dec_list
@@ -196,7 +205,7 @@ function chi2(lats::T) where T
     obs_long = 9.944333
     alt = 0.201
 
-    seconds = range(79,80,step=1)
+    seconds = range(50,50,step=1)
     for sec in seconds
         print(sec)
         time_stamps_string = Vector{String}(undef,size(reiners_eclipse)...) 
@@ -218,8 +227,8 @@ function chi2(lats::T) where T
             intensity_arr[i] = intensity
         end
 
-        @save "src/tests/ReinersChi2/model_data_$(sec).jld2"
-        jldopen("src/tests/ReinersChi2/model_data_$(sec).jld2", "a+") do file
+        @save "src/tests/Debug/model_data_$(sec).jld2"
+        jldopen("src/tests/Debug/model_data_$(sec).jld2", "a+") do file
             file["RV_list_no_cb"] = RV_list_no_cb 
             file["RV_list_cb"] = RV_list_cb 
             file["RV_list_cb_new"] = RV_list_cb_new 

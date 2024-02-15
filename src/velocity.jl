@@ -50,7 +50,9 @@ function projected!(A::Matrix, B::Matrix, out_no_cb::Matrix, out_cb::Matrix, out
     for i in 1:length(A)
         #[0.27, 0.325, 12., 0.11]
         #a/(1+exp(−b ∗ (x−c)))+d 0.27/(1+exp(-0.325*(mu[i]-12)))+0.11 
+        #0.27 * (2/(1 + exp((star.mu[ind] - 0.325)*12)) - 1) + 0.11        
         new_cb_model = 0.27 * (2/(1+exp((mu[i]-0.325)*12))-1) + 0.11
+                       
         
         vel = A[i][4:6]
         angle = dot(B[i][1:3], vel) / (norm(B[i][1:3]) * norm(vel))
@@ -71,5 +73,3 @@ end
 #updating velocity AND angle gives same results as original with patch vel projected than cb vel added
 #diff results found when angle is found using patch vel but the norm vel as cb vel added
     #BUT has worse residuals than without CB SO CB model being included wrong? 
-
-#difference comes from mu - nope makes it super worse 
