@@ -92,7 +92,7 @@ function gottingen_loop(lats::T) where T
         # RV_list_cb_new[i] = mean(new_cb_bin)
         # intensity_list[i] = mean(intensity_bin)
     end
-
+    
     @save "src/plots/Reiners/model_data.jld2"
     jldopen("src/plots/Reiners/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 

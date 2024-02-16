@@ -20,11 +20,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     disk_θc = zeros(lats, maximum(Nθ))
     for i in eachindex(Nθ)
         edges = range(deg2rad(0.0), deg2rad(360.0), length=Nθ[i]+1)
-        # edges = range(0.0, 2π, length=Nθ[i]+1)
-        # # offset by plus/minus half step size
-        # alpha = rand(Uniform(-step(edges/2), step(edges)/2),1)[1]
-        # edges = collect(edges) .+ alpha
-        disk_θc[i, 1:Nθ[i]] .= get_grid_centers(edges) #get_grid_centers_offset
+        disk_θc[i, 1:Nθ[i]] .= get_grid_centers(edges) 
         disk_θe[i, 1:Nθ[i]+1] .= collect(edges)
     end
 
@@ -59,18 +55,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
     # get rotation matrix for sun
     sun_rot_mat = pxform("IAU_SUN", "J2000", epoch_lt)
-
-    # # get vector for sun pole
-    # sun_lat = deg2rad(90.0)
-    # sun_lon = deg2rad(0.0)
-    # sun_pole_sun = pgrrec("SUN", sun_lon, sun_lat, 0.0, sun_radius, 0.0)
-    # sun_pole_bary = pxform("IAU_SUN", "J2000", epoch_lt) * sun_pole_sun
-    # # compute inclination
-    # v1 = sun_pole_bary
-    # v2 = OS_bary[1:3]
-    # sun_angle = 90.0 - rad2deg(acos(dot(v1, v2) / (norm(v1) * norm(v2))))
-    # @show sun_angle
-
 
     # set size of subgrid
     Nsubgrid = 20
@@ -142,7 +126,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
 
         #calculate mu for each patch
             calc_mu_grid!(SP_bary, OP_bary, mu_grid)
-            #mu_grid = map(x -> sqrt(1-((x[1]^2+x[2]^2)/sun_radius^2)), SP_bary)
             # move on if everything is off the grid
             all(mu_grid .< zero(T)) && continue
             
@@ -190,18 +173,16 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             dθ = step(θe_sub) 
             dA_sub = map(x -> calc_dA(sun_radius, getindex(x,1), dϕ, dθ), subgrid)
             #get total projected, visible area of larger tile
-            # dp_sub = map((x,y) -> abs(dot(x[1:3],y[1:3])), OP_bary, SP_bary) ./ map((x,y) -> norm(x[1:3]) * norm(y[1:3]), OP_bary, SP_bary)
-            # dA_total_proj = dA_sub .* dp_sub 
             dA_total_proj = dA_sub .* mu_grid
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
 
 
         #get ra and dec
-            # OP_earth = map(x -> sxform("J2000", "ITRF93", epoch) * x, OP_bary)
-            # # x_mean = mean(view(getindex.(OP_earth,1), idx3))
-            # # y_mean = mean(view(getindex.(OP_earth,2), idx3))
-            # # z_mean = mean(view(getindex.(OP_earth,3), idx3))
-            # # dis_var, ra_mean[i,j], de_mean[i,j] = recrad([x_mean, y_mean, z_mean])
+            OP_earth = map(x -> sxform("J2000", "ITRF93", epoch) * x, OP_bary)
+            x_mean = mean(view(getindex.(OP_earth,1), idx3))
+            y_mean = mean(view(getindex.(OP_earth,2), idx3))
+            z_mean = mean(view(getindex.(OP_earth,3), idx3))
+            dis_var, ra_mean[i,j], de_mean[i,j] = recrad([x_mean, y_mean, z_mean])
 
             # OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_earth])
             # ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
