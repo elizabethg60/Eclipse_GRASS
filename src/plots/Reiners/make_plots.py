@@ -1,5 +1,4 @@
 import h5py
-import jdcal
 import math
 import csv
 import numpy as np
@@ -9,7 +8,6 @@ import matplotlib.pyplot as plt
 mpl = plt.matplotlib 
 import matplotlib.dates as mdates
 from astropy.time import Time
-from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 #read in data
 #model

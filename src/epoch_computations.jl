@@ -177,16 +177,10 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
 
 
-        #get ra and dec
-            OP_earth = map(x -> sxform("J2000", "ITRF93", epoch) * x, OP_bary)
-            x_mean = mean(view(getindex.(OP_earth,1), idx3))
-            y_mean = mean(view(getindex.(OP_earth,2), idx3))
-            z_mean = mean(view(getindex.(OP_earth,3), idx3))
-            dis_var, ra_mean[i,j], de_mean[i,j] = recrad([x_mean, y_mean, z_mean])
-
-            # OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_earth])
-            # ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
-            # de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
+        # #get ra and dec
+        #     OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_bary])
+        #     ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
+        #     de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
 
         #determine mean intensity
             mean_intensity[i,j] = mean(view(LD_all, idx3)) 
