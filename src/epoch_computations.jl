@@ -53,9 +53,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     # get light travel time corrected OS vector
     OS_bary, OS_lt, OS_dlt = spkltc(10, epoch, "J2000", lt_flag, BO_bary)
 
-    # get light travel time corrected ES vector
-    ES_bary, ES_lt, ES_dlt = spkltc(10, epoch, "J2000", lt_flag, BE_bary)
-
     # get vector from observatory on earth's surface to moon center
     OM_bary, OM_lt, OM_dlt = spkltc(301, epoch, "J2000", lt_flag, BO_bary)
 
@@ -72,7 +69,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     v1 = sun_pole_bary
     v2 = OS_bary[1:3]
     sun_angle = 90.0 - rad2deg(acos(dot(v1, v2) / (norm(v1) * norm(v2))))
-    # @show sun_angle
+    @show sun_angle
 
     # allocate memory
     dA_total_proj_mean = zeros(length(disk_ϕc), maximum(Nθ))

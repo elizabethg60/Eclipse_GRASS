@@ -12,4 +12,4 @@
 *.jl.mem
 /docs/build/
 /docs/Manifest.toml
-*.DS_Store
+.DS_Store
