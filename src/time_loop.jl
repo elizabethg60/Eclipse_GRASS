@@ -16,19 +16,15 @@ function neid_loop(lats::T) where T
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
-    RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
-    dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
         intensity_list[i] = intensity
-        RA_list[i] = ra
-        dec_list[i] = dec
         vel_no_cb[i] = projected_v_no_cb
         vel_cb[i] = projected_v_cb
     end
@@ -39,8 +35,6 @@ function neid_loop(lats::T) where T
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new
         file["intensity_list"] = intensity_list
-        file["RA_list"] = RA_list
-        file["dec_list"] = dec_list
         file["vel_no_cb"] = vel_no_cb
         file["vel_cb"] = vel_cb
     end
@@ -63,19 +57,15 @@ function gottingen_loop(lats::T) where T
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
-    RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
-    dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
         intensity_list[i] = intensity
-        RA_list[i] = ra
-        dec_list[i] = dec
         vel_no_cb[i] = projected_v_no_cb
         vel_cb[i] = projected_v_cb
 
@@ -85,7 +75,7 @@ function gottingen_loop(lats::T) where T
         # intensity_bin = Vector{Float64}(undef,12)
         # sample = utc2et.(reiners_finer_sample_50[i]) 
         # for j in 1:12
-        #     rv_bin[j], cb_bin[j], new_cb_bin[j], intensity_bin[j], ra, dec, projected_v_no_cb, projected_v_cb  = (compute_rv(lats, sample[j], obs_long, obs_lat, alt, "optical", i))
+        #     rv_bin[j], cb_bin[j], new_cb_bin[j], intensity_bin[j], projected_v_no_cb, projected_v_cb  = (compute_rv(lats, sample[j], obs_long, obs_lat, alt, "optical", i))
         # end
         # RV_list_no_cb[i] = mean(rv_bin)
         # RV_list_cb[i] = mean(cb_bin)
@@ -99,8 +89,6 @@ function gottingen_loop(lats::T) where T
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new
         file["intensity_list"] = intensity_list
-        file["RA_list"] = RA_list
-        file["dec_list"] = dec_list
         file["vel_no_cb"] = vel_no_cb
         file["vel_cb"] = vel_cb
     end
@@ -123,19 +111,15 @@ function expres_loop(lats::T) where T
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
-    RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
-    dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
         intensity_list[i] = intensity
-        RA_list[i] = ra
-        dec_list[i] = dec
         vel_no_cb[i] = projected_v_no_cb
         vel_cb[i] = projected_v_cb
     end
@@ -146,8 +130,6 @@ function expres_loop(lats::T) where T
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new
         file["intensity_list"] = intensity_list
-        file["RA_list"] = RA_list
-        file["dec_list"] = dec_list
         file["vel_no_cb"] = vel_no_cb
         file["vel_cb"] = vel_cb
     end
@@ -169,19 +151,15 @@ function boulder_loop(lats::T) where T
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
-    RA_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
-    dec_list = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_no_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     vel_cb = Vector{Matrix{Float64}}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity, ra, dec, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity, projected_v_no_cb, projected_v_cb  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
         intensity_list[i] = intensity
-        RA_list[i] = ra
-        dec_list[i] = dec
         vel_no_cb[i] = projected_v_no_cb
         vel_cb[i] = projected_v_cb
     end
@@ -192,8 +170,6 @@ function boulder_loop(lats::T) where T
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new
         file["intensity_list"] = intensity_list
-        file["RA_list"] = RA_list
-        file["dec_list"] = dec_list
         file["vel_no_cb"] = vel_no_cb
         file["vel_cb"] = vel_cb
     end
@@ -220,7 +196,7 @@ function chi2(lats::T) where T
         intensity_arr = Vector{Float64}(undef,size(time_stamps)...)
         #run compute_rv for each timestamp
         for i in 1:length(time_stamps)
-            RV_no_cb, RV_cb, RV_cb_new, intensity, ra, dec, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+            RV_no_cb, RV_cb, RV_cb_new, intensity, projected_v_no_cb, projected_v_cb = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
             RV_list_no_cb[i] = RV_no_cb
             RV_list_cb[i] = RV_cb
             RV_list_cb_new[i] = RV_cb_new

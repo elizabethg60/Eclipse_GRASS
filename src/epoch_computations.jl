@@ -57,7 +57,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     sun_rot_mat = pxform("IAU_SUN", "J2000", epoch_lt)
 
     # set size of subgrid
-    Nsubgrid = 20
+    Nsubgrid = 10
 # allocate memory
     dA_total_proj_mean = zeros(length(disk_ϕc), maximum(Nθ))
     mean_intensity = zeros(length(disk_ϕc), maximum(Nθ))
@@ -176,12 +176,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             dA_total_proj = dA_sub .* mu_grid
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
 
-
-        # #get ra and dec
-        #     OP_ra_dec = SPICE.recrad.([x[1:3] for x in OP_bary])
-        #     ra_mean[i,j] = mean(getindex.(OP_ra_dec, 2))
-        #     de_mean[i,j] = mean(getindex.(OP_ra_dec, 3))
-
         #determine mean intensity
             mean_intensity[i,j] = mean(view(LD_all, idx3)) 
             #extinction 
@@ -201,7 +195,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     idx_grid = mean_intensity .> 0.0
 
     contrast = (mean_intensity / NaNMath.maximum(mean_intensity)).^0.1
-    brightness = mean_intensity .* mean_exti .* dA_total_proj_mean
+    brightness = mean_intensity .* dA_total_proj_mean .* mean_exti
     cheapflux = sum(view(brightness, idx_grid))
 
     #determine final mean intensity for disk grid
@@ -217,5 +211,5 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     final_weight_v_cb_new = sum(view(contrast .* mean_weight_v_cb_new .* brightness, idx_grid)) / cheapflux
     final_weight_v_cb_new += mean(view(mean_weight_v_earth_orb, idx_grid)) 
 
-    return final_weight_v_no_cb, final_weight_v_cb, final_weight_v_cb_new, final_mean_intensity, rad2deg.(ra_mean), rad2deg.(de_mean), mean_weight_v_no_cb, mean_weight_v_cb
+    return final_weight_v_no_cb, final_weight_v_cb, final_weight_v_cb_new, final_mean_intensity, mean_weight_v_no_cb, mean_weight_v_cb
 end
