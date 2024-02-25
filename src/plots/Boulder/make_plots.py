@@ -89,13 +89,3 @@ plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
 plt.savefig("rm_and_residuals_cb.png")
 plt.show()
-
-# #intensity
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# ax1.scatter(time_stamps_data, intensity_list)  
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# ax1.set_xlabel("Time (UTC)")
-# ax1.set_ylabel("Relative Intensity") 
-# plt.savefig("intensity.png")
-# plt.show()
