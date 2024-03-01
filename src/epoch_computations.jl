@@ -1,3 +1,4 @@
+using PyPlot; plt=PyPlot
 function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r::Float64=moon_radius) where T 
     """
     compute rv for a given grid size and timestamp  
@@ -86,6 +87,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     v_scalar_grid = zeros(Nsubgrid, Nsubgrid)
     v_earth_orb_proj = zeros(Nsubgrid, Nsubgrid)
 
+    #set up plot
+    fig, ax1 = plt.subplots()
 
 # loop over sub-tiles
     for i in eachindex(disk_ϕc)
@@ -176,6 +179,13 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             dA_total_proj = dA_sub .* mu_grid
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
 
+            OP_ra_dec_sub = SPICE.recrad.([x[1:3] for x in OP_bary])
+            ra_sub = getindex.(OP_ra_dec_sub, 2)
+            de_sub = getindex.(OP_ra_dec_sub, 3)
+
+            ra_sub_deg = rad2deg.(ra_sub) 
+            de_sub_deg = rad2deg.(de_sub)
+            
         #determine mean intensity
             mean_intensity[i,j] = mean(view(LD_all, idx3)) 
             #extinction 
@@ -188,8 +198,20 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             mean_weight_v_cb[i,j] = mean(view(projected_velocities_cb, idx3))
             mean_weight_v_cb_new[i,j] = mean(view(projected_velocities_cb_new, idx3)) 
             mean_weight_v_earth_orb[i,j] = mean(view(v_earth_orb_proj, idx3))
+
+            for i in 1:length(idx3)
+                if idx3[i] == false
+                    projected_velocities_no_cb[i] = NaN
+                end
+            end
+            ax1.pcolormesh(ra_sub_deg, de_sub_deg, projected_velocities_no_cb, cmap="seismic", vmin=-2000, vmax=2000, rasterized=true)
         end
     end
+
+    ax1.set_xlabel("RA (decimal degrees)")
+    ax1.set_ylabel("DEC (decimal degrees)")
+    ax1.set_aspect("equal")
+    fig.savefig("src/plots/NEID/movie/$index.png", dpi=250)
 
     #index for correct lat / lon disk grid
     idx_grid = mean_intensity .> 0.0

@@ -6,6 +6,7 @@
 *.png
 *.gif
 *.tf
+*.pdf
 
 *.jl.cov
 *.jl.*.cov
