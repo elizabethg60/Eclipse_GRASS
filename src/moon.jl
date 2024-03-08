@@ -1,4 +1,4 @@
-function calc_proj_dist2(p1, p2)
+function calc_proj_dist(p1, p2)
     """
     determines distance in radians between moon and cell on solar grid
 

@@ -18,11 +18,6 @@ function get_grid_centers(grid::StepRangeLen)
     return range(start, stop, length=length(grid)-1)
 end
 
-# function get_grid_centers_offset(grid)
-#     idx = findlast(x -> x .> 0.0, grid)
-#     return grid[1:idx-1] .+ (grid[2:idx] .- grid[1:idx-1])/2.0
-# end
-
 function get_Nθ(ϕc, dϕ)
     #determine number of lons for each lat slice
     return ceil(Int, 2π * cos(ϕc) / dϕ)

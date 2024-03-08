@@ -226,5 +226,3 @@ plt.title("Φ - solid line, θ - dashed line")
 plt.legend()
 plt.savefig("tilt_evolution.png")
 plt.show()
-
-print()

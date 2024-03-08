@@ -1,5 +1,7 @@
 import numpy as np
 from datetime import datetime, timedelta
+
+#print timestamps for binned data
 data_time = np.loadtxt("Boulder_Data_bin.txt")[:, 0]
 UTC_time = []
 for i in data_time:

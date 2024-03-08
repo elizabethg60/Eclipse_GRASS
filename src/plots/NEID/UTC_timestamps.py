@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime, timedelta
 
+#print out timestamps for NEID data
 data = pd.read_csv("NEID_Data.csv")
 UTC_time = []
 for i in data["obsdate"][15:-150]:

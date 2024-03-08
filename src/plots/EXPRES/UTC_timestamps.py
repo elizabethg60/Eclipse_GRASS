@@ -1,5 +1,7 @@
 import pandas as pd
 from datetime import datetime
+
+#print out timestamps for EXPRES data 
 data = pd.read_csv("EXPRES_data.csv")
 UTC_time = []
 for i in data["tobs"]:

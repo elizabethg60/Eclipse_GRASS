@@ -1,5 +1,5 @@
-using PyPlot; plt=PyPlot
-function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r::Float64=moon_radius) where T 
+# using PyPlot; plt=PyPlot
+function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; ext::Bool = false, moon_r::Float64=moon_radius) where T 
     """
     compute rv for a given grid size and timestamp  
     
@@ -26,10 +26,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     end
 
 # collect geometry vectors 
-    # query JPL horizons for E, S, M position (km) and velocities (km/s)
+    # query JPL horizons for E position (km) and velocities (km/s)
     BE_bary = spkssb(399,epoch,"J2000")
-    BS_bary = spkssb(10,epoch,"J2000")
-    BM_bary = spkssb(301,epoch,"J2000")
 
     #determine xyz earth coordinates for lat/long of observatory
     flat_coeff = (earth_radius - earth_radius_pole) / earth_radius
@@ -57,8 +55,21 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     # get rotation matrix for sun
     sun_rot_mat = pxform("IAU_SUN", "J2000", epoch_lt)
 
-    # set size of subgrid
+    # # get vector for sun pole
+    # sun_lat = deg2rad(90.0)
+    # sun_lon = deg2rad(0.0)
+    # sun_pole_sun = pgrrec("SUN", sun_lon, sun_lat, 0.0, sun_radius, 0.0)
+    # sun_pole_bary = pxform("IAU_SUN", "J2000", epoch_lt) * sun_pole_sun
+    # #ra and dec of pole vector 
+    # sun_pole_sun_rotate = sun_rot_mat * sun_pole_sun 
+    # OP_bary_pole = OS_bary[1:3] + sun_pole_sun_rotate 
+    # OP_ra_dec_pole = SPICE.recrad(OP_bary_pole)
+    # ra_sub_deg_pole = rad2deg.(OP_ra_dec_pole[2]) 
+    # de_sub_deg_pole = rad2deg.(OP_ra_dec_pole[3])
+
+# set size of subgrid
     Nsubgrid = 10
+
 # allocate memory
     dA_total_proj_mean = zeros(length(disk_ϕc), maximum(Nθ))
     mean_intensity = zeros(length(disk_ϕc), maximum(Nθ))
@@ -66,8 +77,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     mean_weight_v_cb = zeros(length(disk_ϕc), maximum(Nθ))
     mean_weight_v_cb_new = zeros(length(disk_ϕc), maximum(Nθ))
     mean_weight_v_earth_orb = zeros(length(disk_ϕc), maximum(Nθ))
-    ra_mean = zeros(length(disk_ϕc), maximum(Nθ))
-    de_mean = zeros(length(disk_ϕc), maximum(Nθ))
     mean_exti = zeros(length(disk_ϕc), maximum(Nθ))
     # vectors
     pole_vector_grid = fill(Vector{Float64}(undef, 3), Nsubgrid, Nsubgrid)
@@ -87,8 +96,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     v_scalar_grid = zeros(Nsubgrid, Nsubgrid)
     v_earth_orb_proj = zeros(Nsubgrid, Nsubgrid)
 
-    #set up plot
-    fig, ax1 = plt.subplots()
+    # #set up plot
+    # fig, ax1 = plt.subplots()
 
 # loop over sub-tiles
     for i in eachindex(disk_ϕc)
@@ -100,7 +109,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             θc_sub = get_grid_centers(θe_sub)
             subgrid = Iterators.product(ϕc_sub, θc_sub)
 
-            
         #determine required position vectors
             #determine xyz stellar coordinates for lat/long grid
             SP_sun_pos .= map(x -> pgrrec("SUN", getindex(x,2), getindex(x,1), 0.0, sun_radius, 0.0), subgrid)
@@ -132,13 +140,12 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             # move on if everything is off the grid
             all(mu_grid .< zero(T)) && continue
             
-
         #get projected velocity for each patch
             convective_velocities .= convective_blueshift_interpol.(mu_grid)
             projected!(SP_bary, OP_bary, projected_velocities_no_cb, projected_velocities_cb, projected_velocities_cb_new, mu_grid, convective_velocities)
             # convert from km/s to m/s
-            projected_velocities_cb .*= 1000.0
             projected_velocities_no_cb .*= 1000.0
+            projected_velocities_cb .*= 1000.0
             projected_velocities_cb_new .*= 1000.0
 
         #get relative orbital motion in m/s
@@ -150,12 +157,11 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             end
             # convert from km/s to m/s
             v_earth_orb_proj .*= 1000.0
-
             
         #determine patches that are blocked by moon
             #calculate the distance between tile corner and moon
             for i in eachindex(OP_bary)
-                distance[i] = calc_proj_dist2(OM_bary[1:3], OP_bary[i][1:3])
+                distance[i] = calc_proj_dist(OM_bary[1:3], OP_bary[i][1:3])
             end
 
             #get indices for visible patches
@@ -178,20 +184,15 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             #get total projected, visible area of larger tile
             dA_total_proj = dA_sub .* mu_grid
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
-
-            OP_ra_dec_sub = SPICE.recrad.([x[1:3] for x in OP_bary])
-            ra_sub = getindex.(OP_ra_dec_sub, 2)
-            de_sub = getindex.(OP_ra_dec_sub, 3)
-
-            ra_sub_deg = rad2deg.(ra_sub) 
-            de_sub_deg = rad2deg.(de_sub)
             
         #determine mean intensity
             mean_intensity[i,j] = mean(view(LD_all, idx3)) 
-            #extinction 
-            zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist2(x[1:3], EO_bary[1:3]), OP_bary))
-            extin = map(x -> 10^(-((1/cosd(x))*ext_coef[index])/2.5), zenith_angle_matrix)
-            mean_exti[i,j] = mean(view(extin, idx3)) 
+            if ext == true
+                #extinction 
+                zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist(x[1:3], EO_bary[1:3]), OP_bary))
+                extin = map(x -> 10^(-((1/cosd(x))*ext_coef[index])/2.5), zenith_angle_matrix)
+                mean_exti[i,j] = mean(view(extin, idx3)) 
+            end
 
         #determine mean weighted velocity from sun given blocking from moon
             mean_weight_v_no_cb[i,j] = mean(view(projected_velocities_no_cb, idx3))
@@ -199,25 +200,38 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
             mean_weight_v_cb_new[i,j] = mean(view(projected_velocities_cb_new, idx3)) 
             mean_weight_v_earth_orb[i,j] = mean(view(v_earth_orb_proj, idx3))
 
-            for i in 1:length(idx3)
-                if idx3[i] == false
-                    projected_velocities_no_cb[i] = NaN
-                end
-            end
-            ax1.pcolormesh(ra_sub_deg, de_sub_deg, projected_velocities_no_cb, cmap="seismic", vmin=-2000, vmax=2000, rasterized=true)
+            # for i in 1:length(idx3)
+            #     if idx3[i] == false
+            #         projected_velocities_no_cb[i] = NaN
+            #     end
+            # end
+
+            # OP_ra_dec_sub = SPICE.recrad.([x[1:3] for x in OP_bary])
+            # ra_sub = getindex.(OP_ra_dec_sub, 2)
+            # de_sub = getindex.(OP_ra_dec_sub, 3)
+            # ra_sub_deg = rad2deg.(ra_sub) 
+            # de_sub_deg = rad2deg.(de_sub)
+
+            # ax1.pcolormesh(ra_sub_deg, de_sub_deg, projected_velocities_no_cb, cmap="seismic", vmin=-2000, vmax=2000, rasterized=true)
+            # ax1.scatter(ra_sub_deg_pole, de_sub_deg_pole)
+            # ax1.pcolormesh(ra_sub_deg, de_sub_deg, mu_grid, vmin=0.0, vmax=1.0, rasterized=true)
+            # ax1.pcolormesh(ra_sub_deg, de_sub_deg, dA_total_proj, vmin=0.1e7, vmax=1e7, rasterized=true)
         end
     end
 
-    ax1.set_xlabel("RA (decimal degrees)")
-    ax1.set_ylabel("DEC (decimal degrees)")
-    ax1.set_aspect("equal")
-    fig.savefig("src/plots/NEID/movie/$index.png", dpi=250)
+    # ax1.set_xlabel("RA (decimal degrees)")
+    # ax1.set_ylabel("DEC (decimal degrees)")
+    # ax1.set_aspect("equal")
+    # #fig.savefig("src/plots/NEID/movie/$index.png", dpi=250)
 
     #index for correct lat / lon disk grid
     idx_grid = mean_intensity .> 0.0
 
     contrast = (mean_intensity / NaNMath.maximum(mean_intensity)).^0.1
-    brightness = mean_intensity .* dA_total_proj_mean .* mean_exti
+    brightness = mean_intensity .* dA_total_proj_mean 
+    if ext == true 
+        brightness = brightness .* mean_exti
+    end
     cheapflux = sum(view(brightness, idx_grid))
 
     #determine final mean intensity for disk grid
@@ -233,5 +247,5 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; moon_r:
     final_weight_v_cb_new = sum(view(contrast .* mean_weight_v_cb_new .* brightness, idx_grid)) / cheapflux
     final_weight_v_cb_new += mean(view(mean_weight_v_earth_orb, idx_grid)) 
 
-    return final_weight_v_no_cb, final_weight_v_cb, final_weight_v_cb_new, final_mean_intensity, mean_weight_v_no_cb, mean_weight_v_cb
+    return final_weight_v_no_cb, final_weight_v_cb, final_weight_v_cb_new, final_mean_intensity
 end

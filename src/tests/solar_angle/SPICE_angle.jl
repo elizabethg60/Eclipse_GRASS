@@ -6,11 +6,9 @@ epoch = utc2et.(UTC_time)
 
 sun_radius = bodvrd("SUN","RADII")[1]
 sun_axis_sun = [0.0,0.0,sun_radius]
-#sun_axis_bary = Vector{Float64}[]
 
 angle_list = Vector{Float64}[]
 for i in 1:length(epoch)
-    #push!(sun_axis_bary, pxform("IAU_SUN", "J2000", epoch[i])*sun_axis_sun)
     sun_axis_earth = pxform("IAU_SUN", "IAU_Earth", epoch[i])*sun_axis_sun
     bary_axis_earth = pxform("J2000", "IAU_Earth", epoch[i])*sun_axis_sun
     
