@@ -83,7 +83,7 @@ for i in range(1,len(lines)):
     plt.yticks(fontsize=12)
     #residuals
     axs[1].scatter(UTC_time, (rv_obs) - RV_list_no_cb, color = 'r', marker = "x", s = 3) 
-    axs[1].scatter(UTC_time, (GRASS_rv) - RV_list_no_cb, color = 'b', marker = "x", s = 3)  
+    axs[1].scatter(UTC_time, (rv_obs) - GRASS_rv, color = 'b', marker = "x", s = 3)  
     axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     axs[1].set_xlabel("Time (UTC)", fontsize=12)
     axs[1].set_ylabel("Residuals", fontsize=12) 
