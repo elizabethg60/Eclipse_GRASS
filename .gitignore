@@ -2,11 +2,11 @@
 *.bpc
 *.tls
 *.tpc
-*.jld2 
-*.png
-*.gif
+#*.jld2 
+#*.png
+#*.gif
 *.tf
-*.pdf
+#*.pdf
 
 *.jl.cov
 *.jl.*.cov
