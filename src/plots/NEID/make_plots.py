@@ -10,7 +10,7 @@ from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 #read in data
 #GRASS
-grass_data = h5py.File("neid_all_lines_rv.jld2", "r")
+grass_data = h5py.File("neid_all_lines_rv_newLD.jld2", "r")
 lines = grass_data["name"][()]
 grass_rv  = grass_data["rv"][()]
 #model
@@ -89,7 +89,7 @@ for i in range(1,len(lines)):
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    plt.savefig("GRASS/rm_and_residuals_{}.png".format(lines[i]))
+    plt.savefig("GRASS/LD_corrected/rm_and_residuals_{}.png".format(lines[i]))
     plt.show()
 
 #rm curve 

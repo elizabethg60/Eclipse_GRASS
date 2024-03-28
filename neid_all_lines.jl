@@ -56,7 +56,7 @@ for i in eachindex(lp.λrest)
     spec = GRASS.SpecParams(lines=lines, depths=depths, variability=variability,
                     blueshifts=blueshifts, templates=templates, resolution=resolution) 
 
-    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, time_stamps, verbose=true, use_gpu=false)
+    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, lines[1]/10.0, time_stamps, verbose=true, use_gpu=false)
 
     #measure velocities
     v_grid_cpu, ccf_cpu = GRASS.calc_ccf(lambdas_cpu, outspec_cpu, spec)
@@ -65,8 +65,8 @@ for i in eachindex(lp.λrest)
     rv[i] = rvs_cpu
 end
 
-@save "neid_all_lines_rv.jld2"
-jldopen("neid_all_lines_rv.jld2", "a+") do file
+@save "neid_all_lines_rv_newLD.jld2"
+jldopen("neid_all_lines_rv_newLD.jld2", "a+") do file
     file["name"] = λrest 
     file["rv"] = rv 
 end
