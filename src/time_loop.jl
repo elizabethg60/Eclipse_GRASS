@@ -12,13 +12,15 @@ function neid_loop(lats::T) where T
     obs_long = -111.5967  
     alt = 2.097938 
 
+    wavelength = 512 #must be in nanometers
+
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength, i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
@@ -47,13 +49,15 @@ function gottingen_loop(lats::T) where T
     obs_long = 9.944333
     alt = 0.201
 
+    wavelength = 600
+
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i, ext = true)
+        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength, i, ext = true)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
@@ -65,7 +69,7 @@ function gottingen_loop(lats::T) where T
         # intensity_bin = Vector{Float64}(undef,12)
         # sample = utc2et.(reiners_finer_sample_50[i]) 
         # for j in 1:12
-        #     rv_bin[j], cb_bin[j], new_cb_bin[j], intensity_bin[j]  = (compute_rv(lats, sample[j], obs_long, obs_lat, alt, "optical", i, ext = true))
+        #     rv_bin[j], cb_bin[j], new_cb_bin[j], intensity_bin[j]  = (compute_rv(lats, sample[j], obs_long, obs_lat, alt, "optical", wavelength, i, ext = true))
         # end
         # RV_list_no_cb[i] = mean(rv_bin)
         # RV_list_cb[i] = mean(cb_bin)
@@ -95,13 +99,15 @@ function expres_loop(lats::T) where T
     obs_long = -111.421944 
     alt = 2.359152
 
+    wavelength = 600
+
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength, i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
@@ -129,13 +135,15 @@ function boulder_loop(lats::T) where T
     obs_long = -105.262390
     alt = 1.6523
 
+    wavelength = 600
+
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", i)
+        RV_no_cb, RV_cb, RV_cb_new, intensity  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", wavelength, i)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
@@ -157,6 +165,8 @@ function chi2(lats::T) where T
     obs_long = 9.944333
     alt = 0.201
 
+    wavelength = 600
+
     seconds = range(63,63,step=1)
     for sec in seconds
         print(sec)
@@ -172,7 +182,7 @@ function chi2(lats::T) where T
         intensity_arr = Vector{Float64}(undef,size(time_stamps)...)
         #run compute_rv for each timestamp
         for i in 1:length(time_stamps)
-            RV_no_cb, RV_cb, RV_cb_new, intensity, = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", i, ext = true)
+            RV_no_cb, RV_cb, RV_cb_new, intensity, = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength, i, ext = true)
             RV_list_no_cb[i] = RV_no_cb
             RV_list_cb[i] = RV_cb
             RV_list_cb_new[i] = RV_cb_new

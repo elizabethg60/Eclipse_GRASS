@@ -20,6 +20,8 @@ if case == "NEID"
     obs_long = -111.5967  
     alt = 2.097938 
 
+    wavelength = 512 #must be in nanometers
+
     # set up paramaters for disk
     N = 50
     Nt = length(time_stamps)
@@ -40,7 +42,7 @@ if case == "NEID"
     # actually synthesize the spectra
     println(">>> Synthesizing on CPU...")
     tstart = time()
-    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, time_stamps, verbose=true, use_gpu=false)
+    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, wavelength, time_stamps, verbose=true, use_gpu=false)
     tstop = time()
     @printf(">>> Synthesis time --> %.3f seconds \n", tstop - tstart)
 
@@ -59,6 +61,8 @@ if case == "Boulder"
     obs_long = -105.262390
     alt = 1.6523
 
+    wavelength = 512 #must be in nanometers
+
     # set up paramaters for disk
     N = 50
     Nt = length(time_stamps)
@@ -79,7 +83,7 @@ if case == "Boulder"
     # actually synthesize the spectra
     println(">>> Synthesizing on CPU...")
     tstart = time()
-    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, time_stamps, verbose=true, use_gpu=false)
+    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, wavelength, time_stamps, verbose=true, use_gpu=false)
     tstop = time()
     @printf(">>> Synthesis time --> %.3f seconds \n", tstop - tstart)
 
@@ -98,6 +102,8 @@ if case == "EXPRES"
     obs_long = -111.421944 
     alt = 2.359152
 
+    wavelength = 512 #must be in nanometers
+
     # set up paramaters for disk
     N = 50
     Nt = length(time_stamps)
@@ -118,7 +124,7 @@ if case == "EXPRES"
     # actually synthesize the spectra
     println(">>> Synthesizing on CPU...")
     tstart = time()
-    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, time_stamps, verbose=true, use_gpu=false)
+    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, wavelength, time_stamps, verbose=true, use_gpu=false)
     tstop = time()
     @printf(">>> Synthesis time --> %.3f seconds \n", tstop - tstart)
 
@@ -137,6 +143,8 @@ if case == "Gottingen"
     obs_long = 9.944333
     alt = 0.201
 
+    wavelength = 512 #must be in nanometers
+
     # set up paramaters for disk
     N = 50
     Nt = length(time_stamps)
@@ -157,7 +165,7 @@ if case == "Gottingen"
     # actually synthesize the spectra
     println(">>> Synthesizing on CPU...")
     tstart = time()
-    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, time_stamps, verbose=true, use_gpu=false)
+    lambdas_cpu, outspec_cpu = GRASS.synthesize_spectra_eclipse(spec, disk, obs_long, obs_lat, alt, wavelength, time_stamps, verbose=true, use_gpu=false)
     tstop = time()
     @printf(">>> Synthesis time --> %.3f seconds \n", tstop - tstart)
 

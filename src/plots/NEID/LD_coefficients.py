@@ -38,4 +38,3 @@ plt.plot(lambda_nm, cs5(lambda_nm), color = 'purple')
 plt.legend()
 plt.savefig("LD.png")
 plt.show()
-

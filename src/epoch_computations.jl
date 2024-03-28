@@ -1,5 +1,5 @@
 # using PyPlot; plt=PyPlot
-function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; ext::Bool = false, moon_r::Float64=moon_radius) where T 
+function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, index; ext::Bool = false, moon_r::Float64=moon_radius) where T 
     """
     compute rv for a given grid size and timestamp  
     
@@ -174,7 +174,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, index; ext::Bo
             end
             
             if band == "optical"
-                LD_all = map(x -> quad_limb_darkening_optical(x), mu_grid)
+                LD_all = map(x -> quad_limb_darkening_optical(x, wavelength), mu_grid)
             end
 
         #calculating the area element dA for each tile
