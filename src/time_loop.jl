@@ -12,27 +12,41 @@ function neid_loop(lats::T) where T
     obs_long = -111.5967  
     alt = 2.097938 
 
-    wavelength = 512 #must be in nanometers
+    wavelength = [5250.2084, 5250.6453, 5379.5734, 5381.0216, 5382.2562, 5383.368, 5432.546, 5432.947, 5434.5232, 5435.8577, 5436.2945, 5436.5875, 5576.0881, 5578.718, 6149.246, 6151.617, 6169.042, 6169.563, 6170.5056, 6173.3344, 6301.5008, 6302.4932]
+
+    RV_list_no_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
+    RV_list_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
+    RV_list_cb_new_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
+    intensity_list_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
-    #run compute_rv for each timestamp
-    for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength, i)
-        RV_list_no_cb[i] = RV_no_cb
-        RV_list_cb[i] = RV_cb
-        RV_list_cb_new[i] = RV_cb_new
-        intensity_list[i] = intensity
+
+    for lambda in 1:length(wavelength)
+        print(lambda)
+        #run compute_rv for each timestamp
+        for i in 1:length(time_stamps)
+            RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda]/10.0, i)
+            RV_list_no_cb[i] = RV_no_cb
+            RV_list_cb[i] = RV_cb
+            RV_list_cb_new[i] = RV_cb_new
+            intensity_list[i] = intensity
+        end
+        RV_list_no_cb_final[lambda] = RV_list_no_cb
+        RV_list_cb_final[lambda] = RV_list_cb 
+        RV_list_cb_new_final[lambda] = RV_list_cb_new
+        intensity_list_final[lambda] = intensity_list
+
     end
 
     @save "src/plots/NEID/model_data.jld2"
     jldopen("src/plots/NEID/model_data.jld2", "a+") do file
-        file["RV_list_no_cb"] = RV_list_no_cb 
-        file["RV_list_cb"] = RV_list_cb 
-        file["RV_list_cb_new"] = RV_list_cb_new
-        file["intensity_list"] = intensity_list
+        file["RV_list_no_cb"] = RV_list_no_cb_final 
+        file["RV_list_cb"] = RV_list_cb_final 
+        file["RV_list_cb_new"] = RV_list_cb_new_final
+        file["intensity_list"] = intensity_list_final
     end
 end
 
