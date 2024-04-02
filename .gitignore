@@ -2,9 +2,9 @@
 *.bpc
 *.tls
 *.tpc
-*.jld2 
-*.png
-*.gif
+# *.jld2 
+# *.png
+# *.gif
 *.tf
 *.pdf
 *.fits
