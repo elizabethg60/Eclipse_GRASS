@@ -19,15 +19,17 @@ function neid_loop(lats::T) where T
     RV_list_cb_new_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
     intensity_list_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
 
-    RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
-    RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
-    RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
-    intensity_list = Vector{Float64}(undef,size(time_stamps)...)
-
     for lambda in 1:length(wavelength)
-        print(lambda)
+        println(wavelength[lambda]/10.0)
+
+        RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
+        RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+        RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
+        intensity_list = Vector{Float64}(undef,size(time_stamps)...)
+        # airmass_list = Vector{Float64}(undef,size(time_stamps)...)
         #run compute_rv for each timestamp
         for i in 1:length(time_stamps)
+            # airmass_list[i] = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda]/10.0, i)
             RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda]/10.0, i)
             RV_list_no_cb[i] = RV_no_cb
             RV_list_cb[i] = RV_cb
@@ -38,7 +40,6 @@ function neid_loop(lats::T) where T
         RV_list_cb_final[lambda] = RV_list_cb 
         RV_list_cb_new_final[lambda] = RV_list_cb_new
         intensity_list_final[lambda] = intensity_list
-
     end
 
     @save "src/plots/NEID/model_data.jld2"
@@ -63,7 +64,7 @@ function gottingen_loop(lats::T) where T
     obs_long = 9.944333
     alt = 0.201
 
-    wavelength = 600
+    wavelength = 580.0
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
@@ -113,7 +114,7 @@ function expres_loop(lats::T) where T
     obs_long = -111.421944 
     alt = 2.359152
 
-    wavelength = 600
+    wavelength = 580.0
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
@@ -149,7 +150,7 @@ function boulder_loop(lats::T) where T
     obs_long = -105.262390
     alt = 1.6523
 
-    wavelength = 600
+    wavelength = 580.0
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
@@ -179,7 +180,7 @@ function chi2(lats::T) where T
     obs_long = 9.944333
     alt = 0.201
 
-    wavelength = 600
+    wavelength = 580
 
     seconds = range(63,63,step=1)
     for sec in seconds

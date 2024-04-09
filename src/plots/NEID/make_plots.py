@@ -10,13 +10,12 @@ from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 #read in data
 #GRASS
-grass_data = h5py.File("neid_all_lines_rv_newLD.jld2", "r")
+grass_data = h5py.File("neid_all_lines_rv_LD.jld2", "r")
 lines = grass_data["name"][()]
 grass_rv  = grass_data["rv"][()]
 #model
 file = h5py.File("model_data.jld2", "r")
 RV_list_model = file["RV_list_no_cb"][()]
-print(RV_list_model)
 # RV_list_cb  = file["RV_list_cb"][()]
 # intensity_list = file["intensity_list"][()]
 #data 
@@ -87,15 +86,16 @@ for i in range(1,len(lines)):
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     #residuals
-    axs[1].scatter(UTC_time, (rv_obs) - RV_list_no_cb, color = 'r', marker = "x", s = 3) 
-    axs[1].scatter(UTC_time, (rv_obs) - GRASS_rv, color = 'b', marker = "x", s = 3)  
+    axs[1].scatter(UTC_time, rv_obs - RV_list_no_cb, color = 'r', marker = "x", s = 3) 
+    axs[1].scatter(UTC_time, rv_obs - GRASS_rv, color = 'b', marker = "x", s = 3)  
     axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     axs[1].set_xlabel("Time (UTC)", fontsize=12)
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.savefig("GRASS/LD_corrected/rm_and_residuals_{}.png".format(lines[i]))
-    plt.show()
+    #plt.show()
+    plt.clf()
 
 # #rm curve 
 # fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})

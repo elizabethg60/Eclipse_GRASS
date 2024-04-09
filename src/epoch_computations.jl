@@ -46,6 +46,11 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
     # get light travel time corrected OS vector
     OS_bary, OS_lt, OS_dlt = spkltc(10, epoch, "J2000", lt_flag, BO_bary)
 
+    # # get airmass for Sun center
+    # zenith_angle= rad2deg.(calc_proj_dist(OS_bary[1:3], EO_bary[1:3]))
+    # airmass_center = (1/cosd(zenith_angle))
+    # return airmass_center
+
     # get vector from observatory on earth's surface to moon center
     OM_bary, OM_lt, OM_dlt = spkltc(301, epoch, "J2000", lt_flag, BO_bary)
 
@@ -166,7 +171,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
 
             #get indices for visible patches
             idx1 = mu_grid .> 0.0
-            idx3 = (idx1) .& (distance .> atan((moon_r)/norm(OM_bary))) 
+            idx3 = (idx1) .& (distance .> atan((moon_r)/norm(OM_bary[1:3]))) 
 
         #calculate limb darkening weight for each patch
             if band == "NIR"

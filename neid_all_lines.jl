@@ -65,8 +65,8 @@ for i in eachindex(lp.λrest)
     rv[i] = rvs_cpu
 end
 
-@save "neid_all_lines_rv_newLD.jld2"
-jldopen("neid_all_lines_rv_newLD.jld2", "a+") do file
+@save "neid_all_lines_rv_LD.jld2"
+jldopen("neid_all_lines_rv_LD.jld2", "a+") do file
     file["name"] = λrest 
     file["rv"] = rv 
 end
