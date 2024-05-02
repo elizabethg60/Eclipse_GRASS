@@ -5,7 +5,7 @@ function neid_loop(lats::T) where T
     lats: number of latitude grid cells
     """
     #convert from utc to et as needed by SPICE
-    time_stamps = utc2et.(neid_timestamps)
+    time_stamps = utc2et.(neid_april_timestamps)
 
     #NEID location
     obs_lat = 31.9583 
@@ -42,8 +42,8 @@ function neid_loop(lats::T) where T
         intensity_list_final[lambda] = intensity_list
     end
 
-    @save "src/plots/NEID/model_data.jld2"
-    jldopen("src/plots/NEID/model_data.jld2", "a+") do file
+    @save "src/plots/NEID_April/model_data.jld2"
+    jldopen("src/plots/NEID_April/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb_final 
         file["RV_list_cb"] = RV_list_cb_final 
         file["RV_list_cb_new"] = RV_list_cb_new_final
