@@ -192,7 +192,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             
         #determine mean intensity
             #mean_intensity[i,j] = mean(view(LD_all, idx3)) 
-            mean_intensity[i,j] = sum(view(LD_all, idx3)) / Nsubgrid^2
+            mean_intensity[i,j] = sum(view(LD_all, idx3)) / sum(idx1)
 
             if ext == true
                 #extinction 
@@ -253,6 +253,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
 
     final_weight_v_cb_new = sum(view(contrast .* mean_weight_v_cb_new .* brightness, idx_grid)) / cheapflux
     final_weight_v_cb_new += mean(view(mean_weight_v_earth_orb, idx_grid)) 
-
+    
     return final_weight_v_no_cb, final_weight_v_cb, final_weight_v_cb_new, final_mean_intensity
 end
