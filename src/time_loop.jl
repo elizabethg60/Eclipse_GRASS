@@ -177,7 +177,7 @@ function boulder_loop(lats::T) where T
     obs_long = -105.262390
     alt = 1.6523
 
-    wavelength = 543.4
+    wavelength = 543.4 #does not matter for NIR
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
