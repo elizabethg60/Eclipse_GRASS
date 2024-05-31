@@ -15,14 +15,14 @@ from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 #read in data
 #GRASS
-grass_data = h5py.File("neid_all_lines_rv_regular.jld2", "r")
+grass_data = h5py.File("data/neid_all_lines_rv_regular.jld2", "r")
 lines = grass_data["name"][()]
 GRASS_rv  = grass_data["rv"][()]
-grass_data_no_cb = h5py.File("neid_all_lines_rv_off.jld2", "r")
+grass_data_no_cb = h5py.File("data/neid_all_lines_rv_off.jld2", "r")
 lines_no_cb = grass_data_no_cb["name"][()]
 GRASS_no_cb  = grass_data_no_cb["rv"][()]
 #model
-file = h5py.File("model_data.jld2", "r")
+file = h5py.File("data/model_data.jld2", "r")
 RV_list_no_cb = file["RV_list_no_cb"][()]
 RV_list_cb  = file["RV_list_cb"][()]
 
@@ -41,7 +41,7 @@ vb, warnings, flag = get_BC_vel(JDUTC=time_julian, lat=31.9583 , longi=-111.5967
 rv_obs = np.array(rv_obs)
 rv_obs -= rv_obs[-1]
 
-for i in range(1,len(lines)):
+for i in range(0,len(lines)):
     GRASS_rv_array = grass_data[GRASS_rv[i]][()][24:,]
     GRASS_rv_array = np.array(GRASS_rv_array + vb)
     GRASS_rv_array -= GRASS_rv_array[-1]

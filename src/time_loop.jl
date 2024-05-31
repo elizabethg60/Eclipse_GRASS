@@ -29,8 +29,8 @@ function neid_april_loop(lats::T) where T
         intensity_list_final[lambda] = intensity_list
     end
 
-    @save "src/plots/NEID_April/model_data.jld2"
-    jldopen("src/plots/NEID_April/model_data.jld2", "a+") do file
+    @save "src/plots/NEID_April/data/model_data.jld2"
+    jldopen("src/plots/NEID_April/data/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb_final 
         file["RV_list_cb"] = RV_list_cb_final 
         file["intensity_list"] = intensity_list_final
@@ -70,8 +70,8 @@ function neid_october_loop(lats::T) where T
         intensity_list_final[lambda] = intensity_list
     end
 
-    @save "src/plots/NEID_October/model_data.jld2"
-    jldopen("src/plots/NEID_October/model_data.jld2", "a+") do file
+    @save "src/plots/NEID_October/data/model_data.jld2"
+    jldopen("src/plots/NEID_October/data/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb_final 
         file["RV_list_cb"] = RV_list_cb_final 
         file["intensity_list"] = intensity_list_final
@@ -119,8 +119,8 @@ function gottingen_loop(lats::T) where T
         # intensity_list[i] = mean(intensity_bin)
     end
     
-    @save "src/plots/Reiners/model_data.jld2"
-    jldopen("src/plots/Reiners/model_data.jld2", "a+") do file
+    @save "src/plots/Reiners/data/model_data.jld2"
+    jldopen("src/plots/Reiners/data/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new
@@ -156,8 +156,8 @@ function expres_loop(lats::T) where T
         intensity_list[i] = intensity
     end
 
-    @save "src/plots/EXPRES/model_data.jld2"
-    jldopen("src/plots/EXPRES/model_data.jld2", "a+") do file
+    @save "src/plots/EXPRES/data/model_data.jld2"
+    jldopen("src/plots/EXPRES/data/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new
@@ -165,7 +165,7 @@ function expres_loop(lats::T) where T
     end
 end
 
-function boulder_loop(lats::T) where T
+function boulder_october_loop(lats::T) where T
     """
     computes RV for each timestamp for the boulder eclipse 
     """
@@ -177,7 +177,7 @@ function boulder_loop(lats::T) where T
     obs_long = -105.262390
     alt = 1.6523
 
-    wavelength = 543.4 #does not matter for NIR
+    wavelength = NaN
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
@@ -192,8 +192,80 @@ function boulder_loop(lats::T) where T
         intensity_list[i] = intensity
     end
 
-    @save "src/plots/Boulder/model_data.jld2"
-    jldopen("src/plots/Boulder/model_data.jld2", "a+") do file
+    @save "src/plots/Boulder_October/data/model_data.jld2"
+    jldopen("src/plots/Boulder_October/data/model_data.jld2", "a+") do file
+        file["RV_list_no_cb"] = RV_list_no_cb 
+        file["RV_list_cb"] = RV_list_cb 
+        file["RV_list_cb_new"] = RV_list_cb_new
+        file["intensity_list"] = intensity_list
+    end
+end
+
+function boulder_april_swept_loop(lats::T) where T
+    """
+    computes RV for each timestamp for the boulder eclipse 
+    """
+    #convert from utc to et as needed by SPICE
+    time_stamps = utc2et.(boulder_april_swept)
+
+    #Boulder location
+    obs_lat = 39.995380
+    obs_long = -105.262390
+    alt = 1.6523
+
+    wavelength = NaN
+
+    RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
+    intensity_list = Vector{Float64}(undef,size(time_stamps)...)
+    #run compute_rv for each timestamp
+    for i in 1:length(time_stamps)
+        RV_no_cb, RV_cb, RV_cb_new, intensity  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", wavelength, i)
+        RV_list_no_cb[i] = RV_no_cb
+        RV_list_cb[i] = RV_cb
+        RV_list_cb_new[i] = RV_cb_new
+        intensity_list[i] = intensity
+    end
+
+    @save "src/plots/Boulder_April/data/model_data_swept.jld2"
+    jldopen("src/plots/Boulder_April/data/model_data_swept.jld2", "a+") do file
+        file["RV_list_no_cb"] = RV_list_no_cb 
+        file["RV_list_cb"] = RV_list_cb 
+        file["RV_list_cb_new"] = RV_list_cb_new
+        file["intensity_list"] = intensity_list
+    end
+end
+
+function boulder_april_dither_loop(lats::T) where T
+    """
+    computes RV for each timestamp for the boulder eclipse 
+    """
+    #convert from utc to et as needed by SPICE
+    time_stamps = utc2et.(boulder_april_dither)
+
+    #Boulder location
+    obs_lat = 39.995380
+    obs_long = -105.262390
+    alt = 1.6523
+
+    wavelength = NaN
+
+    RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+    RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
+    intensity_list = Vector{Float64}(undef,size(time_stamps)...)
+    #run compute_rv for each timestamp
+    for i in 1:length(time_stamps)
+        RV_no_cb, RV_cb, RV_cb_new, intensity  = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "NIR", wavelength, i)
+        RV_list_no_cb[i] = RV_no_cb
+        RV_list_cb[i] = RV_cb
+        RV_list_cb_new[i] = RV_cb_new
+        intensity_list[i] = intensity
+    end
+
+    @save "src/plots/Boulder_April/data/model_data_dither.jld2"
+    jldopen("src/plots/Boulder_April/data/model_data_dither.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new

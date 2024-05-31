@@ -234,7 +234,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
     #index for correct lat / lon disk grid
     idx_grid = mean_intensity .> 0.0
 
-    contrast = (mean_intensity / NaNMath.maximum(mean_intensity)).^0.1
     brightness = mean_intensity .* dA_total_proj_mean 
     if ext == true 
         brightness = brightness .* mean_exti
@@ -245,13 +244,13 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
     final_mean_intensity = cheapflux 
 
     #determine final mean weighted velocity for disk grid
-    final_weight_v_no_cb = sum(view(contrast .* mean_weight_v_no_cb .* brightness, idx_grid)) / cheapflux 
+    final_weight_v_no_cb = sum(view(mean_weight_v_no_cb .* brightness, idx_grid)) / cheapflux 
     final_weight_v_no_cb += mean(view(mean_weight_v_earth_orb, idx_grid)) 
 
-    final_weight_v_cb = sum(view(contrast .* mean_weight_v_cb .* brightness, idx_grid)) / cheapflux
+    final_weight_v_cb = sum(view(mean_weight_v_cb .* brightness, idx_grid)) / cheapflux
     final_weight_v_cb += mean(view(mean_weight_v_earth_orb, idx_grid)) 
 
-    final_weight_v_cb_new = sum(view(contrast .* mean_weight_v_cb_new .* brightness, idx_grid)) / cheapflux
+    final_weight_v_cb_new = sum(view(mean_weight_v_cb_new .* brightness, idx_grid)) / cheapflux
     final_weight_v_cb_new += mean(view(mean_weight_v_earth_orb, idx_grid)) 
     
     return final_weight_v_no_cb, final_weight_v_cb, final_weight_v_cb_new, final_mean_intensity
