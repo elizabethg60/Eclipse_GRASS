@@ -11,21 +11,38 @@ function neid_april_loop(lats::T) where T
 
     RV_list_no_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
     RV_list_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
+    RV_list_new_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
     intensity_list_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
     for lambda in 1:length(wavelength)
         println(wavelength[lambda]/10.0)
         RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
         RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+        RV_list_new_cb = Vector{Float64}(undef,size(time_stamps)...)
         intensity_list = Vector{Float64}(undef,size(time_stamps)...)
         #run compute_rv for each timestamp
-        for i in 1:length(time_stamps)
+        Threads.@threads for i in 1:length(time_stamps)
             RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda]/10.0, i)
             RV_list_no_cb[i] = RV_no_cb
             RV_list_cb[i] = RV_cb
+            RV_list_new_cb[i] = RV_cb_new
             intensity_list[i] = intensity
+
+            # sample = utc2et.(neid_april_timestamps_fine[i]) 
+            # rv_bin = Vector{Float64}(undef,length(sample))
+            # cb_bin = Vector{Float64}(undef,length(sample))
+            # new_cb_bin = Vector{Float64}(undef,length(sample))
+            # intensity_bin = Vector{Float64}(undef,length(sample))
+            # for j in 1:length(sample)
+            #     rv_bin[j], cb_bin[j], new_cb_bin[j], intensity_bin[j] = (compute_rv(lats, sample[j], obs_long, obs_lat, alt, "optical", wavelength[lambda]/10.0, i))
+            # end
+            # RV_list_no_cb[i] = nansum(rv_bin .* intensity_bin) / nansum(intensity_bin)
+            # RV_list_cb[i] = nansum(cb_bin .* intensity_bin) / nansum(intensity_bin)
+            # RV_list_new_cb[i] = nansum(new_cb_bin .* intensity_bin) / nansum(intensity_bin)
+            # intensity_list[i] = nanmean(intensity_bin)
         end
         RV_list_no_cb_final[lambda] = RV_list_no_cb
         RV_list_cb_final[lambda] = RV_list_cb 
+        RV_list_new_cb_final[lambda] = RV_list_new_cb 
         intensity_list_final[lambda] = intensity_list
     end
 
@@ -33,6 +50,7 @@ function neid_april_loop(lats::T) where T
     jldopen("src/plots/NEID_April/data/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb_final 
         file["RV_list_cb"] = RV_list_cb_final 
+        file["RV_list_new_cb"] = RV_list_new_cb_final 
         file["intensity_list"] = intensity_list_final
     end
 end
@@ -50,30 +68,35 @@ function neid_october_loop(lats::T) where T
 
     RV_list_no_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
     RV_list_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
+    RV_list_new_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
     intensity_list_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
-    for lambda in 1:length(wavelength)
+    for lambda in 6:6#1:length(wavelength)
         println(wavelength[lambda]/10.0)
         RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
         RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
+        RV_list_new_cb = Vector{Float64}(undef,size(time_stamps)...)
         intensity_list = Vector{Float64}(undef,size(time_stamps)...)
         # airmass_list = Vector{Float64}(undef,size(time_stamps)...)
         #run compute_rv for each timestamp
-        for i in 1:length(time_stamps)
+        Threads.@threads for i in 1:length(time_stamps)
             # airmass_list[i] = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda]/10.0, i)
             RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda]/10.0, i)
             RV_list_no_cb[i] = RV_no_cb
             RV_list_cb[i] = RV_cb
+            RV_list_new_cb[i] = RV_cb_new
             intensity_list[i] = intensity
         end
         RV_list_no_cb_final[lambda] = RV_list_no_cb
         RV_list_cb_final[lambda] = RV_list_cb 
+        RV_list_new_cb_final[lambda] = RV_list_new_cb 
         intensity_list_final[lambda] = intensity_list
     end
 
-    @save "src/plots/NEID_October/data/model_data.jld2"
-    jldopen("src/plots/NEID_October/data/model_data.jld2", "a+") do file
+    @save "src/plots/NEID_October/data/model_data_full.jld2"
+    jldopen("src/plots/NEID_October/data/model_data_full.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb_final 
         file["RV_list_cb"] = RV_list_cb_final 
+        file["RV_list_new_cb"] = RV_list_new_cb_final 
         file["intensity_list"] = intensity_list_final
     end
 end
