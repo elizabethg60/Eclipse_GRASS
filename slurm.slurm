@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --account=sqm107_b
-#SBATCH --time=72:00:00
+#SBATCH --time=48:00:00
 #SBATCH --nodes=10
 #SBATCH --ntasks=10
 #SBATCH --mem=15gb
-#SBATCH --job-name=my_model_full
-#SBATCH --output /storage/home/efg5335/work/Eclipse_GRASS/my_model_full.out
-#SBATCH --error /storage/home/efg5335/work/Eclipse_GRASS/my_model_full.err
+#SBATCH --job-name=model_data_Kostogryz_LD_SSD
+#SBATCH --output /storage/home/efg5335/work/Eclipse_GRASS/model_data_Kostogryz_LD_SSD.out
+#SBATCH --error /storage/home/efg5335/work/Eclipse_GRASS/model_data_Kostogryz_LD_SSD.err
 #SBATCH --mail-user=efg5335@psu.com
 
 ##now=$(date +"%T")

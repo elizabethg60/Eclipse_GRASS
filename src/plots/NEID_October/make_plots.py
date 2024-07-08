@@ -15,14 +15,14 @@ from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 #read in data
 #GRASS
-grass_data = h5py.File("full_resolution/neid_all_lines_rv_regular_october_FeI_5383_fullR.jld2", "r")
+grass_data = h5py.File("data/neid_all_lines_rv_regular.jld2", "r")
 lines = grass_data["name"][()]
 GRASS_rv  = grass_data["rv"][()]
-grass_data_no_cb = h5py.File("full_resolution/neid_all_lines_rv_off_october_FeI_5383_fullR.jld2", "r")
+grass_data_no_cb = h5py.File("data/neid_all_lines_rv_off.jld2", "r")
 lines_no_cb = grass_data_no_cb["name"][()]
 GRASS_no_cb  = grass_data_no_cb["rv"][()]
 #model
-file = h5py.File("full_resolution/model_data_full.jld2", "r")
+file = h5py.File("data/model_data.jld2", "r")
 RV_list_no_cb = file["RV_list_no_cb"][()]
 RV_list_cb  = file["RV_list_cb"][()]
 # intensity_list = file["intensity_list"][()]
@@ -36,7 +36,7 @@ for i in data["obsdate"][15:-150]:
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
 #line by line data
-line_data = h5py.File("full_resolution/neid_RVlinebyline_october_FeI_5383_fullR.jld2", "r")
+line_data = h5py.File("data/neid_RVlinebyline.jld2", "r")
 line_lines = line_data["name"][()]
 line_rv  = line_data["rv"][()]
 
@@ -97,8 +97,7 @@ for i in [5]:#range(0,len(lines)):
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    #plt.savefig("No_Granulation/LinebyLine/rm_and_residuals_{}.png".format(lines_no_cb[i]))
-    plt.savefig("full_resolution/line_rm_and_residuals_{}.png".format(lines_no_cb[i]))
+    plt.savefig("No_Granulation/LinebyLine/rm_and_residuals_{}.png".format(lines_no_cb[i]))
     #plt.show()
     plt.clf()
 
@@ -125,8 +124,7 @@ for i in [5]:#range(0,len(lines)):
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    #plt.savefig("No_Granulation/rm_and_residuals_{}.png".format(lines_no_cb[i]))
-    plt.savefig("full_resolution/rm_and_residuals_{}.png".format(lines_no_cb[i]))
+    plt.savefig("No_Granulation/rm_and_residuals_{}.png".format(lines_no_cb[i]))
     #plt.show()
     plt.clf()
 
@@ -160,8 +158,7 @@ for i in [5]:#range(0,len(lines)):
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    #plt.savefig("Granulation/LinebyLine/rm_and_residuals_cb_{}.png".format(lines[i]))
-    plt.savefig("full_resolution/line_rm_and_residuals_cb_{}.png".format(lines[i]))
+    plt.savefig("Granulation/LinebyLine/rm_and_residuals_cb_{}.png".format(lines[i]))
     #plt.show()
     plt.clf()
 
@@ -188,8 +185,7 @@ for i in [5]:#range(0,len(lines)):
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    #plt.savefig("Granulation/rm_and_residuals_cb_{}.png".format(lines[i]))
-    plt.savefig("full_resolution/rm_and_residuals_cb_{}.png".format(lines[i]))
+    plt.savefig("Granulation/rm_and_residuals_cb_{}.png".format(lines[i]))
     #plt.show()
     plt.clf()
 

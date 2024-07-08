@@ -1,5 +1,5 @@
 # using PyPlot; plt=PyPlot
-function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, index; ext::Bool = false, moon_r::Float64=moon_radius) where T 
+function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, index, neid_ext_coeff; ext::Bool = false, moon_r::Float64=moon_radius) where T 
     """
     compute rv for a given grid size and timestamp  
     
@@ -195,9 +195,10 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             mean_intensity[i,j] = sum(view(LD_all, idx3)) / sum(idx1)
 
             if ext == true
-                #extinction 
+                #extinction
                 zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist(x[1:3], EO_bary[1:3]), OP_bary))
-                extin = map(x -> 10^(-((1/cosd(x))*ext_coef[index])/2.5), zenith_angle_matrix)
+                # extin = map(x -> 10^(-((1/cosd(x))*ext_coef[index])/2.5), zenith_angle_matrix)
+                extin = map(x -> exp(-((1/cosd(x))*neid_ext_coeff)), zenith_angle_matrix)
                 mean_exti[i,j] = mean(view(extin, idx3)) 
             end
 
