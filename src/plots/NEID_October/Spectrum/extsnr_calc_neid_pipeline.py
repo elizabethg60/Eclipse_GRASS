@@ -1,21 +1,13 @@
 # * along the way keep checking CCF mean error compared to out of transit NEID data RMS
 
-# Monday:
-# 1. rerun (just my model for a single line) with (1) weighted flux midpoint and (2) 5 sec cadence - future analysis done with the best one
-# 2. run with BEST timing option (N = 50 and subset = 10) for all lines (my model + GRASS) overnight (if not regular midpoint)
-
-# Tuesday: Meeting with Chris @ 10AM
-# 1. regenerate RM curves for best timing option
-# 2. organize all code + folders
-# 3. submit jobs to run updated code at full resolution for a single line 
-    # (by then should have decided if 197 ok if 300 better)
-
-# Weekend:
-# 1. regenerate RM curves for updated code at full resolution
-# 2. submit jobs to run updated code at N = 197 and subgrid = 80 for a single line 
-# 3. makes Tuesday's group slides 
+# Weekend: make Tuesday's group slides 
 
 #future: calculate gravitational redshift of sun and a white dwarf + sensitivity test of LD + extinction coefficient
+    # time weighting: 1. rerun (just my model for a single line) with (1) weighted flux midpoint and (2) 5 sec cadence - future analysis done with the best one
+                    # 2. run with BEST timing option (N = 50 and subset = 10) for all lines (my model + GRASS) overnight (if not regular midpoint)
+    # full resolution: 1. submit jobs to run updated code at full resolution for a single line (by then should have decided if 197 ok if 300 better)
+                     # 2. submit jobs to run updated code at N = 197 and subgrid = 80 for a single line
+    # extinction: try slope method again but with two different laws where extinction clearly changes slope
 #plan b: consider how to validate model is correct in orientation / time, consider Reiners newer CB model, consider NEID SPF not a gaussian 
 
 import os
@@ -70,8 +62,8 @@ airmass = [2.572425367171159, 2.5448735167307444, 2.5180129852674447, 2.49181965
 airmass_next_day = [1.766610154779519, 1.7566191871652905, 1.746790123204968, 1.7371414103451779, 1.7276693596938506, 1.7183702783550086, 1.7092404757642614, 1.7002766992439282, 1.6914753622423204, 1.6828335117028685, 1.6743475565571195, 1.6660147278317745, 1.6578319322153565, 1.6497962668339659, 1.6419049127001464, 1.6341550389718114, 1.6265442646697401, 1.6190696375641391, 1.6117289205340153, 1.604519582312987, 1.5974392513036884, 1.5904856221310038, 1.5836563716529657, 1.576949485805271, 1.5703627620709284, 1.5638941394660004, 1.5575416133744304, 1.5513031590298254, 1.5451770302626477, 1.5391613052270394, 1.5332541171772707, 1.527453930817201, 1.5217588329551917, 1.5161672390187295, 1.5106774719915244, 1.5052880962432893, 1.499997518005852, 1.4948042509119703, 1.4897068478761184, 1.484703840036097, 1.4797939765912973, 1.4749758607306593, 1.4702481918140997, 1.4656096477761906, 1.4610591075139228, 1.456595313440845, 1.4522170960806213, 1.447923316608493, 1.443712866055501, 1.4395846645406674, 1.4355376120675019, 1.4315707826229884, 1.4276831298091357, 1.423873682942278, 1.4201414969610042, 1.4164856080932275, 1.412905251967709, 1.4093993835768877, 1.4059672829497234, 1.4026080814598816, 1.3959381084413276, 1.392804034379087, 1.3897320542789846, 1.3867291698615183, 1.3837946448524314, 1.38092779997589, 1.3781279749759805, 1.3753944955614459, 1.372726804469675, 1.3701242627422294, 1.367586282409122, 1.3651122927011081, 1.36270173969934, 1.360354086033361, 1.3580687833094516, 1.3558453816115352, 1.3536833634005574, 1.3515822545387943, 1.3495415716912371, 1.3475609436760139, 1.3456398451405287, 1.343777931745373, 1.341974778935331, 1.3402299996988158, 1.3385432207639427, 1.336914063040604, 1.3353422195498081, 1.33382733701681, 1.332369095206067, 1.3309671866996038, 1.3296213167354674, 1.3283312030534131, 1.3270965611490668, 1.3259171631945352, 1.3247927483109057, 1.3237230828412432, 1.3227079330127351, 1.3217471132763106, 1.3208404125328952, 1.3199876438018885, 1.319188631518287, 1.318443202751978, 1.3177512225359715, 1.3171125397011638, 1.3165270235132573, 1.3159945542659572, 1.3155150177391568, 1.3150883325482992, 1.314714395291477, 1.314393131741419, 1.314124484311589, 1.3139083941907213, 1.3137448141726413, 1.3136337210397964, 1.3135750819355776, 1.3135688897745499, 1.3136151423722613, 1.3137138492374163, 1.3138650305503157, 1.3140687171729564, 1.3146508843676523, 1.315013810748451, 1.3154305552945205, 1.3159001247139817, 1.3164226149893354, 1.316998133008446, 1.3176268045440243, 1.3183087432551277, 1.3190440963728511, 1.319833015001365, 1.3206756614719402, 1.3215722206027718, 1.3225228557553914, 1.323527773990482, 1.3245871965910723, 1.3257013039655532, 1.3268703672028908, 1.3280946318919165, 1.3293743240710225, 1.3307097260573355, 1.3321011180265434, 1.333548792632386, 1.3350530551598503, 1.3366142429114671, 1.3382326491657885, 1.339908636631941, 1.3416425627938133, 1.343434798651181, 1.3452857516531398, 1.347195775648958, 1.3491652812378712, 1.3511947680767882, 1.3532846053103853, 1.355435273648915, 1.357647271829831, 1.3599210333055025, 1.362257087032262, 1.3646559514834933, 1.36711816132506, 1.3696442677190188, 1.3722348703643767, 1.374890491710917, 1.3776117652886417, 1.3803993115121311, 1.3832537689908864, 1.3861757948895377, 1.3891661019220714, 1.3922253132611158, 1.395354179930717, 1.3985534374202588, 1.4018238418835418, 1.4051661706042335, 1.4085812642268882, 1.412069861154891, 1.4156328458879297, 1.4192710852249688, 1.4229854696833204, 1.4267769604013154, 1.4306464053695533, 1.434594815180816, 1.443652244037057, 1.4478523219893995, 1.452145161976374, 1.4565223924481816, 1.4609851493925985, 1.4655348215999329, 1.4701722801398585, 1.4748990374443234, 1.4797161316399963, 1.4846250967396304, 1.4896270923593786, 1.4947236116835492, 1.4999158773517323, 1.5052055234645023, 1.5105940403429705, 1.516082824847498, 1.521673510376001, 1.527367708617811, 1.5331671461904635, 1.5390733841591562, 1.5450882402090875, 1.551213510834245, 1.5574510423297185, 1.5638027323458712, 1.570270531513536, 1.5768564450962952, 1.5835626165931016, 1.5903910037189721, 1.5973438668525093, 1.6044234480482498, 1.6116321414868295, 1.6189721452965287, 1.626445986819871, 1.634056270687161, 1.641805303214182, 1.6496960237383178, 1.6577310784209252, 1.6659132873930087, 1.6742456564270367, 1.682730974983207, 1.6913724239481458, 1.7001731776133666, 1.709136616342259, 1.7182658944975635, 1.7275645945624962, 1.7370362993674975, 1.74668470355897, 1.7565136178304737, 1.7665269733501452, 1.7767288263950174, 1.7871234901256565, 1.7977150343901336, 1.8085081771889717, 1.819507130785895, 1.8307171868173617, 1.8421428597377691, 1.8537893655981785, 1.8656619573003812, 1.8777660660016815, 1.8901073085770066, 1.916437987250106, 1.9295189076999746, 1.942887012496054, 1.9565238760263914, 1.9704364259498761, 1.9846318406777248, 1.9991175606773948, 2.013901480914375, 2.028991244782345, 2.0443953298814295, 2.0601223505892463, 2.0761812498315297, 2.092581515191484, 2.1093323979044714, 2.1264447479594546, 2.1439271055675717]
 df = pd.DataFrame(columns= ['datetime','airmass'] + wavelength)
 
-#file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/data/model_data_ext.jld2", "r")
-file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Kostogryz/model_data_Kostogryz_LD_SSD.jld2", "r")
+file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/data/model_data.jld2", "r")
+#file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Kostogryz/model_data_Kostogryz_LD_300.jld2", "r")
 
 intensity_list = file_data["intensity_list"][()]
 
@@ -132,26 +124,42 @@ cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 
 fig = plt.figure()
 ax1 = fig.add_subplot()
+
 for i, value in enumerate(wavelength):
     color = cmap(norm(value))
     ax1.plot(df['airmass'][0:-10], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10], color=color)
+    slope, intercept = np.polyfit(df['airmass'][0:-10][0:94], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10][0:94], deg=1)
+    ax1.plot(df['airmass'][0:-10][0:94], df['airmass'][0:-10][0:94]*slope+intercept, color=color)
+    slope, intercept = np.polyfit(df['airmass'][0:-10][94:-1], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10][94:-1], deg=1)
+    ax1.plot(df['airmass'][0:-10][94:-1], df['airmass'][0:-10][94:-1]*slope+intercept, color=color)
 ax1.set_xlabel("airmass")
 ax1.set_ylabel("relative flux/intensity") 
-# plt.axvline(x=df['airmass'][45])
-plt.savefig("Eclipse_Figures/Kostogryz_SSD/coeff_eclipse.png")
+plt.axvline(x=df['airmass'][94])
+print(df['datetime'][94])
+plt.savefig("Eclipse_Figures/NL94_LD/coeff_eclipse.png")
 plt.clf()
 
-fig = plt.figure()
-ax1 = fig.add_subplot()  
-for i, value in enumerate(wavelength):
-    color = cmap(norm(value))
-    ax1.scatter(df['airmass'], file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), label = wavelength[i], color=color, s = 1)
-    ax1.plot(df['airmass'], df[wavelength[i]]/max(df[wavelength[i]]), color=color)
-# plt.legend()
-ax1.set_xlabel("airmass")
-ax1.set_ylabel("relative flux") 
-plt.savefig("Eclipse_Figures/Kostogryz_SSD/flux_comp.png")
-plt.clf()
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# for i, value in enumerate(wavelength):
+#     color = cmap(norm(value))
+#     ax1.plot(df['airmass'][0:-10], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10], color=color)
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("relative flux/intensity") 
+# plt.savefig("Eclipse_Figures/Kostogryz_300/coeff_eclipse.png")
+# plt.clf()
+
+# fig = plt.figure()
+# ax1 = fig.add_subplot()  
+# for i, value in enumerate(wavelength):
+#     color = cmap(norm(value))
+#     ax1.scatter(df['airmass'], file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), label = wavelength[i], color=color, s = 1)
+#     ax1.plot(df['airmass'], df[wavelength[i]]/max(df[wavelength[i]]), color=color)
+# # plt.legend()
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("relative flux") 
+# plt.savefig("Eclipse_Figures/Kostogryz_300/flux_comp.png")
+# plt.clf()
 
 # def extinction_func(airmass, LD_intensity, coefficient): #Bouguer–Lambert law
 #     return LD_intensity * np.exp(-airmass*coefficient)
@@ -160,15 +168,15 @@ plt.clf()
 #     return -(np.log(flux/LD))/airmass
 
 # df_ext = pd.DataFrame()
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
 # for i in range(0,len(wavelength)):
 #     k = solve_k(df[wavelength[i]]/max(df[wavelength[i]]), file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), df['airmass'])
 #     df_ext[wavelength[i]] = np.array(k)
-
-#     # plt.scatter(df['airmass'], file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), label = 'LD', s = 1)
-#     # plt.plot(df['airmass'], df[wavelength[i]]/max(df[wavelength[i]]), label = 'NEID Flux')
-#     # plt.plot(df['airmass'], extinction_func(df['airmass'], file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), k), label = 'eq')
-#     # plt.legend()
-#     # plt.show()
+#     ax1.plot(df['datetime'], k)
+# ax1.set_xlabel("hour on 10/14")
+# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# plt.savefig("Eclipse_Figures/NL94_LD/coeff_BL_Law_evolution.png")
 # df_ext.to_csv('extinction_coefficient.csv')
 
 # fig = plt.figure()

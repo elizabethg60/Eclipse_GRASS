@@ -82,8 +82,8 @@ function neid_october_loop(lats::T) where T
         # airmass_list = Vector{Float64}(undef,size(time_stamps)...)
         #run compute_rv for each timestamp
         Threads.@threads for i in 1:length(time_stamps)
-            # airmass_list[i] = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda]/10.0, i)
-            RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda], i, neid_ext_coeff[i], ext = true)
+            # airmass_list[i] = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda], i, neid_ext_coeff[i], ext = false)
+            RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda], i, neid_ext_coeff[i], ext = false)
             RV_list_no_cb[i] = RV_no_cb
             RV_list_cb[i] = RV_cb
             RV_list_new_cb[i] = RV_cb_new

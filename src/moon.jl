@@ -29,11 +29,10 @@ function quad_limb_darkening_optical(μ::T, wavelength::T) where T
     end
 
     index = findmin(x->abs(x-wavelength), Kostogryz_LD_file[!, "wavelength"])[2]
-    mu_round = round(μ; digits=1)
-    if mu_round == 0.0
-        mu_round = 0.1
-    end
-    return Kostogryz_LD_file[!, string(mu_round)][index]
+    Kostogryz_LD_array = Kostogryz_LD_file[index, ["0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1.0"]]
+    Kostogryz_LD_interpol = linear_interp([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], collect(Kostogryz_LD_array))
+
+    return Kostogryz_LD_interpol(μ)
 end
 
 function quad_limb_darkening_NIR(μ::T) where T
