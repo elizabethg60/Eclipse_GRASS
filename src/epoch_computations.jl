@@ -179,7 +179,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             end
             
             if band == "optical"
-                LD_all = map(x -> quad_limb_darkening_optical(x, wavelength), mu_grid)
+                LD_all = map(x -> quad_limb_darkening_optical(x, wavelength / 10.0), mu_grid)
             end
 
         #calculating the area element dA for each tile

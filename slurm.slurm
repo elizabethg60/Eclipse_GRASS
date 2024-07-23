@@ -4,9 +4,9 @@
 #SBATCH --nodes=10
 #SBATCH --ntasks=10
 #SBATCH --mem=15gb
-#SBATCH --job-name=model_data_Kostogryz_LD_SSD
-#SBATCH --output /storage/home/efg5335/work/Eclipse_GRASS/model_data_Kostogryz_LD_SSD.out
-#SBATCH --error /storage/home/efg5335/work/Eclipse_GRASS/model_data_Kostogryz_LD_SSD.err
+#SBATCH --job-name=model_data_Kostogryz_quadrant_LD_SSD_exp_meter
+#SBATCH --output /storage/home/efg5335/work/Eclipse_GRASS/model_data_Kostogryz_quadrant_LD_SSD_exp_meter.out
+#SBATCH --error /storage/home/efg5335/work/Eclipse_GRASS/model_data_Kostogryz_quadrant_LD_SSD_exp_meter.err
 #SBATCH --mail-user=efg5335@psu.com
 
 ##now=$(date +"%T")

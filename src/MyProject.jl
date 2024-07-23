@@ -12,6 +12,7 @@ using Dates
 using ThreadsX
 using Distributions
 using NaNStatistics
+using LsqFit
 
 include("get_kernels.jl")
 include("epoch_computations.jl")
@@ -74,10 +75,10 @@ function linear_interp(xs::AA{T,1}, ys::AA{T,1}; bc::T=NaN) where T<:Float64
     return f
 end
 
-file = DataFrame(CSV.File("src/convective_blueshift.csv"))
+file = DataFrame(CSV.File("data/convective_blueshift.csv"))
 blueshift_values = reverse((file." blueshift"))
 mu_values = reverse(file."mu")
 convective_blueshift_interpol = linear_interp(mu_values, blueshift_values)
 
-Kostogryz_LD_file = DataFrame(CSV.File("src/Kostogryz_LD_SSD.csv", header = ["wavelength", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1.0"]))
+Kostogryz_LD_file = DataFrame(CSV.File("data/Kostogryz_LD_SSD.csv", header = ["wavelength", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1.0"]))
 end 

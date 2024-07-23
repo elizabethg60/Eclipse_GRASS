@@ -56,8 +56,12 @@ function neid_april_loop(lats::T) where T
 end
 
 function neid_october_loop(lats::T) where T
+
+    # exp_meter = DataFrame(CSV.File("data/exposure_meter_data.csv"))
+
     #convert from utc to et as needed by SPICE
     time_stamps = utc2et.(neid_timestamps)
+    # time_stamps = utc2et.(exp_meter[!, "Array2"])
 
     #NEID location
     obs_lat = 31.9583 
@@ -65,7 +69,9 @@ function neid_october_loop(lats::T) where T
     alt = 2.097938 
 
     wavelength = [5250.2084, 5250.6453, 5379.5734, 5381.0216, 5382.2562, 5383.368, 5432.546, 5432.947, 5434.5232, 5435.8577, 5436.2945, 5436.5875, 5576.0881, 5578.718, 6149.246, 6151.617, 6169.042, 6169.563, 6170.5056, 6173.3344, 6301.5008, 6302.4932]
-    file = DataFrame(CSV.File("src/extinction_coefficient.csv"))
+    # exp_meter_wav = dropmissing(exp_meter, :"Wavelength")
+    #wavelength = exp_meter_wav[!, "Wavelength"]
+    file = DataFrame(CSV.File("data/extinction_coefficient.csv"))
     
     RV_list_no_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
     RV_list_cb_final = Vector{Vector{Float64}}(undef,size(wavelength)...)
@@ -83,7 +89,7 @@ function neid_october_loop(lats::T) where T
         #run compute_rv for each timestamp
         Threads.@threads for i in 1:length(time_stamps)
             # airmass_list[i] = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda], i, neid_ext_coeff[i], ext = false)
-            RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda], i, neid_ext_coeff[i], ext = false)
+            RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength[lambda], i, neid_ext_coeff[1], ext = false)
             RV_list_no_cb[i] = RV_no_cb
             RV_list_cb[i] = RV_cb
             RV_list_new_cb[i] = RV_cb_new
@@ -95,8 +101,8 @@ function neid_october_loop(lats::T) where T
         intensity_list_final[lambda] = intensity_list
     end
 
-    @save "src/plots/NEID_October/data/model_data_Kostogryz_LD_SSD.jld2"
-    jldopen("src/plots/NEID_October/data/model_data_Kostogryz_LD_SSD.jld2", "a+") do file
+    @save "src/plots/NEID_October/data/model_data_test.jld2"
+    jldopen("src/plots/NEID_October/data/model_data_test.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb_final 
         file["RV_list_cb"] = RV_list_cb_final 
         file["RV_list_new_cb"] = RV_list_new_cb_final 
