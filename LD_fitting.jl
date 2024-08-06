@@ -2,6 +2,9 @@ using Revise
 using MyProject
 using PyPlot
 using LsqFit
+using JLD2
+using DataFrames
+using CSV
 
 model(x, p) = 1 .- p[1] .* (1 .-x) .- p[2] .* (1 .- x) .^ 2.0
 
@@ -20,6 +23,8 @@ mu_zero_arr = range(0.0, step=0.05, stop=1.0)
 # GRASS lines - A
 wavelength = [5250.2084, 5250.6453, 5379.5734, 5381.0216, 5382.2562, 5383.368, 5432.546, 5432.947, 5434.5232, 5435.8577, 5436.2945, 5436.5875, 5576.0881, 5578.718, 6149.246, 6151.617, 6169.042, 6169.563, 6170.5056, 6173.3344, 6301.5008, 6302.4932]
 
+best_u1 = Vector{Float64}(undef,size(wavelength)...)
+best_u2 = Vector{Float64}(undef,size(wavelength)...)
 #for each GRASS wavelength determine NL94 + Kostogryz LD at mu array
 for lambda in 1:length(wavelength)
     NL_LD = Vector{Float64}(undef,size(mu_arr)...)
@@ -33,17 +38,15 @@ for lambda in 1:length(wavelength)
     #iterate through mu + collect corresponding NL94 + Kostogryz LD
     for i in 1:length(mu_arr)
         NL_LD[i] = a0[index] + a1[index]*mu_arr[i] + a2[index]*mu_arr[i]^2 + a3[index]*mu_arr[i]^3 + a4[index]*mu_arr[i]^4 + a5[index]*mu_arr[i]^5
-        Kos_LD[i] = MyProject.quad_limb_darkening_optical(mu_arr[i], wavelength[lambda] ./ 10)
+        Kos_LD[i], best_u1[lambda], best_u2[lambda] = MyProject.quad_limb_darkening_optical(mu_arr[i], wavelength[lambda] ./ 10)
     end
 
     p0 = [1.0, 1.0]
-    fit_K = curve_fit(model, mu_arr, Kos_LD, p0)
-    p_opt_K = fit_K.param
     fit_NL = curve_fit(model, mu_arr, NL_LD, p0)
     p_opt_NL = fit_NL.param
 
     for i in 1:length(mu_zero_arr)
-        Kos_LD_full[i] = model(mu_zero_arr[i], p_opt_K)
+        Kos_LD_full[i] = model(mu_zero_arr[i], [best_u1[lambda], best_u2[lambda]])
         NL_LD_full[i] = model(mu_zero_arr[i], p_opt_NL)
     end
 
@@ -59,6 +62,12 @@ for lambda in 1:length(wavelength)
     plt.text(mu_arr[4], 0.55, "Kostogryz - GRASS wavelength $(round(collect(MyProject.Kostogryz_LD_file[!, "wavelength"])[index] - wavelength[lambda]/10.0; digits = 3)) nm")
     plt.xlabel("mu")
     plt.ylabel("relative intensity")
-    plt.savefig("src/tests/LD_comp/LD_comp_300/$(wavelength[lambda]).png")
+    plt.savefig("src/tests/LD_comp/LD_comp_SSD/$(wavelength[lambda]).png")
     plt.clf()
 end
+
+df = DataFrame()
+df[!, "wavelength"] = wavelength 
+df[!, "u1"] = best_u1
+df[!, "u2"] = best_u2
+CSV.write("quad_ld_coeff_SSD.csv", df)

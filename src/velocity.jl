@@ -52,12 +52,6 @@ function projected!(A::Matrix, B::Matrix, out_no_cb::Matrix, out_cb::Matrix, out
                        
         vel = A[i][4:6]
         angle = dot(B[i][1:3], vel) / (norm(B[i][1:3]) * norm(vel))
-        
-        # vel_old = A[i][4:6] .+ cb_velocity[i]
-        # angle_old = dot(B[i][1:3], vel_old) / (norm(B[i][1:3]) * norm(vel_old))
-        
-        # vel_new = A[i][4:6] .+ new_cb_model
-        # angle_new = dot(B[i][1:3], vel_new) / (norm(B[i][1:3]) * norm(vel_new))
 
         out_no_cb[i] = (norm(vel) * angle)
         out_cb[i] = (norm(vel) * angle) + cb_velocity[i]

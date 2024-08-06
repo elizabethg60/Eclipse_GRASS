@@ -1,18 +1,10 @@
-# Code Rewrite / Reorganize:
-    # separate geometry from rest of simulation (i.e. save results of geomety then do intensity + RV separate)
-        # can use GRASS geometry function - make sure gives same results for projected RV 
-    # update all functions + trending to be flexible 
-    # update all code to be Julia efficient
-    # rewrite LD_models_comp to be modular 
-        # can also do comparison of line by line RV vs pipeline RV RMS
-    # rerun + reorganize Eclipse_GRASS + GRASS folder
-        # make plots nice (include CCF mean error compared to out of transit NEID data RMS)
-# only move forward when everything is organized
+# reach out to Connor to test pattern sensitivity 
+# LD_models_comp: can also do comparison of line by line RV vs pipeline RV RMS
+# NL94: does rv / intensity rms change if you use different low mu cut off instead of 0.12?
 # run K HD data
 # run quadratic SSD for exopsure meter wavelength + time then compare model results with exposure meter 
     # plot residuals as a function of wavelength
     # get new extinction coefficients + rerun simulations with extinction 
-# read LD papers
 
 #future: calculate gravitational redshift of sun and a white dwarf + sensitivity test of LD + extinction coefficient
     # time weighting: 1. rerun (just my model for a single line) with (1) weighted flux midpoint and (2) 5 sec cadence - future analysis done with the best one
@@ -104,7 +96,6 @@ def NEID_flux(Fiber, directory, airmass, wavelength):
 
 def model_flux(file_data):
     intensity_list = file_data["intensity_list"][()]
-
     intensity_array = [[]]*len(wavelength)
     for i in range(0,len(wavelength)):
         intensity = (file_data[intensity_list[i]][()])
@@ -120,68 +111,15 @@ airmass = [2.572425367171159, 2.5448735167307444, 2.5180129852674447, 2.49181965
 
 df = NEID_flux(Fiber, directory, airmass, wavelength)
 
-# ----------------------------------------
-# # Exposure Meter
-
-# # October Eclipse
-# path_october = "/storage/group/ebf11/default/pipeline/neid_solar/data/v1.3/L2/2023/10/14/"
-# timestamps_full_october = pd.read_csv("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/data/NEID_Data.csv")["filename"]
-# timestamps_october = timestamps_full_october[15:-150]
-
-# exp_meter_time = []
-# exp_meter_wav = []
-# exp_meter_flux = []
-# for j in range(0,len(timestamps_october[0:-25])):
-#     inputSpectrum = fits.open('{}/{}'.format(path_october, np.array(timestamps_october)[j]))
-#     jd = Time(inputSpectrum[14].header["JDREF"], format='jd')
-#     dt = jd.to_datetime()
-#     time = []
-#     for i in inputSpectrum[14].data[0][0]:
-#         time.append(dt + timedelta(seconds=i))
-#     exp_meter_time.append(time)
-#     exp_meter_wav.append(inputSpectrum[14].data[1][30:-14])
-#     exp_meter_flux.append(inputSpectrum[14].data[4][30:-14])
-
-# exp_meter_wav = [array[0] for array in exp_meter_wav[0]]
-# #bluest: 4292.473 reddest: 9300.471
-
-# # Normalize the values to the range [0, 1]
-# norm = mcolors.Normalize(vmin=min(exp_meter_wav), vmax=max((exp_meter_wav)))
-# # Create a colormap from blue to red
-# cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# for wav_ind in range(0, len(exp_meter_wav)):
-#     wav = exp_meter_wav[wav_ind]
-#     color = cmap(norm(wav))
-
-#     max_value = max(exp_meter_flux[0][wav_ind][2:-5])
-#     for i in range(0, len(exp_meter_time)):
-#         if max(exp_meter_flux[i][wav_ind][2:-5]) > max_value:
-#             max_value = max(exp_meter_flux[i][wav_ind][2:-5])
-
-#     for i in range(0, len(exp_meter_time)):
-#         ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5])/max_value, color = color)
-# ax1.set_xlabel("hour on 10/14")
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# ax1.set_ylabel("relative flux") 
-# plt.savefig("Eclipse_Figures/exp_meter/exp_meter.png")
-# plt.clf()
-
-# df = pd.DataFrame({'Wavelength': pd.Series(exp_meter_wav), 'Array2': pd.Series([item.strftime("%Y-%m-%dT%H:%M:%S") for sublist in exp_meter_time for item in sublist[2:-5]])})
-# # Save the DataFrame to a CSV file
-# df.to_csv('exposure_meter_data.csv', index=False)
-
-#----------------------------------------
-
 # Normalize the values to the range [0, 1]
 norm = mcolors.Normalize(vmin=np.min(wavelength), vmax=np.max(wavelength))
 # Create a colormap from blue to red
 cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 
+#----------------------------------------
+
 # #SSD
-# file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Kostogryz_LD/SSD/data/model_data_Kostogryz_quadrant_LD_SSD.jld2", "r")
+# file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/data/neid_october_N_50_KSSD.jld2", "r")
 # intensity_list, intensity_array = model_flux(file_data)
 
 # fig = plt.figure()
@@ -191,7 +129,7 @@ cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 #     ax1.plot(df['airmass'][0:-10], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10], color=color)
 # ax1.set_xlabel("airmass")
 # ax1.set_ylabel("relative flux/intensity") 
-# plt.savefig("Eclipse_Figures/Kostogryz_SSD/coeff_eclipse_quadratic.png")
+# plt.savefig("Eclipse_Figures/Kostogryz_SSD/coeff_eclipse.png")
 # plt.clf()
 
 # fig = plt.figure()
@@ -204,42 +142,13 @@ cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 # ax1.text(np.array(df['airmass'])[-10], 0.5, "{} RMS {}".format(wavelength[1], rms))    
 # ax1.set_xlabel("airmass")
 # ax1.set_ylabel("relative flux") 
-# plt.savefig("Eclipse_Figures/Kostogryz_SSD/flux_comp_quadratic.png")
-# plt.clf()
-
-#----------------------------------------
-
-# #300
-# file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Kostogryz_LD/300/data/model_data_Kostogryz_LD_300.jld2", "r")
-# intensity_list, intensity_array = model_flux(file_data)
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# for i, value in enumerate(wavelength):
-#     color = cmap(norm(value))
-#     ax1.plot(df['airmass'][0:-10], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10], color=color)
-# ax1.set_xlabel("airmass")
-# ax1.set_ylabel("relative flux/intensity") 
-# plt.savefig("Eclipse_Figures/Kostogryz_300/coeff_eclipse.png")
-# plt.clf()
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()  
-# for i, value in enumerate(wavelength):
-#     color = cmap(norm(value))
-#     ax1.scatter(df['airmass'], file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), label = wavelength[i], color=color, s = 1)
-#     ax1.plot(df['airmass'], df[wavelength[i]]/max(df[wavelength[i]]), color=color)
-# rms = round(np.sqrt((np.nansum(((df[wavelength[1]]/max(df[wavelength[1]])) - file_data[intensity_list[1]][()]/max(file_data[intensity_list[1]][()]))**2))/len((df[wavelength[1]]/max(df[wavelength[1]])) - file_data[intensity_list[1]][()]/max(file_data[intensity_list[1]][()]))),4)
-# ax1.text(np.array(df['airmass'])[-10], 0.5, "{} RMS {}".format(wavelength[1], rms))
-# ax1.set_xlabel("airmass")
-# ax1.set_ylabel("relative flux") 
-# plt.savefig("Eclipse_Figures/Kostogryz_300/flux_comp.png")
+# plt.savefig("Eclipse_Figures/Kostogryz_SSD/flux_comp.png")
 # plt.clf()
 
 #----------------------------------------
 
 #NL94
-file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/NL94_LD/data/model_data_NL94_quadrant_LD.jld2", "r")
+file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/NL94_LD/data/neid_october_N_50_NL94.jld2", "r")
 intensity_list, intensity_array = model_flux(file_data)
 
 fig = plt.figure()
@@ -249,7 +158,7 @@ for i, value in enumerate(wavelength):
     ax1.plot(df['airmass'][0:-10], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10], color=color)
 ax1.set_xlabel("airmass")
 ax1.set_ylabel("relative flux/intensity") 
-plt.savefig("Eclipse_Figures/NL94_LD/coeff_eclipse_quadratic.png")
+plt.savefig("Eclipse_Figures/NL94_LD/coeff_eclipse.png")
 plt.clf()
 
 fig = plt.figure()
@@ -262,117 +171,37 @@ rms = round(np.sqrt((np.nansum(((df[wavelength[1]]/max(df[wavelength[1]])) - fil
 ax1.text(np.array(df['airmass'])[-10], 0.5, "{} RMS {}".format(wavelength[1], rms))
 ax1.set_xlabel("airmass")
 ax1.set_ylabel("relative flux") 
-plt.savefig("Eclipse_Figures/NL94_LD/flux_comp_quadratic.png")
+plt.savefig("Eclipse_Figures/NL94_LD/flux_comp.png")
+plt.clf()
+
+fig = plt.figure()
+ax1 = fig.add_subplot()
+for i in wavelength:
+    ax1.plot(df['airmass'], df[i])
+ax1.set_xlabel("airmass")
+ax1.set_ylabel("SNR") 
+plt.savefig("Eclipse_Figures/NL94_LD/snr.png")
+
+fig = plt.figure()
+ax1 = fig.add_subplot()
+for i, value in enumerate(wavelength):
+    ax1.plot(df['datetime'], df[wavelength[i]]/max(df[wavelength[i]]))
+ax1.set_xlabel("hour on 10/14")
+ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+ax1.set_ylabel("relative flux") 
+plt.savefig("Eclipse_Figures/NL94_LD/flux.png")
+plt.clf()
+
+fig = plt.figure()
+ax1 = fig.add_subplot()
+for i in range(0, len(wavelength)):
+    ax1.plot(df['airmass'], intensity_array[0][i])
+ax1.set_xlabel("airmass")
+ax1.set_ylabel("relative intensity") 
+plt.savefig("Eclipse_Figures/NL94_LD/flux_model.png")
 plt.clf()
 
 #----------------------------------------
-#----------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# for i in wavelength:
-#     ax1.plot(df['airmass'], df[i])
-# ax1.set_xlabel("airmass")
-# ax1.set_ylabel("SNR") 
-# plt.savefig("Eclipse_Figures/NL94_LD/snr_coeff_eclipse.png")
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# for i, value in enumerate(wavelength):
-#     ax1.plot(df['datetime'], df[wavelength[i]]/max(df[wavelength[i]]))
-# ax1.set_xlabel("hour on 10/14")
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# ax1.set_ylabel("relative flux") 
-# plt.savefig("Eclipse_Figures/NL94_LD/flux_coeff_eclipse.png")
-# plt.clf()
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# for i in range(0, len(wavelength)):
-#     ax1.plot(df['airmass'], intensity_array[0][i])
-# ax1.set_xlabel("airmass")
-# ax1.set_ylabel("relative intensity") 
-# plt.savefig("Eclipse_Figures/NL94_LD/intensity_coeff_eclipse.png")
-# plt.clf()
-
-# def extinction_func(airmass, LD_intensity, coefficient): #Bouguer–Lambert law
-#     return LD_intensity * np.exp(-airmass*coefficient)
-
-# def solve_k(flux, LD, airmass):
-#     return -(np.log(flux/LD))/airmass
-
-# df_ext = pd.DataFrame()
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# for i in range(0,len(wavelength)):
-#     k = solve_k(df[wavelength[i]]/max(df[wavelength[i]]), file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), df['airmass'])
-#     df_ext[wavelength[i]] = np.array(k)
-#     ax1.plot(df['datetime'], k)
-# ax1.set_xlabel("hour on 10/14")
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# plt.savefig("Eclipse_Figures/NL94_LD/coeff_BL_Law_evolution.png")
-# df_ext.to_csv('extinction_coefficient.csv')
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()  
-# for i, value in enumerate(wavelength):
-#     color = cmap(norm(value))
-#     ax1.scatter(df['datetime'][0:-25], file_data[intensity_list[i]][()][0:-25]/max(file_data[intensity_list[i]][()][0:-25]), label = wavelength[i], color=color, s = 2)
-#     ax1.plot(df['datetime'][0:-25], df[wavelength[i]][0:-25]/max(df[wavelength[i]][0:-25]), color=color)
-# # plt.legend()
-# ax1.set_xlabel("hour on 10/14")
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# ax1.set_ylabel("relative flux") 
-# plt.savefig("Eclipse_Figures/NL94_LD_and_ext/flux_comp_ext.png")
-# plt.clf()
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()  
-# i = 5
-# color = cmap(norm(wavelength[5]))
-# ax1.scatter(df['datetime'][0:-25], file_data[intensity_list[i]][()][0:-25]/max(file_data[intensity_list[i]][()][0:-25]), label = wavelength[i], color=color, s = 2)
-# ax1.plot(df['datetime'][0:-25], df[wavelength[i]][0:-25]/max(df[wavelength[i]][0:-25]), color=color)
-# # plt.legend()
-# ax1.set_xlabel("hour on 10/14")
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# ax1.set_ylabel("relative flux") 
-# plt.savefig("Eclipse_Figures/NL94_LD_and_ext/flux_comp_ext_FeI5383.png")
-# plt.clf()
-
-
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# # ax1.scatter(df['datetime'], file[intensity_list[0]][()]/max(file[intensity_list[0]][()]), label = "Model")  
-# for i, value in enumerate(wavelength):
-#     color = cmap(norm(value))
-#     ax1.plot(df['datetime'], df[wavelength[i]]/max(df[wavelength[i]]), color=color)
-# #ax1.set_xlabel("airmass")
-# ax1.set_xlabel("hour on 10/14")
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# ax1.set_ylabel("relative flux") 
-# plt.savefig("flux_coeff_eclipse_full_orders.png")
-# plt.clf()
-
-
 
 # df_pyrrheliometer = pd.read_csv("Data/neid_ljpyrohelio_chv0_20231009.tel.txt", sep=" ", names=["Date", "Photocell", "Irradiance"])
 # df_pyrrheliometer["DateTime"] = [datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%f") for date in df_pyrrheliometer['Date']]
@@ -386,29 +215,31 @@ plt.clf()
 # ax1.set_ylabel("Irradiance (W/m^2)") 
 # ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 # ax1.set_xlabel("hour on 10/14")
-# plt.savefig("pyrrheliometer.png")
+# plt.savefig("Eclipse_Figures/pyrrheliometer.png")
 # plt.clf()
 
-# # for file in os.listdir(directory):
-# #     filename = os.fsdecode(file)
-# #     if filename.endswith(".fits"): 
-# #         inputSpectrum = fits.open('Data/{}'.format(filename))
-# #         # inputSpectrum.info() # shows file extensions/info
-# #         # print(inputSpectrum[0].header)
-# #         # sciflux=inputSpectrum[1].data#[]
-# #         # scilambda=inputSpectrum[7].data#[]
-# #         # print(sci.shape)
+#----------------------------------------
 
-# #         # plt.plot(np.concatenate(scilambda),np.concatenate(sciflux),label="original")
-# #         # plt.legend()
-# #         # plt.show()
+# for file in os.listdir(directory):
+#     filename = os.fsdecode(file)
+#     if filename.endswith(".fits"): 
+#         inputSpectrum = fits.open('Data/{}'.format(filename))
+#         # inputSpectrum.info() # shows file extensions/info
+#         # print(inputSpectrum[0].header)
+#         # sciflux=inputSpectrum[1].data#[]
+#         # scilambda=inputSpectrum[7].data#[]
+#         # print(sci.shape)
 
-# #         # plt.figure()
-# #         # plt.imshow(scilambda, aspect='auto', interpolation='nearest')
-# #         # plt.colorbar()
-# #         # plt.savefig('wavelength.png')
+#         # plt.plot(np.concatenate(scilambda),np.concatenate(sciflux),label="original")
+#         # plt.legend()
+#         # plt.show()
 
-# #         # plt.figure()
-# #         # plt.imshow(sciflux, aspect='auto', vmin=-10, vmax=10)
-# #         # plt.colorbar()
-# #         # plt.savefig('flux.png')
+#         # plt.figure()
+#         # plt.imshow(scilambda, aspect='auto', interpolation='nearest')
+#         # plt.colorbar()
+#         # plt.savefig('wavelength.png')
+
+#         # plt.figure()
+#         # plt.imshow(sciflux, aspect='auto', vmin=-10, vmax=10)
+#         # plt.colorbar()
+#         # plt.savefig('flux.png')

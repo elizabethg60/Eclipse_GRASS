@@ -191,13 +191,11 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
             
         #determine mean intensity
-            #mean_intensity[i,j] = mean(view(LD_all, idx3)) 
             mean_intensity[i,j] = sum(view(LD_all, idx3)) / sum(idx1)
 
             if ext == true
                 #extinction
                 zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist(x[1:3], EO_bary[1:3]), OP_bary))
-                # extin = map(x -> 10^(-((1/cosd(x))*ext_coef[index])/2.5), zenith_angle_matrix)
                 extin = map(x -> exp(-((1/cosd(x))*neid_ext_coeff)), zenith_angle_matrix)
                 mean_exti[i,j] = mean(view(extin, idx3)) 
             end
