@@ -1,10 +1,13 @@
 # reach out to Connor to test pattern sensitivity 
-# LD_models_comp: can also do comparison of line by line RV vs pipeline RV RMS
 # NL94: does rv / intensity rms change if you use different low mu cut off instead of 0.12?
-# run K HD data
-# run quadratic SSD for exopsure meter wavelength + time then compare model results with exposure meter 
+# exposure meter
     # plot residuals as a function of wavelength
     # get new extinction coefficients + rerun simulations with extinction 
+    # Estimate extinction by comparing best fit quadratic LD laws to exposure meter to reduce intensity RMS - hard code extinction (running now)
+    # With extinction: minimize RV RMS for each line through quadratic LD law coefficients
+# ?  pipeline continues to win out - follow up on line by line computation ?
+# ?  projected rv with NO cb wins out GRASS for some lines  - follow up ?
+
 
 #future: calculate gravitational redshift of sun and a white dwarf + sensitivity test of LD + extinction coefficient
     # time weighting: 1. rerun (just my model for a single line) with (1) weighted flux midpoint and (2) 5 sec cadence - future analysis done with the best one

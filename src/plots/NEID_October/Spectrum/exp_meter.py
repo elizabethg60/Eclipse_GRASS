@@ -1,6 +1,7 @@
 import os
 import h5py
 import csv
+import pickle
 import numpy as np
 import pandas as pd
 import matplotlib.dates as mdates
@@ -10,18 +11,17 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
-def model_flux_exp(file_data, max_intensity):
+def model_flux_exp(file_data):
     intensity_list = file_data["intensity_list"][()]
     intensity_array = [[]]*len(wavelength)
     for i in range(0,len(wavelength)):
         intensity = (file_data[intensity_list[i]][()])
-        intensity_array[i].append(intensity/max_intensity[i])
+        intensity_array[i].append(intensity)
     return intensity_array
 
 def find_closest_index(arr, value):
     return min(range(len(arr)), key=lambda i: abs(arr[i] - value))
 
-max_intensity = [1212197103544.11, 1212197103544.11, 1221568490391.0015, 1221568490391.0015, 1221568490391.0015,  1221568490391.0015, 1223243571572.7612, 1223243571572.7612, 1223243571572.7612, 1223243571572.7612,  1223243571572.7612,  1223243571572.7612, 1233083890048.2249, 1233896233326.561, 1262251409195.169, 1262251409195.169, 1264078174156.69, 1264078174156.69, 1264078174156.69, 1264078174156.69, 1267906167830.0017, 1267906167830.0017]
 wavelength = [5250.2084, 5250.6453, 5379.5734, 5381.0216, 5382.2562, 5383.368, 5432.546, 5432.947, 5434.5232, 5435.8577, 5436.2945, 5436.5875, 5576.0881, 5578.718, 6149.246, 6151.617, 6169.042, 6169.563, 6170.5056, 6173.3344, 6301.5008, 6302.4932]
 
 # ----------------------------------------
@@ -49,30 +49,25 @@ for j in range(0,len(timestamps_october[0:-25])):
 exp_meter_wav = [array[0] for array in exp_meter_wav[0]]
 #bluest: 4292.473 reddest: 9300.471
 
-# Normalize the values to the range [0, 1]
-norm = mcolors.Normalize(vmin=min(exp_meter_wav), vmax=max((exp_meter_wav)))
-# Create a colormap from blue to red
-cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
+# # Normalize the values to the range [0, 1]
+# norm = mcolors.Normalize(vmin=min(exp_meter_wav), vmax=max((exp_meter_wav)))
+# # Create a colormap from blue to red
+# cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 
-fig = plt.figure()
-ax1 = fig.add_subplot()
-for wav_ind in range(0, len(exp_meter_wav)):
-    wav = exp_meter_wav[wav_ind]
-    color = cmap(norm(wav))
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# for wav_ind in range(0, len(exp_meter_wav)):
+#     wav = exp_meter_wav[wav_ind]
+#     color = cmap(norm(wav))
 
-    max_value = max(exp_meter_flux[0][wav_ind][2:-5])
-    for i in range(0, len(exp_meter_time)):
-        if max(exp_meter_flux[i][wav_ind][2:-5]) > max_value:
-            max_value = max(exp_meter_flux[i][wav_ind][2:-5])
+#     for i in range(0, len(exp_meter_time)):
+#         ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5]), color = color)
 
-    for i in range(0, len(exp_meter_time)):
-        ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5])/max_value, color = color)
-
-ax1.set_xlabel("hour on 10/14")
-ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-ax1.set_ylabel("relative flux") 
-plt.savefig("Eclipse_Figures/ExposureMeter/figures/expmeter_full_wavelength.png")
-plt.clf()
+# ax1.set_xlabel("hour on 10/14")
+# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# ax1.set_ylabel("flux") 
+# plt.savefig("Eclipse_Figures/ExposureMeter/figures/expmeter_full_wavelength.png")
+# plt.clf()
 
 # df = pd.DataFrame({'Wavelength': pd.Series(exp_meter_wav), 'Array2': pd.Series([item.strftime("%Y-%m-%dT%H:%M:%S") for sublist in exp_meter_time for item in sublist[2:-5]])})
 # # Save the DataFrame to a CSV file
@@ -92,57 +87,139 @@ norm = mcolors.Normalize(vmin=np.min(wavelength), vmax=np.max(wavelength))
 # Create a colormap from blue to red
 cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 
-fig = plt.figure()
-ax1 = fig.add_subplot()
-intensity_exp_meter = []
-start = 0
-end = 1000
-for j in range(1,7):
-    file_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_{}000_KSSD.jld2").format(j), "r")
-    intensity_array = model_flux_exp(file_data, max_intensity)
-    for i, value in enumerate(wavelength):
-            color = cmap(norm(value))
-            ax1.plot(exp_meter_time_csv[start:end], intensity_array[0][i], color=color)
-    start += 1000
-    end = int("{}000".format(j+1))
-ax1.set_xlabel("hour on 10/14")
-ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-ax1.set_ylabel("relative intensity") 
-plt.savefig("Eclipse_Figures/ExposureMeter/figures/model.png")
-plt.clf()
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# intensity_exp_meter = []
+# start = 0
+# end = 1000
+# for j in range(1,8):
+#     file_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_{}000_KSSD.jld2").format(j), "r")
+#     intensity_array = model_flux_exp(file_data)
+#     for i, value in enumerate(wavelength):
+#             color = cmap(norm(value))
+#             ax1.plot(exp_meter_time_csv[start:end], intensity_array[0][i], color=color)
+#     start += 1000
+#     end = int("{}000".format(j+1))
+# ax1.set_xlabel("hour on 10/14")
+# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# ax1.set_ylabel("intensity") 
+# ax1.axvline(x=exp_meter_time_csv[6200])
+# ax1.axvline(x=exp_meter_time_csv[-1])
+# plt.savefig("Eclipse_Figures/ExposureMeter/figures/model.png")
+# plt.clf()
 
 # ----------------------------------------
 # comparison -  GRASS wavelength 
 
-fig = plt.figure()
-ax1 = fig.add_subplot()
-intensity_exp_meter = []
-start = 0
-end = 1000
-for j in range(1,7):
-    file_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_{}000_KSSD.jld2").format(j), "r")
-    intensity_array = model_flux_exp(file_data, max_intensity)
-    for i, value in enumerate(wavelength):
-            color = cmap(norm(value))
-            ax1.plot(exp_meter_time_csv[start:end], intensity_array[0][i], color=color)
-    start += 1000
-    end = int("{}000".format(j+1))
+# file_data_end = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_7000_KSSD.jld2").format(j), "r")
+# intensity_array_end = model_flux_exp(file_data_end)
+
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# intensity_exp_meter = []
+# start = 0
+# end = 1000
+neid_full_intensity = []
+# neid_normal_intensity = []
+neid_dic = {key: [] for key in wavelength}
+# model_full_intensity = []
+# for j in range(1,8):
+#     file_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_{}000_KSSD.jld2").format(j), "r")
+#     intensity_array = model_flux_exp(file_data)
+#     for i, value in enumerate(wavelength):
+#         color = cmap(norm(value))
+#         normalize_mean = np.mean(intensity_array_end[0][i][200:-1])
+#         ax1.plot(exp_meter_time_csv[start:end], intensity_array[0][i]/normalize_mean, color=color)
+#         if i == 1:
+#             model_full_intensity.append(intensity_array[0][i]/normalize_mean)
+#     start += 1000
+#     end = int("{}000".format(j+1)) 
 
 for ind, value in enumerate(wavelength):
     color = cmap(norm(value))
     wav_ind = find_closest_index(exp_meter_wav, value)
     wav = exp_meter_wav[wav_ind]
 
-    max_value = max(exp_meter_flux[0][wav_ind][2:-5])
+    inner = []
     for i in range(0, len(exp_meter_time)):
-        if max(exp_meter_flux[i][wav_ind][2:-5]) > max_value:
-            max_value = max(exp_meter_flux[i][wav_ind][2:-5])
+        inner.append((exp_meter_flux[i][wav_ind][2:-5]))
+    neid_full_intensity.append(inner)
+
+for ind, value in enumerate(wavelength):
+    color = cmap(norm(value))
+    wav_ind = find_closest_index(exp_meter_wav, value)
+    wav = exp_meter_wav[wav_ind]
+    normalize_mean = np.mean(np.array([item for sublist in neid_full_intensity[ind] for item in sublist])[6200:-1])
 
     for i in range(0, len(exp_meter_time)):
-        ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5])/max_value, color = color)
+        # ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5])/normalize_mean, color = color)
+        neid_dic[value].append((exp_meter_flux[i][wav_ind][2:-5])/normalize_mean)
+        # if ind == 1:
+        #     neid_normal_intensity.append((exp_meter_flux[i][wav_ind][2:-5])/normalize_mean)
 
+# flattened_list_neid = np.array([item for sublist in neid_normal_intensity for item in sublist])
+# flattened_list_model = np.array([item for sublist in model_full_intensity for item in sublist])
+# chi2_stat = np.sum((flattened_list_neid - flattened_list_model) ** 2 / flattened_list_model)
+# ax1.text(exp_meter_time_csv[500], .5, "Chi Squared {}".format(round(chi2_stat,2)))
+# ax1.set_xlabel("hour on 10/14")
+# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# ax1.set_ylabel("relative flux") 
+# plt.savefig("Eclipse_Figures/ExposureMeter/figures/comp.png")
+# plt.clf()
+
+# ----------------------------------------
+# extinction reduced chi square
+
+ext_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/extinction_chi_under1.jld2"), "r")
+
+extinction_chi_data = ext_data["extinction_chi_data"][()]
+
+ext_coeff = np.linspace(0.0, 0.1, 10)
+my_dict = {}
+
+for i in range(0, len(extinction_chi_data)):
+    data_wav = ext_data[extinction_chi_data[i]][()]
+    wav_dict = {}
+    for wav in range(0, len(data_wav)):
+        data_time = ext_data[data_wav[wav]][()]
+        inner_dict = {key: [] for key in ext_coeff}
+        for t in range(0,len(data_time)):
+            for ind in range(0, len(ext_coeff)):
+                    inner_dict[ext_coeff[ind]].append(ext_data[data_time[t]][()][ind])
+        wav_dict[wavelength[wav]] = inner_dict
+    my_dict[i] = wav_dict
+with open('Eclipse_Figures/ExposureMeter/data/data_under1.pkl', 'wb') as pickle_file:
+    pickle.dump(my_dict, pickle_file)
+
+with open('Eclipse_Figures/ExposureMeter/data/data_under1.pkl', 'rb') as pickle_file:
+    loaded_dict = pickle.load(pickle_file)
+
+flattened_list_neid = np.array([item for sublist in neid_dic[value] for item in sublist])
+
+fig = plt.figure()
+ax1 = fig.add_subplot()
+model_dic = {key: [] for key in np.linspace(0.0, 0.1, 10)}
+for ind in np.linspace(0.0, 0.1, 10):
+    start = 0
+    end = 1000
+    wav_dic = {key: [] for key in wavelength}
+    for j in range(1,8):
+        for i, value in enumerate(wavelength):
+            color = cmap(norm(value))
+            normalize_mean = np.mean(loaded_dict[6][value][ind][200:-1])
+            ax1.plot(exp_meter_time_csv[start:end], loaded_dict[j-1][value][ind]/normalize_mean, color=color)
+            wav_dic[value].append(loaded_dict[j-1][value][ind]/normalize_mean)
+        start += 1000
+        end = int("{}000".format(j+1)) 
+    model_dic[ind].append(wav_dic)
 ax1.set_xlabel("hour on 10/14")
 ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 ax1.set_ylabel("relative flux") 
-plt.savefig("Eclipse_Figures/ExposureMeter/figures/comp.png")
+plt.savefig("Eclipse_Figures/ExposureMeter/figures/test_under1.png")
 plt.clf()
+
+for ind in np.linspace(0.0, 0.1, 10):
+    for i, value in enumerate(wavelength):
+        flattened_list_model = np.array([item for sublist in model_dic[ind][0][value] for item in sublist])
+        chi2_stat = np.sum((flattened_list_neid - flattened_list_model) ** 2 / flattened_list_model)
+        print(ind, value, chi2_stat)
