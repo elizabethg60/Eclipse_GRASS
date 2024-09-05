@@ -1,11 +1,6 @@
 # reach out to Connor to test pattern sensitivity 
-# NL94: does rv / intensity rms change if you use different low mu cut off instead of 0.12?
 # exposure meter
-    # plot residuals as a function of wavelength
-    # get new extinction coefficients + rerun simulations with extinction 
-    # Estimate extinction by comparing best fit quadratic LD laws to exposure meter to reduce intensity RMS - hard code extinction (running now)
     # With extinction: minimize RV RMS for each line through quadratic LD law coefficients
-# ?  pipeline continues to win out - follow up on line by line computation ?
 # ?  projected rv with NO cb wins out GRASS for some lines  - follow up ?
 
 
@@ -122,7 +117,7 @@ cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 #----------------------------------------
 
 # #SSD
-# file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/data/neid_october_N_50_KSSD.jld2", "r")
+# file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD/data/neid_october_N_50_KSSD.jld2", "r")
 # intensity_list, intensity_array = model_flux(file_data)
 
 # fig = plt.figure()
@@ -150,8 +145,8 @@ cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 
 #----------------------------------------
 
-#NL94
-file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/NL94_LD/data/neid_october_N_50_NL94.jld2", "r")
+#SSD + Extinction 
+file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_october_N_50_KSSD_ext.jld2", "r")
 intensity_list, intensity_array = model_flux(file_data)
 
 fig = plt.figure()
@@ -161,7 +156,7 @@ for i, value in enumerate(wavelength):
     ax1.plot(df['airmass'][0:-10], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10], color=color)
 ax1.set_xlabel("airmass")
 ax1.set_ylabel("relative flux/intensity") 
-plt.savefig("Eclipse_Figures/NL94_LD/coeff_eclipse.png")
+plt.savefig("Eclipse_Figures/Kostogryz_SSD_ext/coeff_eclipse.png")
 plt.clf()
 
 fig = plt.figure()
@@ -171,38 +166,67 @@ for i, value in enumerate(wavelength):
     ax1.scatter(df['airmass'], file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), label = wavelength[i], color=color, s = 1)
     ax1.plot(df['airmass'], df[wavelength[i]]/max(df[wavelength[i]]), color=color)
 rms = round(np.sqrt((np.nansum(((df[wavelength[1]]/max(df[wavelength[1]])) - file_data[intensity_list[1]][()]/max(file_data[intensity_list[1]][()]))**2))/len((df[wavelength[1]]/max(df[wavelength[1]])) - file_data[intensity_list[1]][()]/max(file_data[intensity_list[1]][()]))),4)
-ax1.text(np.array(df['airmass'])[-10], 0.5, "{} RMS {}".format(wavelength[1], rms))
+ax1.text(np.array(df['airmass'])[-10], 0.5, "{} RMS {}".format(wavelength[1], rms))    
 ax1.set_xlabel("airmass")
 ax1.set_ylabel("relative flux") 
-plt.savefig("Eclipse_Figures/NL94_LD/flux_comp.png")
+plt.savefig("Eclipse_Figures/Kostogryz_SSD_ext/flux_comp.png")
 plt.clf()
 
-fig = plt.figure()
-ax1 = fig.add_subplot()
-for i in wavelength:
-    ax1.plot(df['airmass'], df[i])
-ax1.set_xlabel("airmass")
-ax1.set_ylabel("SNR") 
-plt.savefig("Eclipse_Figures/NL94_LD/snr.png")
+#----------------------------------------
 
-fig = plt.figure()
-ax1 = fig.add_subplot()
-for i, value in enumerate(wavelength):
-    ax1.plot(df['datetime'], df[wavelength[i]]/max(df[wavelength[i]]))
-ax1.set_xlabel("hour on 10/14")
-ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-ax1.set_ylabel("relative flux") 
-plt.savefig("Eclipse_Figures/NL94_LD/flux.png")
-plt.clf()
+# #NL94
+# file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/NL94_LD/data/neid_october_N_50_NL94.jld2", "r")
+# intensity_list, intensity_array = model_flux(file_data)
 
-fig = plt.figure()
-ax1 = fig.add_subplot()
-for i in range(0, len(wavelength)):
-    ax1.plot(df['airmass'], intensity_array[0][i])
-ax1.set_xlabel("airmass")
-ax1.set_ylabel("relative intensity") 
-plt.savefig("Eclipse_Figures/NL94_LD/flux_model.png")
-plt.clf()
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# for i, value in enumerate(wavelength):
+#     color = cmap(norm(value))
+#     ax1.plot(df['airmass'][0:-10], ((df[wavelength[i]]/max(df[wavelength[i]]))/(intensity_array[0][i]))[0:-10], color=color)
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("relative flux/intensity") 
+# plt.savefig("Eclipse_Figures/NL94_LD/coeff_eclipse.png")
+# plt.clf()
+
+# fig = plt.figure()
+# ax1 = fig.add_subplot()  
+# for i, value in enumerate(wavelength):
+#     color = cmap(norm(value))
+#     ax1.scatter(df['airmass'], file_data[intensity_list[i]][()]/max(file_data[intensity_list[i]][()]), label = wavelength[i], color=color, s = 1)
+#     ax1.plot(df['airmass'], df[wavelength[i]]/max(df[wavelength[i]]), color=color)
+# rms = round(np.sqrt((np.nansum(((df[wavelength[1]]/max(df[wavelength[1]])) - file_data[intensity_list[1]][()]/max(file_data[intensity_list[1]][()]))**2))/len((df[wavelength[1]]/max(df[wavelength[1]])) - file_data[intensity_list[1]][()]/max(file_data[intensity_list[1]][()]))),4)
+# ax1.text(np.array(df['airmass'])[-10], 0.5, "{} RMS {}".format(wavelength[1], rms))
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("relative flux") 
+# plt.savefig("Eclipse_Figures/NL94_LD/flux_comp.png")
+# plt.clf()
+
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# for i in wavelength:
+#     ax1.plot(df['airmass'], df[i])
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("SNR") 
+# plt.savefig("Eclipse_Figures/NL94_LD/snr.png")
+
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# for i, value in enumerate(wavelength):
+#     ax1.plot(df['datetime'], df[wavelength[i]]/max(df[wavelength[i]]))
+# ax1.set_xlabel("hour on 10/14")
+# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# ax1.set_ylabel("relative flux") 
+# plt.savefig("Eclipse_Figures/NL94_LD/flux.png")
+# plt.clf()
+
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# for i in range(0, len(wavelength)):
+#     ax1.plot(df['airmass'], intensity_array[0][i])
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("relative intensity") 
+# plt.savefig("Eclipse_Figures/NL94_LD/flux_model.png")
+# plt.clf()
 
 #----------------------------------------
 

@@ -111,29 +111,29 @@ cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
 # ----------------------------------------
 # comparison -  GRASS wavelength 
 
-# file_data_end = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_7000_KSSD.jld2").format(j), "r")
-# intensity_array_end = model_flux_exp(file_data_end)
+file_data_end = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_7000_KSSD.jld2").format(j), "r")
+intensity_array_end = model_flux_exp(file_data_end)
 
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# intensity_exp_meter = []
-# start = 0
-# end = 1000
+fig = plt.figure()
+ax1 = fig.add_subplot()
+intensity_exp_meter = []
+start = 0
+end = 1000
 neid_full_intensity = []
-# neid_normal_intensity = []
+neid_normal_intensity = []
 neid_dic = {key: [] for key in wavelength}
-# model_full_intensity = []
-# for j in range(1,8):
-#     file_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_{}000_KSSD.jld2").format(j), "r")
-#     intensity_array = model_flux_exp(file_data)
-#     for i, value in enumerate(wavelength):
-#         color = cmap(norm(value))
-#         normalize_mean = np.mean(intensity_array_end[0][i][200:-1])
-#         ax1.plot(exp_meter_time_csv[start:end], intensity_array[0][i]/normalize_mean, color=color)
-#         if i == 1:
-#             model_full_intensity.append(intensity_array[0][i]/normalize_mean)
-#     start += 1000
-#     end = int("{}000".format(j+1)) 
+model_full_intensity = []
+for j in range(1,8):
+    file_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/neid_october_exp_meter_N_50_{}000_KSSD.jld2").format(j), "r")
+    intensity_array = model_flux_exp(file_data)
+    for i, value in enumerate(wavelength):
+        color = cmap(norm(value))
+        normalize_mean = np.mean(intensity_array_end[0][i][200:-1])
+        # ax1.plot(exp_meter_time_csv[start:end], intensity_array[0][i]/normalize_mean, color=color)
+        if i == 1:
+            model_full_intensity.append(intensity_array[0][i]/normalize_mean)
+    start += 1000
+    end = int("{}000".format(j+1)) 
 
 for ind, value in enumerate(wavelength):
     color = cmap(norm(value))
@@ -152,10 +152,10 @@ for ind, value in enumerate(wavelength):
     normalize_mean = np.mean(np.array([item for sublist in neid_full_intensity[ind] for item in sublist])[6200:-1])
 
     for i in range(0, len(exp_meter_time)):
-        # ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5])/normalize_mean, color = color)
+        ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5])/normalize_mean, color = color)
         neid_dic[value].append((exp_meter_flux[i][wav_ind][2:-5])/normalize_mean)
-        # if ind == 1:
-        #     neid_normal_intensity.append((exp_meter_flux[i][wav_ind][2:-5])/normalize_mean)
+        if ind == 1:
+            neid_normal_intensity.append((exp_meter_flux[i][wav_ind][2:-5])/normalize_mean)
 
 # flattened_list_neid = np.array([item for sublist in neid_normal_intensity for item in sublist])
 # flattened_list_model = np.array([item for sublist in model_full_intensity for item in sublist])
@@ -170,36 +170,34 @@ for ind, value in enumerate(wavelength):
 # ----------------------------------------
 # extinction reduced chi square
 
-ext_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/extinction_chi_under1.jld2"), "r")
+# ext_data = h5py.File(("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/Spectrum/Eclipse_Figures/ExposureMeter/data/extinction_chi_near1.jld2"), "r")
 
-extinction_chi_data = ext_data["extinction_chi_data"][()]
+# extinction_chi_data = ext_data["extinction_chi_data"][()]
 
-ext_coeff = np.linspace(0.0, 0.1, 10)
-my_dict = {}
+# ext_coeff = np.linspace(0.09, 0.2, 20)
+# my_dict = {}
 
-for i in range(0, len(extinction_chi_data)):
-    data_wav = ext_data[extinction_chi_data[i]][()]
-    wav_dict = {}
-    for wav in range(0, len(data_wav)):
-        data_time = ext_data[data_wav[wav]][()]
-        inner_dict = {key: [] for key in ext_coeff}
-        for t in range(0,len(data_time)):
-            for ind in range(0, len(ext_coeff)):
-                    inner_dict[ext_coeff[ind]].append(ext_data[data_time[t]][()][ind])
-        wav_dict[wavelength[wav]] = inner_dict
-    my_dict[i] = wav_dict
-with open('Eclipse_Figures/ExposureMeter/data/data_under1.pkl', 'wb') as pickle_file:
-    pickle.dump(my_dict, pickle_file)
+# for i in range(0, len(extinction_chi_data)):
+#     data_wav = ext_data[extinction_chi_data[i]][()]
+#     wav_dict = {}
+#     for wav in range(0, len(data_wav)):
+#         data_time = ext_data[data_wav[wav]][()]
+#         inner_dict = {key: [] for key in ext_coeff}
+#         for t in range(0,len(data_time)):
+#             for ind in range(0, len(ext_coeff)):
+#                     inner_dict[ext_coeff[ind]].append(ext_data[data_time[t]][()][ind])
+#         wav_dict[wavelength[wav]] = inner_dict
+#     my_dict[i] = wav_dict
+# with open('Eclipse_Figures/ExposureMeter/data/data_near1.pkl', 'wb') as pickle_file:
+#     pickle.dump(my_dict, pickle_file)
 
-with open('Eclipse_Figures/ExposureMeter/data/data_under1.pkl', 'rb') as pickle_file:
+with open('Eclipse_Figures/ExposureMeter/data/data_near1.pkl', 'rb') as pickle_file:
     loaded_dict = pickle.load(pickle_file)
 
-flattened_list_neid = np.array([item for sublist in neid_dic[value] for item in sublist])
-
-fig = plt.figure()
-ax1 = fig.add_subplot()
-model_dic = {key: [] for key in np.linspace(0.0, 0.1, 10)}
-for ind in np.linspace(0.0, 0.1, 10):
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+model_dic = {key: [] for key in np.linspace(0.09, 0.2, 20)}
+for ind in np.linspace(0.09, 0.2, 20):
     start = 0
     end = 1000
     wav_dic = {key: [] for key in wavelength}
@@ -207,19 +205,51 @@ for ind in np.linspace(0.0, 0.1, 10):
         for i, value in enumerate(wavelength):
             color = cmap(norm(value))
             normalize_mean = np.mean(loaded_dict[6][value][ind][200:-1])
-            ax1.plot(exp_meter_time_csv[start:end], loaded_dict[j-1][value][ind]/normalize_mean, color=color)
+            # ax1.plot(exp_meter_time_csv[start:end], loaded_dict[j-1][value][ind]/normalize_mean, color=color)
             wav_dic[value].append(loaded_dict[j-1][value][ind]/normalize_mean)
         start += 1000
         end = int("{}000".format(j+1)) 
     model_dic[ind].append(wav_dic)
+# ax1.set_xlabel("hour on 10/14")
+# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+# ax1.set_ylabel("relative flux") 
+# plt.savefig("Eclipse_Figures/ExposureMeter/figures/ext_flux_near1.png")
+# plt.clf()
+
+min_chi = {key: [] for key in wavelength}
+for i, value in enumerate(wavelength):
+    color = cmap(norm(value))
+    min_chi_value = 10
+    flattened_list_neid = np.array([item for sublist in neid_dic[value] for item in sublist])
+    for ind in np.linspace(0.09, 0.2, 20):
+        flattened_list_model = np.array([item for sublist in model_dic[ind][0][value] for item in sublist])
+        chi2_stat = np.sum((flattened_list_neid - flattened_list_model) ** 2 / flattened_list_model)
+        if chi2_stat < min_chi_value:
+            min_ind = ind
+            min_chi_value = chi2_stat
+    min_chi[value] = min_ind
+    model = np.array([item for sublist in model_dic[min_chi[value]][0][value] for item in sublist])
+    ax1.plot(exp_meter_time_csv, model, color = color)
+
+    if i == 1:
+        ax1.text(exp_meter_time_csv[500], .5, "Chi Squared {}".format(round(min_chi_value,2)))
 ax1.set_xlabel("hour on 10/14")
 ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 ax1.set_ylabel("relative flux") 
-plt.savefig("Eclipse_Figures/ExposureMeter/figures/test_under1.png")
+plt.savefig("Eclipse_Figures/ExposureMeter/figures/ext_comp.png")
 plt.clf()
 
-for ind in np.linspace(0.0, 0.1, 10):
-    for i, value in enumerate(wavelength):
-        flattened_list_model = np.array([item for sublist in model_dic[ind][0][value] for item in sublist])
-        chi2_stat = np.sum((flattened_list_neid - flattened_list_model) ** 2 / flattened_list_model)
-        print(ind, value, chi2_stat)
+# Specify the name of the CSV file
+filename = 'NEID_extinction_coefficient.csv'
+
+# Open the file for writing
+with open(filename, 'w', newline='') as file:
+    # Create a CSV writer object
+    writer = csv.writer(file)
+    
+    # Write the header (optional)
+    writer.writerow(['Key', 'Value'])
+    
+    # Write the dictionary items
+    for key, value in min_chi.items():
+        writer.writerow([key, value])
