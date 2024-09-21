@@ -152,7 +152,7 @@ for ind, value in enumerate(wavelength):
     normalize_mean = np.mean(np.array([item for sublist in neid_full_intensity[ind] for item in sublist])[6200:-1])
 
     for i in range(0, len(exp_meter_time)):
-        ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5])/normalize_mean, color = color)
+        # ax1.plot(exp_meter_time[i][2:-5], (exp_meter_flux[i][wav_ind][2:-5])/normalize_mean, color = color)
         neid_dic[value].append((exp_meter_flux[i][wav_ind][2:-5])/normalize_mean)
         if ind == 1:
             neid_normal_intensity.append((exp_meter_flux[i][wav_ind][2:-5])/normalize_mean)
@@ -229,27 +229,28 @@ for i, value in enumerate(wavelength):
             min_chi_value = chi2_stat
     min_chi[value] = min_ind
     model = np.array([item for sublist in model_dic[min_chi[value]][0][value] for item in sublist])
-    ax1.plot(exp_meter_time_csv, model, color = color)
+    ax1.scatter(exp_meter_time_csv, flattened_list_neid - model, color = color, s = 1)
+    # ax1.plot(exp_meter_time_csv, model, color = color)
 
     if i == 1:
         ax1.text(exp_meter_time_csv[500], .5, "Chi Squared {}".format(round(min_chi_value,2)))
 ax1.set_xlabel("hour on 10/14")
 ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 ax1.set_ylabel("relative flux") 
-plt.savefig("Eclipse_Figures/ExposureMeter/figures/ext_comp.png")
+plt.savefig("Eclipse_Figures/ExposureMeter/figures/ext_comp_diff.png")
 plt.clf()
 
-# Specify the name of the CSV file
-filename = 'NEID_extinction_coefficient.csv'
+# # Specify the name of the CSV file
+# filename = 'NEID_extinction_coefficient.csv'
 
-# Open the file for writing
-with open(filename, 'w', newline='') as file:
-    # Create a CSV writer object
-    writer = csv.writer(file)
+# # Open the file for writing
+# with open(filename, 'w', newline='') as file:
+#     # Create a CSV writer object
+#     writer = csv.writer(file)
     
-    # Write the header (optional)
-    writer.writerow(['Key', 'Value'])
+#     # Write the header (optional)
+#     writer.writerow(['Key', 'Value'])
     
-    # Write the dictionary items
-    for key, value in min_chi.items():
-        writer.writerow([key, value])
+#     # Write the dictionary items
+#     for key, value in min_chi.items():
+#         writer.writerow([key, value])

@@ -45,17 +45,17 @@ UTC_time = UTC_time[0:-25]
 
 #read in data with extinction 
 #GRASS
-grass_data_ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_all_lines_rv_regular_KSSD_ext.jld2", "r")
+grass_data_ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_all_lines_rv_regular_KSSD_2_ext.jld2", "r")
 lines_ext  = grass_data_ext["name"][()]
 GRASS_rv_ext   = grass_data_ext["rv"][()]
-grass_data_no_cb_ext  = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_all_lines_rv_off_KSSD_ext.jld2", "r")
+grass_data_no_cb_ext  = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_all_lines_rv_off_KSSD_2_ext.jld2", "r")
 lines_no_cb_ext  = grass_data_no_cb_ext["name"][()]
 GRASS_no_cb_ext   = grass_data_no_cb_ext["rv"][()]
 #model
-file_ext  = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_october_N_50_KSSD_ext.jld2", "r")
+file_ext  = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_october_N_50_KSSD_2_ext.jld2", "r")
 RV_list_no_cb_ext  = file_ext["RV_list_no_cb"][()]
 #line by line data
-line_data_ext  = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_RVlinebyline_KSSD_ext.jld2", "r")
+line_data_ext  = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/src/plots/NEID_October/KSSD/KSSD_ext/data/neid_RVlinebyline_KSSD_2_ext.jld2", "r")
 line_lines_ext  = line_data_ext["name"][()]
 line_rv_ext   = line_data_ext["rv"][()]
 
@@ -126,6 +126,7 @@ plot_diff(GRASS_rv_ext, grass_data_ext, GRASS_rv, grass_data, "GRASS cb (ext - n
 
 plot(GRASS_no_cb, grass_data_no_cb, "GRASS - no cb (no ext)", "grass_no_cb_no_ext.png", wavelength)
 plot(GRASS_no_cb_ext, grass_data_no_cb_ext, "GRASS - no cb (ext)", "grass_no_cb_ext.png", wavelength)
+plot_diff(GRASS_no_cb_ext, grass_data_no_cb_ext, GRASS_no_cb, grass_data_no_cb, "GRASS no cb (ext - no ext)", "grass_no_cb_ext_diff.png", wavelength)
 
 plot(line_rv, line_data, "Line (no ext)", "line_no_ext.png", wavelength)
 plot(line_rv_ext, line_data_ext, "Line (ext)", "line_ext.png", wavelength)

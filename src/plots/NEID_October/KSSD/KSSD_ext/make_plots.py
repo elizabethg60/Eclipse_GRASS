@@ -88,6 +88,8 @@ def plot_line(UTC_time, rv_obs, line_rv_array, model, model_label, GRASS, GRASS_
     plt.clf()
 
 for i in range(0,len(lines)):
+    if i == 5:
+        continue
 
     rv_error_GRASS_cb_array = grass_data[rv_error_GRASS_cb[i]][()][0:-25]
     rv_error_GRASS_no_cb_array = grass_data_no_cb[rv_error_GRASS_no_cb[i]][()][0:-25]
