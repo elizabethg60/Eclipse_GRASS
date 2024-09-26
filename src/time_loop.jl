@@ -111,7 +111,6 @@ function gottingen_loop(lats::T) where T
     computes RV for each timestamp for the gottingen eclipse 
     """
     #convert from utc to et as needed by SPICE
-    #time_stamps = utc2et.(reiners_timestamps)
     time_stamps = utc2et.(reiners_50)
 
     #Gottingen location
@@ -119,15 +118,20 @@ function gottingen_loop(lats::T) where T
     obs_long = 9.944333
     alt = 0.201
 
-    wavelength = 543.4
+    wavelength = 5798.8
 
     RV_list_no_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
     #run compute_rv for each timestamp
+    ext_coeff = 0.4 .- 0.3 .* (time_stamps .- time_stamps[1]) ./ (time_stamps[length(time_stamps)] - time_stamps[1])
+    
+    # work on getting intensity to match again
+
+    print("contrast+newmu+mean")
     for i in 1:length(time_stamps)
-        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength, i)#, ext = true)
+        RV_no_cb, RV_cb, RV_cb_new, intensity = compute_rv(lats, time_stamps[i], obs_long, obs_lat, alt, "optical", wavelength, i, ext_coeff[i], ext = true)
         RV_list_no_cb[i] = RV_no_cb
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
@@ -147,8 +151,8 @@ function gottingen_loop(lats::T) where T
         # intensity_list[i] = mean(intensity_bin)
     end
     
-    @save "src/plots/Reiners/data/model_data.jld2"
-    jldopen("src/plots/Reiners/data/model_data.jld2", "a+") do file
+    @save "src/plots/Reiners/data/model_data_new2.jld2"
+    jldopen("src/plots/Reiners/data/model_data_new2.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new

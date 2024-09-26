@@ -1,8 +1,7 @@
 #Week of 9/23: KEEP UP WITH JOURNAL
-# 1. get reiners intensity to match (revert to old code - check geometry + try no ext w 5434)
+# 1. get reiners intensity to match (revert to old code - check geometry + try no ext w 5434) - rerun with grass
 # 2. answer why reiners RV residuals DN match his (consider if my mu defined differently from reienrs / NL94)
-# 3. ask suvrath if mcmc for LD coefficients still needed - i dont think so (likely geometry now)
-# 4. do boulder october no ext
+# 3. do boulder october no ext
 
 #Other:
 # Eric's intensity sensitive

@@ -73,7 +73,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
     # de_sub_deg_pole = rad2deg.(OP_ra_dec_pole[3])
 
 # set size of subgrid
-    Nsubgrid = 10
+    Nsubgrid = 40
 
 # allocate memory
     dA_total_proj_mean = zeros(length(disk_ϕc), maximum(Nθ))
@@ -141,7 +141,12 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             end
 
         #calculate mu for each patch
-            calc_mu_grid!(SP_bary, OP_bary, mu_grid)
+            calc_mu_grid!(SP_bary, OS_bary, mu_grid)
+            # incl = deg2rad(97.05)
+            # cDincl = cos(incl)
+            # sDincl = sin(incl)
+
+            # mu_grid = map(x -> cDincl*cos(getindex(x,2)-(pi/2)) - sDincl*sin(getindex(x,2)-(pi/2))*cos(getindex(x,1)), subgrid)
             # move on if everything is off the grid
             all(mu_grid .< zero(T)) && continue
             
@@ -191,12 +196,12 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
             
         #determine mean intensity
-            mean_intensity[i,j] = sum(view(LD_all, idx3)) / sum(idx1)
+            mean_intensity[i,j] = mean(view(LD_all, idx3)) #/ sum(idx1)
 
             if ext == true
                 #extinction
                 zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist(x[1:3], EO_bary[1:3]), OP_bary))
-                extin = map(x -> exp(-((1/cosd(x))*neid_ext_coeff)), zenith_angle_matrix)
+                extin = map(x -> 10^(-(((1/cosd(x)) + 0.025*exp(-11*cosd(x)))*neid_ext_coeff)/2.5), zenith_angle_matrix)
                 mean_exti[i,j] = mean(view(extin, idx3)) 
             end
 
@@ -233,7 +238,9 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
     #index for correct lat / lon disk grid
     idx_grid = mean_intensity .> 0.0
 
-    brightness = mean_intensity .* dA_total_proj_mean 
+    contrast = (mean_intensity / NaNMath.maximum(mean_intensity)).^0.1
+
+    brightness = mean_intensity .* dA_total_proj_mean
     if ext == true 
         brightness = brightness .* mean_exti
     end
@@ -243,13 +250,13 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
     final_mean_intensity = cheapflux 
 
     #determine final mean weighted velocity for disk grid
-    final_weight_v_no_cb = sum(view(mean_weight_v_no_cb .* brightness, idx_grid)) / cheapflux 
+    final_weight_v_no_cb = sum(view(mean_weight_v_no_cb .* brightness .* contrast, idx_grid)) / cheapflux 
     final_weight_v_no_cb += mean(view(mean_weight_v_earth_orb, idx_grid)) 
 
-    final_weight_v_cb = sum(view(mean_weight_v_cb .* brightness, idx_grid)) / cheapflux
+    final_weight_v_cb = sum(view(mean_weight_v_cb .* brightness .* contrast, idx_grid)) / cheapflux
     final_weight_v_cb += mean(view(mean_weight_v_earth_orb, idx_grid)) 
 
-    final_weight_v_cb_new = sum(view(mean_weight_v_cb_new .* brightness, idx_grid)) / cheapflux
+    final_weight_v_cb_new = sum(view(mean_weight_v_cb_new .* brightness .* contrast, idx_grid)) / cheapflux
     final_weight_v_cb_new += mean(view(mean_weight_v_earth_orb, idx_grid)) 
     
     return final_weight_v_no_cb, final_weight_v_cb, final_weight_v_cb_new, final_mean_intensity

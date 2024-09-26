@@ -22,10 +22,10 @@ GRASS_no_cb = [5.645192702071402, 6.881145953508354, 10.542522618337022, 11.4324
 
 #read in data
 #model
-file = h5py.File("data/model_data.jld2", "r")
+file = h5py.File("data/model_data_new.jld2", "r")
 RV_list_no_cb = file["RV_list_no_cb"][()] 
-# RV_list_cb  = file["RV_list_cb"][()]
-# intensity_list = file["intensity_list"][()]
+RV_list_cb  = file["RV_list_cb"][()]
+intensity_list = file["intensity_list"][()]
 
 #data 
 f=open("data/Reiners_Data.txt","r")
@@ -78,8 +78,8 @@ GRASS_no_cb -= GRASS_no_cb[-1]
 RV_list_no_cb_array = np.array(RV_list_no_cb) 
 RV_list_no_cb_array -= RV_list_no_cb[-1]
 
-# RV_list_cb = np.array(RV_list_cb)
-# RV_list_cb -= RV_list_cb[-1]
+RV_list_cb = np.array(RV_list_cb)
+RV_list_cb -= RV_list_cb[-1]
 
 def jld2_read(jld2_file, variable, index):
     array = jld2_file[variable[index]][()]
@@ -98,59 +98,59 @@ corrected_rv = list((raw_rv[0:46]) - linear_correction) + list(raw_rv[46:,])
 fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
 axs[0].scatter(UTC_time, corrected_rv, color = 'k', marker = "x", s = 15, label = "Reiners RVs")
 axs[0].plot(UTC_time, RV_list_no_cb_array, color = 'r', label = "Weighted RVs - No CB")
-axs[0].plot(UTC_time, GRASS_no_cb, color = 'b', linewidth = 2, label = "Line RVs - No CB")
+# axs[0].plot(UTC_time, GRASS_no_cb, color = 'b', linewidth = 2, label = "Line RVs - No CB")
 axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 rms_model_no_cb = round(np.sqrt((np.nansum((corrected_rv - RV_list_no_cb_array)**2))/len(corrected_rv - RV_list_no_cb_array)),2)
 axs[0].text(UTC_time[-55], -400, "Weighted RVs - No CB RMS {}".format(rms_model_no_cb))
-rms_grass_no_cb = round(np.sqrt((np.nansum((corrected_rv  - GRASS_no_cb )**2))/len(corrected_rv  - GRASS_no_cb)),2)
-axs[0].text(UTC_time[-55], -500, "Line RVs - No CB RMS {}".format(rms_grass_no_cb))
+# rms_grass_no_cb = round(np.sqrt((np.nansum((corrected_rv  - GRASS_no_cb )**2))/len(corrected_rv  - GRASS_no_cb)),2)
+# axs[0].text(UTC_time[-55], -500, "Line RVs - No CB RMS {}".format(rms_grass_no_cb))
 axs[0].set_xlabel("Time (UTC)")
 axs[0].set_ylabel("RV [m/s]")
 axs[0].legend()
 #residuals
 axs[1].scatter(UTC_time, corrected_rv - RV_list_no_cb_array, color = 'r', marker = "x", s = 1)
 axs[1].scatter(time_residuals_new1, residual_new1, color = 'k', marker = "x", s = 1)
-axs[1].scatter(UTC_time, corrected_rv - GRASS_no_cb, color = 'b', marker = "x", s = 3) 
+# axs[1].scatter(UTC_time, corrected_rv - GRASS_no_cb, color = 'b', marker = "x", s = 3) 
 axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 axs[1].set_xlabel("Time (UTC)")
 axs[1].set_ylabel("Residuals")
-plt.savefig("rm_and_residuals_no_cb_old.png")
+plt.savefig("rm_and_residuals_no_cb_new.png")
 plt.show()
 
 #rm curve
 fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
 axs[0].scatter(UTC_time, corrected_rv, color = 'k', marker = "x", s = 15, label = "Reiners RVs")
-# axs[0].plot(UTC_time, RV_list_cb, color = 'r', label = "Weighted RVs - CB")
-axs[0].plot(UTC_time, GRASS_rv, color = 'b', linewidth = 2, label = "GRASS")
+axs[0].plot(UTC_time, RV_list_cb, color = 'r', label = "Weighted RVs - CB")
+# axs[0].plot(UTC_time, GRASS_rv, color = 'b', linewidth = 2, label = "GRASS")
 axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# rms_model_no_cb = round(np.sqrt((np.nansum((corrected_rv - RV_list_cb)**2))/len(corrected_rv - RV_list_cb)),2)
-# axs[0].text(UTC_time[-55], -400, "Weighted RVs - CB RMS {}".format(rms_model_no_cb))
-rms_grass_no_cb = round(np.sqrt((np.nansum((corrected_rv - GRASS_rv)**2))/len(corrected_rv - GRASS_rv)),2)
-axs[0].text(UTC_time[-55], -500, "GRASS RMS {}".format(rms_grass_no_cb))
+rms_model_no_cb = round(np.sqrt((np.nansum((corrected_rv - RV_list_cb)**2))/len(corrected_rv - RV_list_cb)),2)
+axs[0].text(UTC_time[-55], -400, "Weighted RVs - CB RMS {}".format(rms_model_no_cb))
+# rms_grass_no_cb = round(np.sqrt((np.nansum((corrected_rv - GRASS_rv)**2))/len(corrected_rv - GRASS_rv)),2)
+# axs[0].text(UTC_time[-55], -500, "GRASS RMS {}".format(rms_grass_no_cb))
 axs[0].set_xlabel("Time (UTC)")
 axs[0].set_ylabel("RV [m/s]")
 axs[0].legend()
 #residuals       
-# axs[1].scatter(UTC_time, corrected_rv - RV_list_cb, color = 'r', marker = "x", s = 1)
+axs[1].scatter(UTC_time, corrected_rv - RV_list_cb, color = 'r', marker = "x", s = 1)
 axs[1].scatter(time_residuals_model2, residual_model2, color = 'k', marker = "x", s = 1)
-axs[1].scatter(UTC_time, corrected_rv - GRASS_rv, color = 'b', marker = "x", s = 3)
+# axs[1].scatter(UTC_time, corrected_rv - GRASS_rv, color = 'b', marker = "x", s = 3)
 axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 axs[1].set_xlabel("Time (UTC)")
 axs[1].set_ylabel("Residuals")
-plt.savefig("rm_and_residuals_cb_old.png")
+plt.savefig("rm_and_residuals_cb_new.png")
 plt.show()
 
-# #intensity
-# fig = plt.figure()
-# ax1 = fig.add_subplot()
-# ax1.plot(UTC_time, intensity_list_array/max(intensity_list_array), color = 'r', label = "model")
-# ax1.scatter(time_flux_model1, flux_model1, color = 'k', label = "Reiners")
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-# ax1.set_xlabel("Time (UTC)")
-# ax1.set_ylabel("Relative Intensity")
-# plt.legend()
-# plt.savefig("intensity_new.png")
-# plt.show()
+#intensity
+fig = plt.figure()
+ax1 = fig.add_subplot()
+ax1.plot(UTC_time, intensity_list/max(intensity_list), color = 'r', label = "model")
+ax1.scatter(time_flux_model1, flux_model1, color = 'k', label = "Reiners")
+ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+ax1.set_xlabel("Time (UTC)")
+ax1.set_ylabel("Relative Intensity")
+plt.legend()
+plt.savefig("intensity_new.png")
+plt.show()
 
 # #barycentric correction test: Sun center vs surface
 # vb, warnings, flag = get_BC_vel(JDUTC=time_julian, lat=51.560583 , longi=9.944333, alt=201, SolSystemTarget='Sun', predictive=False,zmeas=0.0)

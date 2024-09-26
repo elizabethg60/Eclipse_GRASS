@@ -54,10 +54,12 @@ end
 
 function calc_mu(SP::AbstractArray{T,1}, OP::AbstractArray{T,1}) where T
     #determine mu value for each cell
-    return dot(OP, SP) / (norm(OP) * norm(SP))
+    initial_angle = acos(dot(OP, SP) / (norm(OP) * norm(SP)))
+    return cos(pi - initial_angle)
+    #dot(OP, SP) / (norm(OP) * norm(SP))
 end
 
-function calc_mu_grid!(A::Matrix, B::Matrix, out::Matrix)
+function calc_mu_grid!(A::Matrix, B, out::Matrix)
     """
     create matrix of mu values for each cell - serial
 
@@ -66,7 +68,7 @@ function calc_mu_grid!(A::Matrix, B::Matrix, out::Matrix)
     out: mu value between A and B
     """
     for i in eachindex(A)
-        out[i] = calc_mu(view(A[i], 1:3), view(B[i], 1:3))
+        out[i] = calc_mu(view(A[i], 1:3), view(B, 1:3))
         end
     return
 end
