@@ -1,5 +1,5 @@
 # using PyPlot; plt=PyPlot
-function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, index, neid_ext_coeff; ext::Bool = false, moon_r::Float64=moon_radius) where T 
+function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, wavelength, index, neid_ext_coeff; ext::Bool = false, moon_r::Float64=moon_radius) where T 
     """
     compute rv for a given grid size and timestamp  
     
@@ -73,7 +73,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
     # de_sub_deg_pole = rad2deg.(OP_ra_dec_pole[3])
 
 # set size of subgrid
-    Nsubgrid = 40
+    Nsubgrid = 10
 
 # allocate memory
     dA_total_proj_mean = zeros(length(disk_ϕc), maximum(Nθ))
@@ -103,6 +103,7 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
 
     # #set up plot
     # fig, ax1 = plt.subplots()
+    # quad_ld_coeff_HD = CSV.read("/storage/home/efg5335/work/GRASS/data/quad_ld_coeff_HD.csv", DataFrame)
 
 # loop over sub-tiles
     for i in eachindex(disk_ϕc)
@@ -141,12 +142,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             end
 
         #calculate mu for each patch
-            calc_mu_grid!(SP_bary, OS_bary, mu_grid)
-            # incl = deg2rad(97.05)
-            # cDincl = cos(incl)
-            # sDincl = sin(incl)
+            calc_mu_grid!(SP_bary, OP_bary, mu_grid)
 
-            # mu_grid = map(x -> cDincl*cos(getindex(x,2)-(pi/2)) - sDincl*sin(getindex(x,2)-(pi/2))*cos(getindex(x,1)), subgrid)
             # move on if everything is off the grid
             all(mu_grid .< zero(T)) && continue
             
@@ -179,13 +176,9 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             idx3 = (idx1) .& (distance .> atan((moon_r)/norm(OM_bary[1:3]))) 
 
         #calculate limb darkening weight for each patch
-            if band == "NIR"
-                LD_all = map(x -> quad_limb_darkening_NIR(x), mu_grid)
-            end
-            
-            if band == "optical"
-                LD_all = map(x -> quad_limb_darkening_optical(x, wavelength / 10.0), mu_grid)
-            end
+        #     filtered_df = quad_ld_coeff_HD[quad_ld_coeff_HD.wavelength .== wavelength, :]
+        #     LD_all = map(x -> quad_limb_darkening(x, filtered_df.u1[1], filtered_df.u2[1]), mu_grid)
+            LD_all = map(x -> quad_limb_darkening_optical(x, wavelength / 10.0), mu_grid)
 
         #calculating the area element dA for each tile
             dϕ = step(ϕe_sub) 
@@ -196,12 +189,12 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             dA_total_proj_mean[i,j] = sum(view(dA_total_proj, idx1))
             
         #determine mean intensity
-            mean_intensity[i,j] = mean(view(LD_all, idx3)) #/ sum(idx1)
+            mean_intensity[i,j] = mean(view(LD_all, idx3))
 
             if ext == true
                 #extinction
                 zenith_angle_matrix = rad2deg.(map(x -> calc_proj_dist(x[1:3], EO_bary[1:3]), OP_bary))
-                extin = map(x -> 10^(-(((1/cosd(x)) + 0.025*exp(-11*cosd(x)))*neid_ext_coeff)/2.5), zenith_angle_matrix)
+                extin = map(x -> exp(-(((1/cosd(x)))*neid_ext_coeff)), zenith_angle_matrix)
                 mean_exti[i,j] = mean(view(extin, idx3)) 
             end
 
@@ -211,12 +204,6 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             mean_weight_v_cb_new[i,j] = mean(view(projected_velocities_cb_new, idx3)) 
             mean_weight_v_earth_orb[i,j] = mean(view(v_earth_orb_proj, idx3))
 
-            # for i in 1:length(idx3)
-            #     if idx3[i] == false
-            #         projected_velocities_no_cb[i] = NaN
-            #     end
-            # end
-
             # OP_ra_dec_sub = SPICE.recrad.([x[1:3] for x in OP_bary])
             # ra_sub = getindex.(OP_ra_dec_sub, 2)
             # de_sub = getindex.(OP_ra_dec_sub, 3)
@@ -224,8 +211,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
             # de_sub_deg = rad2deg.(de_sub)
 
             # ax1.pcolormesh(ra_sub_deg, de_sub_deg, projected_velocities_no_cb, cmap="seismic", vmin=-2000, vmax=2000, rasterized=true)
-            # ax1.scatter(ra_sub_deg_pole, de_sub_deg_pole)
-            # ax1.pcolormesh(ra_sub_deg, de_sub_deg, mu_grid, vmin=0.0, vmax=1.0, rasterized=true)
+            # ax1.scatter(ra_sub_deg_pole, de_sub_deg_pole, color = "k")
+            # ax1.pcolormesh(ra_sub_deg, de_sub_deg, LD_all, vmin=0.0, vmax=1.0, rasterized=true)
             # ax1.pcolormesh(ra_sub_deg, de_sub_deg, dA_total_proj, vmin=0.1e7, vmax=1e7, rasterized=true)
         end
     end
@@ -233,7 +220,8 @@ function compute_rv(lats::T, epoch, obs_long, obs_lat, alt, band, wavelength, in
     # ax1.set_xlabel("RA (decimal degrees)")
     # ax1.set_ylabel("DEC (decimal degrees)")
     # ax1.set_aspect("equal")
-    # #fig.savefig("src/plots/NEID/movie/$index.png", dpi=250)
+    # ax1.set_title("LHR - 1565.2 nm")
+    # fig.savefig("figures/LHR_proposal/$index.png", dpi=250)
 
     #index for correct lat / lon disk grid
     idx_grid = mean_intensity .> 0.0
