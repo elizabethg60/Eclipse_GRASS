@@ -1,26 +1,10 @@
-#add rms of all lines and get that rms (1 m/s)
-#variability on vs off in grass
-#check line by line rv 
-#quantify photon noise of lines 
-
-#weighted rms by rms or photon noise (error on line by line ccf) if it drops then limit is astrophysical or model
-#look into line shape for blends / depth like eric said 
-#eric's paper complex extinction model with linear weight to z function (Eric’s extinction + compare coef values reasonably match)
-#Do for line by line rv - remove eclipse with model then do binning for entire eclipse time + do for multiple days 
-
-#Other:
-# do boulder october no ext
-# Eric's intensity sensitive
-# Eric's coverage area weighting
-# same intensity pipeline on a different day
-
+#Future: Eric's complex extinction model 
 #Future: Boulder pattern sensitivity + ?  projected rv with NO cb wins out GRASS for some lines  - follow up ?
 #future: calculate gravitational redshift of sun and a white dwarf + sensitivity test of LD + extinction coefficient
     # time weighting: 1. rerun (just my model for a single line) with (1) weighted flux midpoint and (2) 5 sec cadence - future analysis done with the best one
                     # 2. run with BEST timing option (N = 50 and subset = 10) for all lines (my model + GRASS) overnight (if not regular midpoint)
     # full resolution: 1. submit jobs to run updated code at full resolution for a single line (by then should have decided if 197 ok if 300 better)
                      # 2. submit jobs to run updated code at N = 197 and subgrid = 80 for a single line
-    # extinction: try slope method again but with two different laws where extinction clearly changes slope
 #plan b: consider how to validate model is correct in orientation / time, consider Reiners newer CB model, consider NEID SPF not a gaussian 
 #barycentric correction is flux weighted by the counts-per-second recorded using exposure meter
 

@@ -79,5 +79,5 @@ for i in range(0,len(LD_arr)):
     RV_list_no_cb_array = jld2_read(projected_no_cb, RV_list_no_cb, vb[47:-20], i)
 
     #rm curve 
-    plot_line(time_stamps_data, rv_obs, RV_list_no_cb_array, "Weighted RVs - No CB", GRASS_no_cb_array, "Line RVs - No Var", LD_arr[i], "no_granulation_proposal", rv_error_GRASS_no_cb_array)
-    plot_line(time_stamps_data, rv_obs, 'RV_list_no_cb_array', "Weighted RVs - No CB", GRASS_rv_array, "Line RVs - Var", LD_arr[i], "granulation", rv_error_GRASS_cb_array)
+    plot_line(time_stamps_data, rv_obs, RV_list_no_cb_array, "Weighted RVs - No CB", GRASS_no_cb_array, "Line RVs - No Var", LD_arr[i], "no_granulation", rv_error_GRASS_no_cb_array)
+    # plot_line(time_stamps_data, rv_obs, 'RV_list_no_cb_array', "Weighted RVs - No CB", GRASS_rv_array, "Line RVs - Var", LD_arr[i], "granulation", rv_error_GRASS_cb_array)
