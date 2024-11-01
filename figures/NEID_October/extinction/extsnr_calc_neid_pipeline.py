@@ -288,46 +288,46 @@ intensity_list_no_ext, intensity_array_no_ext = model_flux(file_data_no_ext)
 file_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/KSSD/KSSD_3ext/data/neid_october_N_50_KSSD_3ext.jld2", "r")
 intensity_list, intensity_array = model_flux_3_ext(file_data)
 
-fig = plt.figure()
-ax1 = fig.add_subplot()
-for i, value in enumerate(wavelength):
-    data_no_clouds = df[wavelength[i]][0:-20]
-    data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
-    color = cmap(norm(value))
-    ax1.plot(np.delete(df['airmass'][0:-20],46), np.delete(data/(intensity_array[0][i]), 46), color=color)
-ax1.set_xlabel("airmass")
-ax1.set_ylabel("relative flux/intensity") 
-plt.savefig("figures/KSSD_ext/coeff_eclipse.png")
-plt.clf()
+# fig = plt.figure()
+# ax1 = fig.add_subplot()
+# for i, value in enumerate(wavelength):
+#     data_no_clouds = df[wavelength[i]][0:-20]
+#     data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
+#     color = cmap(norm(value))
+#     ax1.plot(np.delete(df['airmass'][0:-20],46), np.delete(data/(intensity_array[0][i]), 46), color=color)
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("relative flux/intensity") 
+# plt.savefig("figures/Ext/coeff_eclipse.png")
+# plt.clf()
 
-fig = plt.figure()
-ax1 = fig.add_subplot()  
-for i, value in enumerate(wavelength):
-    data_no_clouds = df[wavelength[i]][0:-20]
-    data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
-    color = cmap(norm(value))
-    ax1.scatter(np.delete(df['airmass'][0:-20],46), np.delete(intensity_array[0][i],46), label = wavelength[i], color=color, s = 1)
-    ax1.plot(np.delete(df['airmass'][0:-20],46), np.delete(data, 46), color=color)
-data_no_clouds = df[wavelength[0]][0:-20]
-data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
-rms = round(np.sqrt((np.nansum(np.delete(data - intensity_array[0][i],46)**2))/len((np.delete(data,46)))),4)
-ax1.text(np.array(df['airmass'])[-10], 0.5, "{} RMS {}".format(wavelength[1], rms))    
-ax1.set_xlabel("airmass")
-ax1.set_ylabel("relative flux") 
-plt.savefig("figures/KSSD_ext/flux_comp.png")
-plt.clf()
+# fig = plt.figure()
+# ax1 = fig.add_subplot()  
+# for i, value in enumerate(wavelength):
+#     data_no_clouds = df[wavelength[i]][0:-20]
+#     data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
+#     color = cmap(norm(value))
+#     ax1.scatter(np.delete(df['airmass'][0:-20],46), np.delete(intensity_array[0][i],46), label = wavelength[i], color=color, s = 1)
+#     ax1.plot(np.delete(df['airmass'][0:-20],46), np.delete(data, 46), color=color)
+# data_no_clouds = df[wavelength[0]][0:-20]
+# data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
+# rms = round(np.sqrt((np.nansum(np.delete(data - intensity_array[0][i],46)**2))/len((np.delete(data,46)))),4)
+# ax1.text(np.array(df['airmass'])[-10], 0.5, "{} RMS {}".format(wavelength[1], rms))    
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("relative flux") 
+# plt.savefig("figures/Ext/flux_comp.png")
+# plt.clf()
 
-fig = plt.figure()
-ax1 = fig.add_subplot()  
-for i, value in enumerate(wavelength):
-    data_no_clouds = df[wavelength[i]][0:-20]
-    data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
-    color = cmap(norm(value))
-    ax1.scatter(np.delete(df['airmass'][0:-20],46), np.delete(data - intensity_array[0][i],46), label = wavelength[i], color=color, s = 1)  
-ax1.set_xlabel("airmass")
-ax1.set_ylabel("relative flux") 
-plt.savefig("figures/KSSD_ext/flux_comp_diff.png")
-plt.clf()
+# fig = plt.figure()
+# ax1 = fig.add_subplot()  
+# for i, value in enumerate(wavelength):
+#     data_no_clouds = df[wavelength[i]][0:-20]
+#     data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
+#     color = cmap(norm(value))
+#     ax1.scatter(np.delete(df['airmass'][0:-20],46), np.delete(data - intensity_array[0][i],46), label = wavelength[i], color=color, s = 1)  
+# ax1.set_xlabel("airmass")
+# ax1.set_ylabel("relative flux") 
+# plt.savefig("figures/Ext/flux_comp_diff.png")
+# plt.clf()
 
 #----------------------------------------
 
@@ -371,3 +371,19 @@ plt.clf()
 #         # plt.imshow(sciflux, aspect='auto', vmin=-10, vmax=10)
 #         # plt.colorbar()
 #         # plt.savefig('flux.png')
+
+fig, axs = plt.subplots(1, 2, sharex=False, sharey=True, figsize=(10, 5))
+for i, value in enumerate(wavelength):
+    color = cmap(norm(value))
+    data_no_clouds = df[wavelength[i]][0:-20]
+    data = data_no_clouds / np.mean(data_no_clouds[115:len(data_no_clouds)])
+    axs[0].plot(np.delete(df['airmass'][0:-20],46), np.delete(data, 46), color=color)
+    axs[0].scatter(df['airmass'], file_data_no_ext[intensity_list_no_ext[i]][()]/max(file_data_no_ext[intensity_list_no_ext[i]][()]), label = wavelength[i], color=color, s = 1)
+    axs[1].plot(np.delete(df['airmass'][0:-20],46), np.delete(data, 46), color=color)
+    axs[1].scatter(np.delete(df['airmass'][0:-20],[45,46]), np.delete(intensity_array[0][i],[45,46]), label = wavelength[i], color=color, s = 1)
+axs[0].set_xlabel("Airmass")
+axs[0].set_ylabel("Relative Intenstiy")
+axs[1].set_xlabel("Airmass")
+axs[0].set_title('SSD Limb Darkening Only')
+axs[1].set_title('SSD Limb Darkening + Extinction')
+plt.savefig("2nd_yr_project.pdf")

@@ -70,14 +70,24 @@ line_rv = line_data["rv"][()]
 line_rv_err = line_data["rv_error"][()]
 
 #K300
-file_regular_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/data/neid_october_N_50_K300.jld2", "r")
+file_regular_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/K300/data/neid_october_N_50_K300.jld2", "r")
 RV_list_no_cb_300 = file_regular_300["RV_list_no_cb"][()]
 #GRASS CB
-grass_data_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/data/neid_all_lines_rv_regular_K300.jld2", "r")
+grass_data_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/K300/data/neid_all_lines_rv_regular_K300.jld2", "r")
 GRASS_rv_300  = grass_data_300["rv"][()]
 #GRASS no CB
-grass_data_no_cb_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/data/neid_all_lines_rv_off_K300.jld2", "r")
+grass_data_no_cb_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/K300/data/neid_all_lines_rv_off_K300.jld2", "r")
 GRASS_no_cb_v_300  = grass_data_no_cb_300["rv"][()]
+
+#K300 + 3ext
+file_regular_300_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/K300_3ext/data/neid_october_N_50_K300_3ext.jld2", "r")
+RV_list_no_cb_300_3ext = file_regular_300_3ext["RV_list_no_cb"][()]
+#GRASS CB
+grass_data_300_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/K300_3ext/data/neid_all_lines_rv_regular_K300_3ext.jld2", "r")
+GRASS_rv_300_3ext  = grass_data_300_3ext["rv"][()]
+#GRASS no CB
+grass_data_no_cb_300_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/K300_3ext/data/neid_all_lines_rv_off_K300_3ext.jld2", "r")
+GRASS_no_cb_v_300_3ext  = grass_data_no_cb_300_3ext["rv"][()]
 
 #KSSD
 #projected rv model - regular
@@ -429,9 +439,18 @@ plot_4_4(GRASS_rv_NL94, GRASS_rv_KSSD, GRASS_rv_HD, GRASS_rv_300, rv_error_GRASS
 plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "KSSD_comp/KSSD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 plot_3(RV_list_no_cb_SSD_3ext, GRASS_rv_KSSD_3ext, GRASS_no_cb_v_KSSD_3ext, rv_error_GRASS_cb_3ext, file_regular_SSD_3ext, grass_data_KSSD_3ext, grass_data_no_cb_KSSD_3ext, "KSSD_comp/KSSD_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 plot_2_2(GRASS_rv_KSSD, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_KSSD, grass_data_KSSD_3ext, "KSSD_comp/grass_cb_vs_ext", line_data, line_rv, "SSD", "SSD+3ext")
-
 plot_bin(GRASS_rv_KSSD, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_KSSD, grass_data_KSSD_3ext, "KSSD_comp/grass_cb_vs_ext_binned", line_data, line_rv, "SSD", "SSD+3ext")
+plot_single_rms(line_data, line_rv, file_regular_SSD, RV_list_no_cb_SSD, grass_data_KSSD, GRASS_rv_KSSD, grass_data_no_cb_KSSD, GRASS_no_cb_v_KSSD,
+                file_regular_SSD_3ext, RV_list_no_cb_SSD_3ext, grass_data_KSSD_3ext, GRASS_rv_KSSD_3ext, grass_data_no_cb_KSSD_3ext, GRASS_no_cb_v_KSSD_3ext,
+                "KSSD_comp/single_rms")
 
-# plot_single_rms(line_data, line_rv, file_regular_SSD, RV_list_no_cb_SSD, grass_data_KSSD, GRASS_rv_KSSD, grass_data_no_cb_KSSD, GRASS_no_cb_v_KSSD,
-#                 file_regular_SSD_3ext, RV_list_no_cb_SSD_3ext, grass_data_KSSD_3ext, GRASS_rv_KSSD_3ext, grass_data_no_cb_KSSD_3ext, GRASS_no_cb_v_KSSD_3ext,
-#                 "KSSD_comp/single_rms")
+plot_3(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, rv_error_GRASS_cb, file_regular_300, grass_data_300, grass_data_no_cb_300, "K300_comp/K300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+plot_3(RV_list_no_cb_300_3ext, GRASS_rv_300_3ext, GRASS_no_cb_v_300_3ext, rv_error_GRASS_cb_3ext, file_regular_300_3ext, grass_data_300_3ext, grass_data_no_cb_300_3ext, "K300_comp/K300_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+plot_2_2(GRASS_rv_300, GRASS_rv_300_3ext, rv_error_GRASS_cb, grass_data_300, grass_data_300_3ext, "K300_comp/grass_cb_vs_ext", line_data, line_rv, "300", "300+3ext")
+plot_bin(GRASS_rv_300, GRASS_rv_300_3ext, rv_error_GRASS_cb, grass_data_300, grass_data_300_3ext, "K300_comp/grass_cb_vs_ext_binned", line_data, line_rv, "300", "300+3ext")
+plot_single_rms(line_data, line_rv, file_regular_300, RV_list_no_cb_300, grass_data_300, GRASS_rv_300, grass_data_no_cb_300, GRASS_no_cb_v_300,
+                file_regular_300_3ext, RV_list_no_cb_300_3ext, grass_data_300_3ext, GRASS_rv_300_3ext, grass_data_no_cb_300_3ext, GRASS_no_cb_v_300_3ext,
+                "K300_comp/single_rms")
+
+plot_2_2(GRASS_rv_300, GRASS_rv_KSSD, rv_error_GRASS_cb, grass_data_300, grass_data_KSSD, "LD_comp/no_ext_comp", line_data, line_rv, "300", "SSD")
+plot_2_2(GRASS_rv_300_3ext, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_300_3ext, grass_data_KSSD_3ext, "LD_comp/ext_comp", line_data, line_rv, "300+3ext", "SSD+3ext")

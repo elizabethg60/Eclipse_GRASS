@@ -14,16 +14,16 @@ from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 #read in data
 #GRASS
-grass_data = h5py.File("data/neid_all_lines_rv_regular_KSSD.jld2", "r")
+grass_data = h5py.File("data/neid_all_lines_rv_regular_K300_3ext.jld2", "r")
 lines = grass_data["name"][()]
 GRASS_rv  = grass_data["rv"][()]
 rv_error_GRASS_cb  = grass_data["rv_error"][()]
-grass_data_no_cb = h5py.File("data/neid_all_lines_rv_off_KSSD.jld2", "r")
+grass_data_no_cb = h5py.File("data/neid_all_lines_rv_off_K300_3ext.jld2", "r")
 lines_no_cb = grass_data_no_cb["name"][()]
 GRASS_no_cb  = grass_data_no_cb["rv"][()]
 rv_error_GRASS_no_cb = grass_data_no_cb["rv_error"][()]
 #model
-file = h5py.File("data/neid_october_N_50_KSSD.jld2", "r")
+file = h5py.File("data/neid_october_N_50_K300_3ext.jld2", "r")
 RV_list_no_cb = file["RV_list_no_cb"][()]
 
 #data 
@@ -37,6 +37,7 @@ for i in data["obsdate"][15:-150]:
     time_julian.append((Time(dt)).jd)
 #line by line data
 line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline.jld2", "r")
+line_lines = line_data["name"][()]
 line_rv  = line_data["rv"][()]
 rv_error_line = line_data["rv_error"][()]
 
@@ -120,7 +121,7 @@ for i in range(0,len(lines)):
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    plt.savefig("rm_and_residuals_{}_new.png".format(lines_no_cb[i]))
+    plt.savefig("No_Granulation/rm_and_residuals_{}.png".format(lines_no_cb[i]))
     plt.clf()
 
     #rm curve w granulation 
