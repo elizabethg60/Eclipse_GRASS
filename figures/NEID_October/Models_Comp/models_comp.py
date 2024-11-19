@@ -41,17 +41,23 @@ data = pd.read_csv("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_Octobe
 time_julian = []
 UTC_time = []
 for i in data["obsdate"][15:-150]:
-    dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S") + timedelta(seconds=27.5)
+    dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S")
     UTC_time.append(dt)
-    #UTC_time.append((datetime.strptime(i, "%Y-%m-%d %H:%M:%S") + timedelta(seconds=27.5)).strftime("%Y-%m-%dT%H:%M:%S:%f"))
+    # UTC_time.append((datetime.strptime(i, "%Y-%m-%d %H:%M:%S") + timedelta(seconds=27.5)).strftime("%Y-%m-%dT%H:%M:%S:%f"))
     time_julian.append((Time(dt)).jd)
 vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-25], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
 rv_obs = list(data["ccfrvmod"][15:-150]*1000 + 644.9)[0:-25]
 
+# neid_1015 = ["2023-10-15T16:33:02.500", "2023-10-15T16:34:25.500", "2023-10-15T16:35:48.500", "2023-10-15T16:37:10.500", "2023-10-15T16:38:33.500", "2023-10-15T16:39:56.500", "2023-10-15T16:41:18.500", "2023-10-15T16:42:41.500", "2023-10-15T16:44:04.500", "2023-10-15T16:45:26.500", "2023-10-15T16:46:49.500", "2023-10-15T16:48:12.500", "2023-10-15T16:49:34.500", "2023-10-15T16:50:57.500", "2023-10-15T16:52:20.500", "2023-10-15T16:53:42.500", "2023-10-15T16:55:05.500", "2023-10-15T16:56:28.500", "2023-10-15T16:57:50.500", "2023-10-15T16:59:13.500", "2023-10-15T17:00:36.500", "2023-10-15T17:01:59.500", "2023-10-15T17:03:21.500", "2023-10-15T17:04:44.500", "2023-10-15T17:06:07.500", "2023-10-15T17:07:29.500", "2023-10-15T17:08:52.500", "2023-10-15T17:10:15.500", "2023-10-15T17:11:37.500", "2023-10-15T17:13:00.500", "2023-10-15T17:14:23.500", "2023-10-15T17:15:45.500", "2023-10-15T17:17:08.500", "2023-10-15T17:18:31.500", "2023-10-15T17:19:53.500", "2023-10-15T17:21:16.500", "2023-10-15T17:22:39.500", "2023-10-15T17:24:01.500", "2023-10-15T17:25:24.500", "2023-10-15T17:26:47.500", "2023-10-15T17:28:09.500", "2023-10-15T17:29:32.500", "2023-10-15T17:30:55.500", "2023-10-15T17:32:18.500", "2023-10-15T17:33:40.500", "2023-10-15T17:35:03.500", "2023-10-15T17:36:26.500", "2023-10-15T17:37:48.500", "2023-10-15T17:39:11.500", "2023-10-15T17:40:34.500", "2023-10-15T17:41:56.500", "2023-10-15T17:43:19.500", "2023-10-15T17:44:42.500", "2023-10-15T17:46:04.500", "2023-10-15T17:47:27.500", "2023-10-15T17:48:50.500", "2023-10-15T17:50:12.500", "2023-10-15T17:51:35.500", "2023-10-15T17:52:58.500", "2023-10-15T17:54:20.500", "2023-10-15T17:57:10.500", "2023-10-15T17:58:33.500", "2023-10-15T17:59:55.500", "2023-10-15T18:01:18.500", "2023-10-15T18:02:41.500", "2023-10-15T18:04:03.500", "2023-10-15T18:05:26.500", "2023-10-15T18:06:49.500", "2023-10-15T18:08:11.500", "2023-10-15T18:09:34.500", "2023-10-15T18:10:57.500", "2023-10-15T18:12:19.500", "2023-10-15T18:13:42.500", "2023-10-15T18:15:05.500", "2023-10-15T18:16:27.500", "2023-10-15T18:17:50.500", "2023-10-15T18:19:13.500", "2023-10-15T18:20:35.500", "2023-10-15T18:21:58.500", "2023-10-15T18:23:21.500", "2023-10-15T18:24:44.500", "2023-10-15T18:26:06.500", "2023-10-15T18:27:29.500", "2023-10-15T18:28:52.500", "2023-10-15T18:30:14.500", "2023-10-15T18:31:37.500", "2023-10-15T18:33:00.500", "2023-10-15T18:34:22.500", "2023-10-15T18:35:45.500", "2023-10-15T18:37:08.500", "2023-10-15T18:38:30.500", "2023-10-15T18:39:53.500", "2023-10-15T18:41:16.500", "2023-10-15T18:42:38.500", "2023-10-15T18:44:01.500", "2023-10-15T18:45:24.500", "2023-10-15T18:46:46.500", "2023-10-15T18:48:09.500", "2023-10-15T18:49:32.500", "2023-10-15T18:50:54.500", "2023-10-15T18:52:17.500", "2023-10-15T18:53:40.500", "2023-10-15T18:55:03.500", "2023-10-15T18:56:25.500", "2023-10-15T18:57:48.500", "2023-10-15T18:59:11.500", "2023-10-15T19:00:33.500", "2023-10-15T19:01:56.500", "2023-10-15T19:03:19.500", "2023-10-15T19:04:41.500", "2023-10-15T19:06:04.500"]
+# time_julian = []
+# for i in neid_1015:
+#     dt = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+#     time_julian.append((Time(dt)).jd)
+# vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-25], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
+
 df = pd.read_csv("/storage/home/efg5335/work/GRASS/data/optimized_depth.csv")
 df = df.drop(10)
 df = df.reset_index(drop=True)
-
 
 #NL94
 #projected rv model - regular
@@ -68,6 +74,12 @@ line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_Oct
 lines = line_data["name"][()]
 line_rv = line_data["rv"][()]
 line_rv_err = line_data["rv_error"][()]
+
+# #line by line data
+# line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/nxt_day/neid_RVlinebyline_nxt_day.jld2", "r")
+# lines = line_data["name"][()]
+# line_rv = line_data["rv"][()]
+# line_rv_err = line_data["rv_error"][()]
 
 #K300
 file_regular_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/K300/K300/data/neid_october_N_50_K300.jld2", "r")
@@ -101,7 +113,7 @@ rv_error_GRASS_cb  = grass_data_KSSD["rv_error"][()]
 grass_data_no_cb_KSSD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/KSSD/KSSD/data/neid_all_lines_rv_off_KSSD.jld2", "r")
 GRASS_no_cb_v_KSSD  = grass_data_no_cb_KSSD["rv"][()]
 
-#KSSD with 3 extinction 
+# KSSD with 3 extinction 
 #projected rv model - regular
 file_regular_SSD_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/KSSD/KSSD_3ext/data/neid_october_N_50_KSSD_3ext.jld2", "r")
 RV_list_no_cb_SSD_3ext = file_regular_SSD_3ext["RV_list_no_cb"][()]
@@ -112,6 +124,17 @@ rv_error_GRASS_cb_3ext  = grass_data_KSSD_3ext["rv_error"][()]
 #GRASS no CB
 grass_data_no_cb_KSSD_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/KSSD/KSSD_3ext/data/neid_all_lines_rv_off_KSSD_3ext.jld2", "r")
 GRASS_no_cb_v_KSSD_3ext  = grass_data_no_cb_KSSD_3ext["rv"][()]
+
+# #projected rv model - regular
+# file_regular_SSD_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/nxt_day/neid_october_N_50_nxt_day_KSSD.jld2", "r")
+# RV_list_no_cb_SSD_3ext = file_regular_SSD_3ext["RV_list_no_cb"][()]
+# #GRASS CB
+# grass_data_KSSD_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/nxt_day/neid_all_lines_rv_regular_KSSD_3ext_nxt_day.jld2", "r")
+# GRASS_rv_KSSD_3ext  = grass_data_KSSD_3ext["rv"][()]
+# rv_error_GRASS_cb_3ext  = grass_data_KSSD_3ext["rv_error"][()]
+# #GRASS no CB
+# grass_data_no_cb_KSSD_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/nxt_day/neid_all_lines_rv_off_KSSD_3ext_nxt_day.jld2", "r")
+# GRASS_no_cb_v_KSSD_3ext  = grass_data_no_cb_KSSD_3ext["rv"][()]
 
 #HD
 #projected rv model - regular
@@ -138,6 +161,7 @@ def plot_3(projected, grass_cb, grass_no_cb, grass_cb_err,
     grass_cb_arr = []
     grass_no_cb_arr = []
     projected_arr_pipe = []
+    line_rv_pipe = []
     grass_cb_arr_pipe = []
     grass_no_cb_arr_pipe = []
     projected_arr_weight = []
@@ -146,6 +170,7 @@ def plot_3(projected, grass_cb, grass_no_cb, grass_cb_err,
     lines_arr = []
     grass_cb_err_arr = []
     line_err = []
+    lines_combined = []
     for i in range(0,len(lines)):
         if i == 10:
             continue
@@ -157,36 +182,50 @@ def plot_3(projected, grass_cb, grass_no_cb, grass_cb_err,
         line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-25]))
 
         lines_arr.append(lines[i])
-        projected_arr.append(rms(line_i, projected_i))
-        grass_cb_arr.append(rms(line_i, grass_cb_i))
-        grass_no_cb_arr.append(rms(line_i, grass_no_cb_i))
+        # projected_arr.append(rms(line_i, projected_i))
+        # grass_cb_arr.append(rms(line_i, grass_cb_i))
+        # grass_no_cb_arr.append(rms(line_i, grass_no_cb_i))
 
-        projected_arr_pipe.append(rms(rv_obs, projected_i))
-        grass_cb_arr_pipe.append(rms(rv_obs, grass_cb_i))
-        grass_no_cb_arr_pipe.append(rms(rv_obs, grass_no_cb_i))
+        # projected_arr_pipe.append(rms(rv_obs, projected_i))
+        # grass_cb_arr_pipe.append(rms(rv_obs, grass_cb_i))
+        # grass_no_cb_arr_pipe.append(rms(rv_obs, grass_no_cb_i))
 
-        projected_arr_weight.append(weighted_rms(line_i, projected_i, line_file[line_rv_err[i]][()][0:-25]))
-        grass_cb_arr_weight.append(weighted_rms(line_i, grass_cb_i, line_file[line_rv_err[i]][()][0:-25]))
-        grass_no_cb_arr_weight.append(weighted_rms(line_i, grass_no_cb_i, line_file[line_rv_err[i]][()][0:-25]))
+        # projected_arr_pipe.append(rms(bin_array(line_i,5),bin_array(projected_i,5)))
+        # grass_cb_arr_pipe.append(rms(bin_array(line_i,5),bin_array(grass_cb_i,5)))
+        # grass_no_cb_arr_pipe.append(rms(bin_array(line_i,5),bin_array(grass_no_cb_i,5)))
+        line_rv_pipe.append(rms(bin_array(line_i-grass_no_cb_i,6), np.mean(bin_array(line_i-grass_no_cb_i,6))))
+
+        # projected_arr_weight.append(weighted_rms(line_i, projected_i, line_file[line_rv_err[i]][()][0:-25]))
+        # grass_cb_arr_weight.append(weighted_rms(line_i, grass_cb_i, line_file[line_rv_err[i]][()][0:-25]))
+        # grass_no_cb_arr_weight.append(weighted_rms(line_i, grass_no_cb_i, line_file[line_rv_err[i]][()][0:-25]))
+
+        # if i == 5:
+        #     continue
+        # # if i == 14:
+        # #     continue
+        # lines_combined.append(list(line_i-grass_no_cb_i))
 
         if title == "KSSD" or title == "grass_cb_vs_ld":
             grass_cb_err_arr.append(np.mean(grass_cb_file[grass_cb_err[i]][()][0:-25]))
     plt.figure(figsize=(12, 6))
-    plt.scatter(lines_arr, projected_arr, label = label1, color = 'b')
-    plt.scatter(lines_arr, grass_cb_arr, label = label2, color = 'r')
-    plt.scatter(lines_arr, grass_no_cb_arr, label = label3, color = 'g')
-    plt.scatter(lines_arr, projected_arr_pipe, color = 'b', facecolors='none')
-    plt.scatter(lines_arr, grass_cb_arr_pipe, color = 'r', facecolors='none')
-    plt.scatter(lines_arr, grass_no_cb_arr_pipe, color = 'g', facecolors='none')
-    plt.scatter(lines_arr, projected_arr_weight, color = 'b', marker='x')
-    plt.scatter(lines_arr, grass_cb_arr_weight, color = 'r', marker='x')
-    plt.scatter(lines_arr, grass_no_cb_arr_weight, color = 'g', marker='x')
+    # plt.scatter(lines_arr, projected_arr, label = label1, color = 'b')
+    # plt.scatter(lines_arr, grass_cb_arr, label = label2, color = 'r')
+    # plt.scatter(lines_arr, grass_no_cb_arr, label = label3, color = 'g')
+    # plt.scatter(lines_arr, projected_arr_pipe, color = 'b', facecolors='none', label = label1)
+    # plt.scatter(lines_arr, grass_cb_arr_pipe, color = 'r', facecolors='none', label = label2)
+    # plt.scatter(lines_arr, grass_no_cb_arr_pipe, color = 'g', facecolors='none', label = label3)
+    plt.scatter(lines_arr, line_rv_pipe, color = 'y', facecolors='none', label = "line rv")
+
+    # plt.scatter(lines_arr, projected_arr_weight, color = 'b', marker='x')
+    # plt.scatter(lines_arr, grass_cb_arr_weight, color = 'r', marker='x')
+    # plt.scatter(lines_arr, grass_no_cb_arr_weight, color = 'g', marker='x')
     plt.scatter(lines_arr, line_err, color = 'k', marker='x')
-    if title == "KSSD" or title == "grass_cb_vs_ld":
-        plt.scatter(lines_arr, grass_cb_err_arr, color = 'k', marker = 'x')
-        plt.title("solid - line rms & circle - pipeline rms & x - mean error grass cb ccf (SSD)")
-    else:
-        plt.title("solid - line rms & circle - pipeline rms")
+    # if title == "KSSD" or title == "grass_cb_vs_ld":
+    #     plt.scatter(lines_arr, grass_cb_err_arr, color = 'k', marker = 'x')
+    #     plt.title("solid - line rms & circle - pipeline rms & x - mean error grass cb ccf (SSD)")
+    # else:
+    #     # plt.title("solid - line rms & circle - pipeline rms")
+    #     plt.title("solid - line rms & circle - bin rms")
     plt.xlabel("Line Wavelength (Å)", fontsize=12)
     plt.ylabel("RV RMS (m/s)", fontsize=12)
     plt.xticks(rotation=60)
@@ -195,6 +234,9 @@ def plot_3(projected, grass_cb, grass_no_cb, grass_cb_err,
     plt.legend(fontsize=12)
     plt.savefig(title, bbox_inches='tight')
     plt.clf() 
+
+    # lines_combined_avg = np.mean(lines_combined, axis=0)
+    # print(rms(bin_array(lines_combined_avg,6)))
 
 def plot_4_4(projected, grass_cb, grass_no_cb, data_300, grass_cb_err, 
                  projected_file, grass_cb_file, grass_no_cb_file, file_300, title, 
@@ -232,7 +274,7 @@ def plot_4_4(projected, grass_cb, grass_no_cb, data_300, grass_cb_err,
         projected_arr_pipe.append(rms(rv_obs, projected_i))
         grass_cb_arr_pipe.append(rms(rv_obs, grass_cb_i))
         grass_no_cb_arr_pipe.append(rms(rv_obs, grass_no_cb_i))
-        arr_300_pipe.append(rms(rv_obs, data_300_i))
+        arr_300_pipe.append(rms(rv_obs, data_300_i))        
 
         if title == "KSSD" or title == "grass_cb_vs_ld":
             grass_cb_err_arr.append(np.mean(grass_cb_file[grass_cb_err[i]][()][0:-25]))
@@ -328,8 +370,8 @@ def plot_bin(projected, grass_no_cb, grass_cb_err,
         projected_arr.append(rms(line_i, projected_i))
         grass_no_cb_arr.append(rms(line_i, grass_no_cb_i))
 
-        projected_arr_bin.append(rms(bin_array(line_i,5), bin_array(projected_i,5)))
-        grass_no_cb_arr_bin.append(rms(bin_array(line_i,5), bin_array(grass_no_cb_i,5)))
+        projected_arr_bin.append(rms(bin_array(line_i,6), bin_array(projected_i,6)))
+        grass_no_cb_arr_bin.append(rms(bin_array(line_i,6), bin_array(grass_no_cb_i,6)))
 
     plt.figure(figsize=(12, 6))
     plt.scatter(lines_arr, projected_arr, label = label1, color = 'b')
@@ -430,27 +472,27 @@ def plot_single_rms(line_file, line_rv, projected_file, projected, grass_cb_file
     plt.clf() 
 
 
-plot_3(RV_list_no_cb_NL94, GRASS_rv_NL94, GRASS_no_cb_v_NL94, 0, file_regular_NL94, grass_data_NL94, grass_data_no_cb_NL94, "LD_comp/NL94", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "LD_comp/KSSD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_3(RV_list_no_cb_HD, GRASS_rv_HD, GRASS_no_cb_v_HD, 0, file_regular_HD, grass_data_HD, grass_data_no_cb_HD, "LD_comp/HD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_3(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, 0, file_regular_300, grass_data_300, grass_data_no_cb_300, "LD_comp/300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_4_4(GRASS_rv_NL94, GRASS_rv_KSSD, GRASS_rv_HD, GRASS_rv_300, rv_error_GRASS_cb, grass_data_NL94, grass_data_KSSD, grass_data_HD, grass_data_300, "LD_comp/grass_cb_vs_ld", line_data, line_rv, "NL94", "SSD", "HD", "300")
+# plot_3(RV_list_no_cb_NL94, GRASS_rv_NL94, GRASS_no_cb_v_NL94, 0, file_regular_NL94, grass_data_NL94, grass_data_no_cb_NL94, "LD_comp/NL94", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+# plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "LD_comp/KSSD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+# plot_3(RV_list_no_cb_HD, GRASS_rv_HD, GRASS_no_cb_v_HD, 0, file_regular_HD, grass_data_HD, grass_data_no_cb_HD, "LD_comp/HD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+# plot_3(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, 0, file_regular_300, grass_data_300, grass_data_no_cb_300, "LD_comp/300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+# plot_4_4(GRASS_rv_NL94, GRASS_rv_KSSD, GRASS_rv_HD, GRASS_rv_300, rv_error_GRASS_cb, grass_data_NL94, grass_data_KSSD, grass_data_HD, grass_data_300, "LD_comp/grass_cb_vs_ld", line_data, line_rv, "NL94", "SSD", "HD", "300")
 
-plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "KSSD_comp/KSSD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_3(RV_list_no_cb_SSD_3ext, GRASS_rv_KSSD_3ext, GRASS_no_cb_v_KSSD_3ext, rv_error_GRASS_cb_3ext, file_regular_SSD_3ext, grass_data_KSSD_3ext, grass_data_no_cb_KSSD_3ext, "KSSD_comp/KSSD_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_2_2(GRASS_rv_KSSD, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_KSSD, grass_data_KSSD_3ext, "KSSD_comp/grass_cb_vs_ext", line_data, line_rv, "SSD", "SSD+3ext")
-plot_bin(GRASS_rv_KSSD, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_KSSD, grass_data_KSSD_3ext, "KSSD_comp/grass_cb_vs_ext_binned", line_data, line_rv, "SSD", "SSD+3ext")
-plot_single_rms(line_data, line_rv, file_regular_SSD, RV_list_no_cb_SSD, grass_data_KSSD, GRASS_rv_KSSD, grass_data_no_cb_KSSD, GRASS_no_cb_v_KSSD,
-                file_regular_SSD_3ext, RV_list_no_cb_SSD_3ext, grass_data_KSSD_3ext, GRASS_rv_KSSD_3ext, grass_data_no_cb_KSSD_3ext, GRASS_no_cb_v_KSSD_3ext,
-                "KSSD_comp/single_rms")
+# plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "KSSD_comp/KSSD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+plot_3(RV_list_no_cb_SSD_3ext, GRASS_rv_KSSD_3ext, GRASS_no_cb_v_KSSD_3ext, rv_error_GRASS_cb_3ext, file_regular_SSD_3ext, grass_data_KSSD_3ext, grass_data_no_cb_KSSD_3ext, "KSSD_comp/KSSD_3ext_latest_new", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+# plot_2_2(GRASS_rv_KSSD, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_KSSD, grass_data_KSSD_3ext, "KSSD_comp/grass_cb_vs_ext", line_data, line_rv, "SSD", "SSD+3ext")
+# plot_bin(GRASS_rv_KSSD, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_KSSD, grass_data_KSSD_3ext, "KSSD_comp/grass_cb_vs_ext_binned", line_data, line_rv, "SSD", "SSD+3ext")
+# plot_single_rms(line_data, line_rv, file_regular_SSD, RV_list_no_cb_SSD, grass_data_KSSD, GRASS_rv_KSSD, grass_data_no_cb_KSSD, GRASS_no_cb_v_KSSD,
+#                 file_regular_SSD_3ext, RV_list_no_cb_SSD_3ext, grass_data_KSSD_3ext, GRASS_rv_KSSD_3ext, grass_data_no_cb_KSSD_3ext, GRASS_no_cb_v_KSSD_3ext,
+#                 "KSSD_comp/single_rms")
 
-plot_3(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, rv_error_GRASS_cb, file_regular_300, grass_data_300, grass_data_no_cb_300, "K300_comp/K300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_3(RV_list_no_cb_300_3ext, GRASS_rv_300_3ext, GRASS_no_cb_v_300_3ext, rv_error_GRASS_cb_3ext, file_regular_300_3ext, grass_data_300_3ext, grass_data_no_cb_300_3ext, "K300_comp/K300_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_2_2(GRASS_rv_300, GRASS_rv_300_3ext, rv_error_GRASS_cb, grass_data_300, grass_data_300_3ext, "K300_comp/grass_cb_vs_ext", line_data, line_rv, "300", "300+3ext")
-plot_bin(GRASS_rv_300, GRASS_rv_300_3ext, rv_error_GRASS_cb, grass_data_300, grass_data_300_3ext, "K300_comp/grass_cb_vs_ext_binned", line_data, line_rv, "300", "300+3ext")
-plot_single_rms(line_data, line_rv, file_regular_300, RV_list_no_cb_300, grass_data_300, GRASS_rv_300, grass_data_no_cb_300, GRASS_no_cb_v_300,
-                file_regular_300_3ext, RV_list_no_cb_300_3ext, grass_data_300_3ext, GRASS_rv_300_3ext, grass_data_no_cb_300_3ext, GRASS_no_cb_v_300_3ext,
-                "K300_comp/single_rms")
+# plot_3(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, rv_error_GRASS_cb, file_regular_300, grass_data_300, grass_data_no_cb_300, "K300_comp/K300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+# plot_3(RV_list_no_cb_300_3ext, GRASS_rv_300_3ext, GRASS_no_cb_v_300_3ext, rv_error_GRASS_cb_3ext, file_regular_300_3ext, grass_data_300_3ext, grass_data_no_cb_300_3ext, "K300_comp/K300_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+# plot_2_2(GRASS_rv_300, GRASS_rv_300_3ext, rv_error_GRASS_cb, grass_data_300, grass_data_300_3ext, "K300_comp/grass_cb_vs_ext", line_data, line_rv, "300", "300+3ext")
+# plot_bin(GRASS_rv_300, GRASS_rv_300_3ext, rv_error_GRASS_cb, grass_data_300, grass_data_300_3ext, "K300_comp/grass_cb_vs_ext_binned", line_data, line_rv, "300", "300+3ext")
+# plot_single_rms(line_data, line_rv, file_regular_300, RV_list_no_cb_300, grass_data_300, GRASS_rv_300, grass_data_no_cb_300, GRASS_no_cb_v_300,
+#                 file_regular_300_3ext, RV_list_no_cb_300_3ext, grass_data_300_3ext, GRASS_rv_300_3ext, grass_data_no_cb_300_3ext, GRASS_no_cb_v_300_3ext,
+#                 "K300_comp/single_rms")
 
-plot_2_2(GRASS_rv_300, GRASS_rv_KSSD, rv_error_GRASS_cb, grass_data_300, grass_data_KSSD, "LD_comp/no_ext_comp", line_data, line_rv, "300", "SSD")
-plot_2_2(GRASS_rv_300_3ext, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_300_3ext, grass_data_KSSD_3ext, "LD_comp/ext_comp", line_data, line_rv, "300+3ext", "SSD+3ext")
+# plot_2_2(GRASS_rv_300, GRASS_rv_KSSD, rv_error_GRASS_cb, grass_data_300, grass_data_KSSD, "LD_comp/no_ext_comp", line_data, line_rv, "300", "SSD")
+# plot_2_2(GRASS_rv_300_3ext, GRASS_rv_KSSD_3ext, rv_error_GRASS_cb, grass_data_300_3ext, grass_data_KSSD_3ext, "LD_comp/ext_comp", line_data, line_rv, "300+3ext", "SSD+3ext")

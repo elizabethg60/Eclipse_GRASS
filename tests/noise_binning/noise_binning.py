@@ -84,7 +84,7 @@ def jld2_read(jld2_file, variable, vb, index):
     array -= array[-1]
     return array
 
-bin_arr = np.linspace(1,30,30)
+bin_arr = np.linspace(1,15,15)
 
 fig = plt.figure()
 ax1 = fig.add_subplot()
@@ -111,23 +111,26 @@ for i, value in enumerate(lines):
         binned_data = bin_array(residuals, int(bin_arr[j]))
         RMS_array_eclipse_day.append(rms(binned_data, np.mean(binned_data)))
     ax1.scatter(bin_arr, RMS_array_eclipse_day, color = color)
+    ax1.plot(bin_arr, RMS_array_eclipse_day, color = color)
 
 RMS_array_15 = []
 for i in range(0, len(bin_arr)):
         binned_data = bin_array(RV_array_15[0:83], int(bin_arr[i]))
         RMS_array_15.append(rms(binned_data, np.mean(binned_data)))
 ax1.scatter(bin_arr, RMS_array_15, color = 'g', label = "10/15")
+ax1.plot(bin_arr, RMS_array_15, color = 'g')
 
 RMS_array_16 = []
 for i in range(0, len(bin_arr)):
         binned_data = bin_array(RV_array_16[0:83], int(bin_arr[i]))
         RMS_array_16.append(rms(binned_data, np.mean(binned_data)))
 ax1.scatter(bin_arr, RMS_array_16, color = 'y', label = "10/16")
+ax1.plot(bin_arr, RMS_array_16, color = 'y')
 
 ax1.set_xlabel("bin size")
 ax1.set_ylabel("RMS (m/s)") 
 plt.legend()
 plt.yscale('log')
-plt.savefig("photon_noise_binning.png")
+plt.savefig("noise_binning.png")
 plt.clf()
 

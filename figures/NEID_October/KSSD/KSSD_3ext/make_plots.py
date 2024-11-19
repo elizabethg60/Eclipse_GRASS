@@ -85,90 +85,142 @@ def plot_line(UTC_time, rv_obs, line_rv_array, model, model_label, GRASS, GRASS_
     plt.savefig("{}/rm_and_residuals_{}.png".format(path, save))
     plt.clf()
 
-for i in range(0,len(lines)):
-    rv_error_GRASS_cb_array = grass_data[rv_error_GRASS_cb[i]][()][0:-25]
-    rv_error_GRASS_no_cb_array = grass_data_no_cb[rv_error_GRASS_no_cb[i]][()][0:-25]
-    rv_error_line_array = line_data[rv_error_line[i]][()][0:-25]
+def plot_line_new(UTC_time, line_rv_array_7, line_rv_array_8, label1, label2, save):
+    fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
+    axs[0].scatter(UTC_time, line_rv_array_7, color = 'k', marker = "x", s = 18, label = label1)
+    axs[0].scatter(UTC_time, line_rv_array_8, color = 'y', marker = "x", s = 18, label = label2) 
+    axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    axs[0].set_xlabel("Time (UTC)", fontsize=12)
+    axs[0].set_ylabel("RV [m/s]", fontsize=12)
+    axs[0].legend(fontsize=12)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    #residuals
+    axs[1].scatter(UTC_time, line_rv_array_7 - line_rv_array_8, color = 'k', marker = "x", s = 3) 
+    rms_model_no_cb = round(np.sqrt((np.nansum((line_rv_array_7 - line_rv_array_8)**2))/len(line_rv_array_7)),2)
+    axs[1].text(UTC_time[-5], 2, "RMS {}".format(rms_model_no_cb))
+    rms_grass_no_cb = round(np.sqrt((np.nansum((line_rv_array_7[-4:-1] - line_rv_array_8[-4:-1])**2))/len(line_rv_array_7[-4:-1])),2)
+    axs[1].text(UTC_time[-5], 4, "Out of Transit RMS {}".format(rms_grass_no_cb))
+    axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    axs[1].set_xlabel("Time (UTC)", fontsize=12)
+    axs[1].set_ylabel("Residuals", fontsize=12) 
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.savefig("{}.png".format(save))
+    plt.clf()
+
+def bin_array(arr, bin_size):
+    # Convert to numpy array with float type for precision
+    arr = np.array(arr, dtype=float)
     
-    GRASS_rv_array = jld2_read(grass_data, GRASS_rv, vb, i)
-    line_rv_array = jld2_read(line_data, line_rv, vb, i)
-    GRASS_no_cb_array = jld2_read(grass_data_no_cb, GRASS_no_cb, vb, i)
-    RV_list_no_cb_array = jld2_read(file, RV_list_no_cb, vb, i)
+    # Check if the array length is less than bin_size
+    if len(arr) < bin_size:
+        raise ValueError("Array length must be at least as large as the bin size.")
+    
+    # Calculate the number of bins
+    num_bins = int(np.ceil(len(arr) / bin_size))
+    
+    # Pad the array to make sure it fits exactly into bins
+    padded_length = num_bins * bin_size
+    padded_arr = np.pad(arr, (0, padded_length - len(arr)), mode='constant', constant_values=np.nan)
+    
+    # Reshape and compute the mean of each bin
+    reshaped_arr = padded_arr.reshape(num_bins, bin_size)
+    binned_arr = np.nanmean(reshaped_arr, axis=1)
+    
+    return np.array(binned_arr)
 
-    #rm curve 
-    plot_line(UTC_time, rv_obs, line_rv_array, RV_list_no_cb_array, "Weighted RVs - No CB", GRASS_no_cb_array, "Line RVs - No Var", "No_Granulation/LinebyLine", lines_no_cb[i], rv_error_GRASS_no_cb_array, rv_error_line_array)
+# line_rv_array_18 = jld2_read(line_data, line_rv, vb, 18)
+# line_rv_array_19 = jld2_read(line_data, line_rv, vb, 19)
+rv_error_line_array18 = line_data[rv_error_line[18]][()][0:-25]
+rv_error_line_array19 = line_data[rv_error_line[19]][()][0:-25]
+plot_line_new(UTC_time, rv_error_line_array18, rv_error_line_array19, lines[18], lines[19], "unbinned_err")
+plot_line_new(range(0, len(bin_array(rv_error_line_array18,6))), bin_array(rv_error_line_array18,6), bin_array(rv_error_line_array19,6), lines[18], lines[19], "binned_err")
+    
+# for i in range(0,len(lines)):
+#     rv_error_GRASS_cb_array = grass_data[rv_error_GRASS_cb[i]][()][0:-25]
+#     rv_error_GRASS_no_cb_array = grass_data_no_cb[rv_error_GRASS_no_cb[i]][()][0:-25]
+#     rv_error_line_array = line_data[rv_error_line[i]][()][0:-25]
+    
+#     GRASS_rv_array = jld2_read(grass_data, GRASS_rv, vb, i)
+#     line_rv_array = jld2_read(line_data, line_rv, vb, i)
+#     GRASS_no_cb_array = jld2_read(grass_data_no_cb, GRASS_no_cb, vb, i)
+#     RV_list_no_cb_array = jld2_read(file, RV_list_no_cb, vb, i)
 
-    #rm curve 
-    fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
-    axs[0].scatter(UTC_time, rv_obs, color = 'k', marker = "x", s = 18, label = "NEID RVs")
-    axs[0].plot(UTC_time, RV_list_no_cb_array, color = 'r', linewidth = 2, label = "Weighted RVs - No CB")
-    axs[0].plot(UTC_time, GRASS_no_cb_array, color = 'b', linewidth = 2, label = "Line RVs - No Var")
-    axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    axs[0].set_xlabel("Time (UTC)", fontsize=12)
-    axs[0].set_ylabel("RV [m/s]", fontsize=12)
-    axs[0].legend(fontsize=12)
-    rms_model_no_cb = round(np.sqrt((np.nansum((rv_obs - RV_list_no_cb_array)**2))/len(rv_obs - RV_list_no_cb_array)),2)
-    axs[0].text(UTC_time[-40], 500, "Model RMS {}".format(rms_model_no_cb))
-    rms_grass_no_cb = round(np.sqrt((np.nansum((rv_obs - GRASS_no_cb_array)**2))/len(rv_obs - GRASS_no_cb_array)),2)
-    axs[0].text(UTC_time[-40], 400, "GRASS RMS {}".format(rms_grass_no_cb))
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    #residuals
-    axs[1].scatter(UTC_time, rv_obs - RV_list_no_cb_array, color = 'r', marker = "x", s = 3) 
-    axs[1].scatter(UTC_time, rv_obs - GRASS_no_cb_array, color = 'b', marker = "x", s = 3) 
-    axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    axs[1].set_xlabel("Time (UTC)", fontsize=12)
-    axs[1].set_ylabel("Residuals", fontsize=12) 
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.savefig("No_Granulation/rm_and_residuals_{}.png".format(lines_no_cb[i]))
-    plt.clf()
+#     #rm curve 
+#     plot_line(UTC_time, rv_obs, line_rv_array, RV_list_no_cb_array, "Weighted RVs - No CB", GRASS_no_cb_array, "Line RVs - No Var", "No_Granulation/LinebyLine", lines_no_cb[i], rv_error_GRASS_no_cb_array, rv_error_line_array)
 
-    #rm curve w granulation 
-    fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
-    axs[0].scatter(UTC_time, rv_obs, color = 'k', marker = "x", s = 18, label = "NEID RVs") 
-    axs[0].scatter(UTC_time, line_rv_array, color = 'y', marker = "x", s = 18, label = "NEID line RVs")
-    axs[0].plot(UTC_time, GRASS_rv_array, color = 'b', linewidth = 2, label = "GRASS")
-    axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    axs[0].set_xlabel("Time (UTC)", fontsize=12)
-    axs[0].set_ylabel("RV [m/s]", fontsize=12)
-    axs[0].legend(fontsize=12)
-    rms_grass_no_cb = round(np.sqrt((np.nansum((line_rv_array - GRASS_rv_array)**2))/len(line_rv_array - GRASS_rv_array)),2)
-    axs[0].text(UTC_time[-40], -300, "GRASS RMS {}".format(rms_grass_no_cb))
-    axs[0].text(UTC_time[-40], -400, "Line RV avg error {}".format(round(np.mean(rv_error_line_array),2)))
-    axs[0].text(UTC_time[-40], -500, "GRASS RV error {}".format(round(np.mean(rv_error_GRASS_cb_array),2)))
-    rms_grass_no_cb = round(np.sqrt((np.nansum((line_rv_array[120:-1] - GRASS_rv_array[120:-1])**2))/len(line_rv_array[120:-1])),2)
-    axs[0].text(UTC_time[-40], -600, "Out of Transit RMS {}".format(rms_grass_no_cb)) 
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    #residuals 
-    axs[1].scatter(UTC_time, line_rv_array - GRASS_rv_array, color = 'b', marker = "x", s = 3) 
-    axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    axs[1].set_xlabel("Time (UTC)", fontsize=12)
-    axs[1].set_ylabel("Residuals", fontsize=12) 
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.savefig("Granulation/LinebyLine/rm_and_residuals_cb_{}.png".format(lines[i]))
-    plt.clf()
+    # #rm curve 
+    # fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
+    # axs[0].scatter(UTC_time, rv_obs, color = 'k', marker = "x", s = 18, label = "NEID RVs")
+    # axs[0].plot(UTC_time, RV_list_no_cb_array, color = 'r', linewidth = 2, label = "Weighted RVs - No CB")
+    # axs[0].plot(UTC_time, GRASS_no_cb_array, color = 'b', linewidth = 2, label = "Line RVs - No Var")
+    # axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    # axs[0].set_xlabel("Time (UTC)", fontsize=12)
+    # axs[0].set_ylabel("RV [m/s]", fontsize=12)
+    # axs[0].legend(fontsize=12)
+    # rms_model_no_cb = round(np.sqrt((np.nansum((rv_obs - RV_list_no_cb_array)**2))/len(rv_obs - RV_list_no_cb_array)),2)
+    # axs[0].text(UTC_time[-40], 500, "Model RMS {}".format(rms_model_no_cb))
+    # rms_grass_no_cb = round(np.sqrt((np.nansum((rv_obs - GRASS_no_cb_array)**2))/len(rv_obs - GRASS_no_cb_array)),2)
+    # axs[0].text(UTC_time[-40], 400, "GRASS RMS {}".format(rms_grass_no_cb))
+    # plt.xticks(fontsize=12)
+    # plt.yticks(fontsize=12)
+    # #residuals
+    # axs[1].scatter(UTC_time, rv_obs - RV_list_no_cb_array, color = 'r', marker = "x", s = 3) 
+    # axs[1].scatter(UTC_time, rv_obs - GRASS_no_cb_array, color = 'b', marker = "x", s = 3) 
+    # axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    # axs[1].set_xlabel("Time (UTC)", fontsize=12)
+    # axs[1].set_ylabel("Residuals", fontsize=12) 
+    # plt.xticks(fontsize=12)
+    # plt.yticks(fontsize=12)
+    # plt.savefig("No_Granulation/rm_and_residuals_{}.png".format(lines_no_cb[i]))
+    # plt.clf()
 
-    #rm curve w granulation 
-    fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
-    axs[0].scatter(UTC_time, rv_obs, color = 'k', marker = "x", s = 18, label = "NEID RVs") 
-    axs[0].plot(UTC_time, GRASS_rv_array, color = 'b', linewidth = 2, label = "GRASS")
-    axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    axs[0].set_xlabel("Time (UTC)", fontsize=12)
-    axs[0].set_ylabel("RV [m/s]", fontsize=12)
-    axs[0].legend(fontsize=12)
-    rms_grass_no_cb = round(np.sqrt((np.nansum((rv_obs - GRASS_rv_array)**2))/len(rv_obs - GRASS_rv_array)),2)
-    axs[0].text(UTC_time[-40], -500, "GRASS RMS {}".format(rms_grass_no_cb))
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    #residuals
-    axs[1].scatter(UTC_time, rv_obs - GRASS_rv_array, color = 'b', marker = "x", s = 3)    
-    axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    axs[1].set_xlabel("Time (UTC)", fontsize=12)
-    axs[1].set_ylabel("Residuals", fontsize=12) 
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.savefig("Granulation/rm_and_residuals_cb_{}.png".format(lines[i]))
-    plt.clf()
+    # #rm curve w granulation 
+    # fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
+    # axs[0].scatter(UTC_time, rv_obs, color = 'k', marker = "x", s = 18, label = "NEID RVs") 
+    # axs[0].scatter(UTC_time, line_rv_array, color = 'y', marker = "x", s = 18, label = "NEID line RVs")
+    # axs[0].plot(UTC_time, GRASS_rv_array, color = 'b', linewidth = 2, label = "GRASS")
+    # axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    # axs[0].set_xlabel("Time (UTC)", fontsize=12)
+    # axs[0].set_ylabel("RV [m/s]", fontsize=12)
+    # axs[0].legend(fontsize=12)
+    # rms_grass_no_cb = round(np.sqrt((np.nansum((line_rv_array - GRASS_rv_array)**2))/len(line_rv_array - GRASS_rv_array)),2)
+    # axs[0].text(UTC_time[-40], -300, "GRASS RMS {}".format(rms_grass_no_cb))
+    # axs[0].text(UTC_time[-40], -400, "Line RV avg error {}".format(round(np.mean(rv_error_line_array),2)))
+    # axs[0].text(UTC_time[-40], -500, "GRASS RV error {}".format(round(np.mean(rv_error_GRASS_cb_array),2)))
+    # rms_grass_no_cb = round(np.sqrt((np.nansum((line_rv_array[120:-1] - GRASS_rv_array[120:-1])**2))/len(line_rv_array[120:-1])),2)
+    # axs[0].text(UTC_time[-40], -600, "Out of Transit RMS {}".format(rms_grass_no_cb)) 
+    # plt.xticks(fontsize=12)
+    # plt.yticks(fontsize=12)
+    # #residuals 
+    # axs[1].scatter(UTC_time, line_rv_array - GRASS_rv_array, color = 'b', marker = "x", s = 3) 
+    # axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    # axs[1].set_xlabel("Time (UTC)", fontsize=12)
+    # axs[1].set_ylabel("Residuals", fontsize=12) 
+    # plt.xticks(fontsize=12)
+    # plt.yticks(fontsize=12)
+    # plt.savefig("Granulation/LinebyLine/rm_and_residuals_cb_{}.png".format(lines[i]))
+    # plt.clf()
+
+    # #rm curve w granulation 
+    # fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
+    # axs[0].scatter(UTC_time, rv_obs, color = 'k', marker = "x", s = 18, label = "NEID RVs") 
+    # axs[0].plot(UTC_time, GRASS_rv_array, color = 'b', linewidth = 2, label = "GRASS")
+    # axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    # axs[0].set_xlabel("Time (UTC)", fontsize=12)
+    # axs[0].set_ylabel("RV [m/s]", fontsize=12)
+    # axs[0].legend(fontsize=12)
+    # rms_grass_no_cb = round(np.sqrt((np.nansum((rv_obs - GRASS_rv_array)**2))/len(rv_obs - GRASS_rv_array)),2)
+    # axs[0].text(UTC_time[-40], -500, "GRASS RMS {}".format(rms_grass_no_cb))
+    # plt.xticks(fontsize=12)
+    # plt.yticks(fontsize=12)
+    # #residuals
+    # axs[1].scatter(UTC_time, rv_obs - GRASS_rv_array, color = 'b', marker = "x", s = 3)    
+    # axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    # axs[1].set_xlabel("Time (UTC)", fontsize=12)
+    # axs[1].set_ylabel("Residuals", fontsize=12) 
+    # plt.xticks(fontsize=12)
+    # plt.yticks(fontsize=12)
+    # plt.savefig("Granulation/rm_and_residuals_cb_{}.png".format(lines[i]))
+    # plt.clf()
