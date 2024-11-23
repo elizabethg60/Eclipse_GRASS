@@ -1,11 +1,9 @@
 function gottingen_loop(lats::T) where T
-    """
-    computes RV for each timestamp for the gottingen eclipse 
-    """
-    #convert from utc to et as needed by SPICE
+
+    # convert from utc to et as needed by SPICE
     time_stamps = utc2et.(reiners_timestamps)
 
-    #Gottingen location
+    # Gottingen location
     obs_lat = 51.560583 
     obs_long = 9.944333
     alt = 0.201
@@ -16,7 +14,7 @@ function gottingen_loop(lats::T) where T
     RV_list_cb = Vector{Float64}(undef,size(time_stamps)...)
     RV_list_cb_new = Vector{Float64}(undef,size(time_stamps)...)
     intensity_list = Vector{Float64}(undef,size(time_stamps)...)
-    #run compute_rv for each timestamp
+    # run compute_rv for each timestamp
     ext_coeff = 0.4 .- 0.3 .* (time_stamps .- time_stamps[1]) ./ (time_stamps[length(time_stamps)] - time_stamps[1])
 
     for i in 1:length(time_stamps)
@@ -25,11 +23,10 @@ function gottingen_loop(lats::T) where T
         RV_list_cb[i] = RV_cb
         RV_list_cb_new[i] = RV_cb_new
         intensity_list[i] = intensity
-
     end
     
-    @save "Confirm_Reiners/data/model_data_new.jld2"
-    jldopen("Confirm_Reiners/data/model_data_new.jld2", "a+") do file
+    @save "Confirm_Reiners/data/model_data.jld2"
+    jldopen("Confirm_Reiners/data/model_data.jld2", "a+") do file
         file["RV_list_no_cb"] = RV_list_no_cb 
         file["RV_list_cb"] = RV_list_cb 
         file["RV_list_cb_new"] = RV_list_cb_new
@@ -42,7 +39,7 @@ function figures()
     boulder_timestamps = ["2023-10-14T13:25:37"]
     time_stamps = utc2et.(boulder_timestamps)
 
-    #Boulder location
+    # Boulder location
     obs_lat = 39.995380
     obs_long = -105.262390
     alt = 1.6523

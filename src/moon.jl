@@ -1,17 +1,8 @@
 function calc_proj_dist(p1, p2)
-    """
-    determines distance in radians between moon and cell on solar grid
-
-    p1: vector from observer to cell on solar grid
-    p2: vector from observer to moon 
-    """
     return acos(dot(p1, p2)/(norm(p1)*norm(p2)))
 end
 
-function quad_limb_darkening_optical(μ::T, wavelength::T) where T
-    """
-    limb darkening prescription for optical based on mu angle  
-    """
+function NL94_limb_darkening(μ::T, wavelength::T) where T
     μ < zero(T) && return 0.0
 
     index = findmin(x->abs(x-wavelength), lambda_nm)[2]

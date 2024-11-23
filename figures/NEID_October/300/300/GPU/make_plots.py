@@ -10,18 +10,14 @@ from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 # read in data
 # GRASS
-grass_data = h5py.File("data/neid_all_lines_rv_regular_NL94.jld2", "r")
+grass_data = h5py.File("data/neid_all_lines_rv_regular_300_gpu.jld2", "r")
 lines = grass_data["name"][()]
 GRASS_rv  = grass_data["rv"][()]
 rv_error_GRASS_cb  = grass_data["rv_error"][()]
-grass_data_no_cb = h5py.File("data/neid_all_lines_rv_off_NL94.jld2", "r")
+grass_data_no_cb = h5py.File("data/neid_all_lines_rv_off_300_gpu.jld2", "r")
 lines_no_cb = grass_data_no_cb["name"][()]
 GRASS_no_cb  = grass_data_no_cb["rv"][()]
 rv_error_GRASS_no_cb = grass_data_no_cb["rv_error"][()]
-
-# model
-file = h5py.File("data/neid_october_N_50_NL94.jld2", "r")
-RV_list_no_cb = file["RV_list_no_cb"][()]
 
 # data 
 data = pd.read_csv("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/NEID_Data.csv")
@@ -32,10 +28,8 @@ for i in data["obsdate"][15:-150]:
     dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S") + timedelta(seconds=27.5)
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
-
 # line by line data
 line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline.jld2", "r")
-line_lines = line_data["name"][()]
 line_rv  = line_data["rv"][()]
 rv_error_line = line_data["rv_error"][()]
 
@@ -52,24 +46,20 @@ def jld2_read(jld2_file, variable, vb, index):
     array -= array[-1]
     return array
 
-def plot_line(UTC_time, rv_obs, line_rv_array, model, model_label, GRASS, GRASS_label, path, save, rv_error_GRASS_no_cb_array, rv_error_line_array):
+def plot_line(UTC_time, rv_obs, line_rv_array, GRASS, GRASS_label, path, save, rv_error_GRASS_no_cb_array, rv_error_line_array):
     fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
     axs[0].scatter(UTC_time, rv_obs, color = 'k', marker = "x", s = 18, label = "NEID RVs")
     axs[0].scatter(UTC_time, line_rv_array, color = 'y', marker = "x", s = 18, label = "NEID line RVs") 
-    axs[0].plot(UTC_time, model, color = 'r', linewidth = 2, label = model_label)
     axs[0].plot(UTC_time, GRASS, color = 'b', linewidth = 2, label = GRASS_label)
     axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     axs[0].set_xlabel("Time (UTC)", fontsize=12)
     axs[0].set_ylabel("RV [m/s]", fontsize=12)
     axs[0].legend(fontsize=12)
-    rms_model_no_cb = round(np.sqrt((np.nansum((line_rv_array - model)**2))/len(line_rv_array - model)),2)
-    axs[0].text(UTC_time[-40], 800, "Model RMS {}".format(rms_model_no_cb))
     rms_grass_no_cb = round(np.sqrt((np.nansum((line_rv_array - GRASS)**2))/len(line_rv_array - GRASS)),2)
     axs[0].text(UTC_time[-40], 700, "GRASS RMS {}".format(rms_grass_no_cb))
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    #residuals
-    axs[1].scatter(UTC_time, line_rv_array - model, color = 'r', marker = "x", s = 3) 
+    # residuals
     axs[1].scatter(UTC_time, line_rv_array - GRASS, color = 'b', marker = "x", s = 3)  
     axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     axs[1].set_xlabel("Time (UTC)", fontsize=12)
@@ -87,28 +77,23 @@ for i in range(0,len(lines)):
     GRASS_rv_array = jld2_read(grass_data, GRASS_rv, vb, i)
     line_rv_array = jld2_read(line_data, line_rv, vb, i)
     GRASS_no_cb_array = jld2_read(grass_data_no_cb, GRASS_no_cb, vb, i)
-    RV_list_no_cb_array = jld2_read(file, RV_list_no_cb, vb, i)
 
     # rm curve 
-    plot_line(UTC_time, rv_obs, line_rv_array, RV_list_no_cb_array, "Weighted RVs - No CB", GRASS_no_cb_array, "Line RVs - No Var", "No_Granulation/LinebyLine", lines_no_cb[i], rv_error_GRASS_no_cb_array, rv_error_line_array)
+    plot_line(UTC_time, rv_obs, line_rv_array, GRASS_no_cb_array, "Line RVs - No Var", "No_Granulation/LinebyLine", lines_no_cb[i], rv_error_GRASS_no_cb_array, rv_error_line_array)
 
     # rm curve 
     fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
     axs[0].scatter(UTC_time, rv_obs, color = 'k', marker = "x", s = 18, label = "NEID RVs")
-    axs[0].plot(UTC_time, RV_list_no_cb_array, color = 'r', linewidth = 2, label = "Weighted RVs - No CB")
     axs[0].plot(UTC_time, GRASS_no_cb_array, color = 'b', linewidth = 2, label = "Line RVs - No Var")
     axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     axs[0].set_xlabel("Time (UTC)", fontsize=12)
     axs[0].set_ylabel("RV [m/s]", fontsize=12)
     axs[0].legend(fontsize=12)
-    rms_model_no_cb = round(np.sqrt((np.nansum((rv_obs - RV_list_no_cb_array)**2))/len(rv_obs - RV_list_no_cb_array)),2)
-    axs[0].text(UTC_time[-40], 500, "Model RMS {}".format(rms_model_no_cb))
     rms_grass_no_cb = round(np.sqrt((np.nansum((rv_obs - GRASS_no_cb_array)**2))/len(rv_obs - GRASS_no_cb_array)),2)
     axs[0].text(UTC_time[-40], 400, "GRASS RMS {}".format(rms_grass_no_cb))
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     # residuals
-    axs[1].scatter(UTC_time, rv_obs - RV_list_no_cb_array, color = 'r', marker = "x", s = 3) 
     axs[1].scatter(UTC_time, rv_obs - GRASS_no_cb_array, color = 'b', marker = "x", s = 3) 
     axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     axs[1].set_xlabel("Time (UTC)", fontsize=12)

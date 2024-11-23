@@ -9,18 +9,17 @@ from astropy.time import Time
 from barycorrpy import get_BC_vel, exposure_meter_BC_vel
 
 # read in data
-# GRASS
-grass_data = h5py.File("data/neid_all_lines_rv_regular_NL94.jld2", "r")
+#GRASS
+grass_data = h5py.File("data/neid_all_lines_rv_regular_HD.jld2", "r")
 lines = grass_data["name"][()]
 GRASS_rv  = grass_data["rv"][()]
 rv_error_GRASS_cb  = grass_data["rv_error"][()]
-grass_data_no_cb = h5py.File("data/neid_all_lines_rv_off_NL94.jld2", "r")
+grass_data_no_cb = h5py.File("data/neid_all_lines_rv_off_HD.jld2", "r")
 lines_no_cb = grass_data_no_cb["name"][()]
 GRASS_no_cb  = grass_data_no_cb["rv"][()]
 rv_error_GRASS_no_cb = grass_data_no_cb["rv_error"][()]
-
 # model
-file = h5py.File("data/neid_october_N_50_NL94.jld2", "r")
+file = h5py.File("data/neid_october_N_50_HD.jld2", "r")
 RV_list_no_cb = file["RV_list_no_cb"][()]
 
 # data 
@@ -32,7 +31,6 @@ for i in data["obsdate"][15:-150]:
     dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S") + timedelta(seconds=27.5)
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
-
 # line by line data
 line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline.jld2", "r")
 line_lines = line_data["name"][()]
