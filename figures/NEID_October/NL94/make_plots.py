@@ -39,15 +39,15 @@ line_lines = line_data["name"][()]
 line_rv  = line_data["rv"][()]
 rv_error_line = line_data["rv_error"][()]
 
-vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-25], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
+vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-28], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
 
-rv_obs = np.array(rv_obs[0:-25])
+rv_obs = np.array(rv_obs[0:-28])
 rv_obs -= rv_obs[-1]
 
-UTC_time = UTC_time[0:-25]
+UTC_time = UTC_time[0:-28]
 
 def jld2_read(jld2_file, variable, vb, index):
-    array = jld2_file[variable[index]][()][0:-25]
+    array = jld2_file[variable[index]][()][0:-28]
     array = np.array(array + vb)
     array -= array[-1]
     return array
@@ -80,9 +80,9 @@ def plot_line(UTC_time, rv_obs, line_rv_array, model, model_label, GRASS, GRASS_
     plt.clf()
 
 for i in range(0,len(lines)):
-    rv_error_GRASS_cb_array = grass_data[rv_error_GRASS_cb[i]][()][0:-25]
-    rv_error_GRASS_no_cb_array = grass_data_no_cb[rv_error_GRASS_no_cb[i]][()][0:-25]
-    rv_error_line_array = line_data[rv_error_line[i]][()][0:-25]
+    rv_error_GRASS_cb_array = grass_data[rv_error_GRASS_cb[i]][()][0:-28]
+    rv_error_GRASS_no_cb_array = grass_data_no_cb[rv_error_GRASS_no_cb[i]][()][0:-28]
+    rv_error_line_array = line_data[rv_error_line[i]][()][0:-28]
     
     GRASS_rv_array = jld2_read(grass_data, GRASS_rv, vb, i)
     line_rv_array = jld2_read(line_data, line_rv, vb, i)

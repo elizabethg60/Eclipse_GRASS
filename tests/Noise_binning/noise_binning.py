@@ -35,7 +35,7 @@ def rms(arr, mean):
     return np.sqrt((np.nansum((arr - mean)**2))/len(arr))
 
 # GRASS
-grass_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/KSSD/KSSD_3ext/data/neid_all_lines_rv_regular_KSSD_3ext.jld2", "r")
+grass_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/data/neid_all_lines_rv_regular_SSD_3ext.jld2", "r")
 lines = grass_data["name"][()]
 GRASS_rv  = grass_data["rv"][()]
 # line by line data
@@ -50,9 +50,9 @@ for i in data["obsdate"][15:-150]:
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
 
-vb, warnings, flag = get_BC_vel(JDUTC=time_julian[48:-25], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
+vb, warnings, flag = get_BC_vel(JDUTC=time_julian[48:-28], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
 
-UTC_time = UTC_time[48:-25]
+UTC_time = UTC_time[48:-28]
 print(len(UTC_time))
 
 path_october = "/storage/group/ebf11/default/pipeline/neid_solar/data/v1.3/L2/2023/10/15/"
@@ -79,7 +79,7 @@ for file in os.listdir(directory):
         nxt_day_time.append(datetime.strptime(inputSpectrum[0].header["DATE-OBS"], "%Y-%m-%dT%H:%M:%S.%f"))
 
 def jld2_read(jld2_file, variable, vb, index):
-    array = jld2_file[variable[index]][()][48:-25]
+    array = jld2_file[variable[index]][()][48:-28]
     array = np.array(array + vb)
     array -= array[-1]
     return array

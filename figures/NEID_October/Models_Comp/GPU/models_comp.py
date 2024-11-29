@@ -41,8 +41,8 @@ for i in data["obsdate"][15:-150]:
     dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S") + timedelta(seconds=27.5)
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
-vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-25], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
-rv_obs = list(data["ccfrvmod"][15:-150]*1000 + 644.9)[0:-25]
+vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-28], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
+rv_obs = list(data["ccfrvmod"][15:-150]*1000 + 644.9)[0:-28]
 
 # line by line data
 line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline.jld2", "r")
@@ -84,7 +84,7 @@ grass_data_no_cb_HD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figure
 GRASS_no_cb_v_HD  = grass_data_no_cb_HD["rv"][()]
 
 def jld2_read(jld2_file, variable, vb, index):
-    array = jld2_file[variable[index]][()][0:-25]
+    array = jld2_file[variable[index]][()][0:-28]
     array = np.array(array + vb)
     array -= array[-1]
     return array
@@ -104,7 +104,7 @@ def plot_4_4(projected, grass_cb, grass_no_cb, data_300,
     arr_300_pipe = []
     line_err = []
     for i in range(0,len(lines)):
-        if i == 10:
+        if i == 10 or i == 11:
             continue
 
         projected_i = jld2_read(projected_file, projected, vb, i)
@@ -113,7 +113,7 @@ def plot_4_4(projected, grass_cb, grass_no_cb, data_300,
         data_300_i = jld2_read(file_300, data_300, vb, i)
         
         line_i = jld2_read(line_file, line_rv, vb, i)
-        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-25]))
+        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-28]))
 
         lines_arr.append(lines[i])
         projected_arr.append(rms(line_i, projected_i))
@@ -158,13 +158,13 @@ def plot_2_2(projected, grass_no_cb,
     lines_arr = []
     line_err = []
     for i in range(0,len(lines)):
-        if i == 10:
+        if i == 10 or i == 11:
             continue
 
         projected_i = jld2_read(projected_file, projected, vb, i)
         grass_no_cb_i = jld2_read(grass_no_cb_file, grass_no_cb, vb, i)
         line_i = jld2_read(line_file, line_rv, vb, i)
-        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-25]))
+        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-28]))
 
         lines_arr.append(lines[i])
         projected_arr.append(rms(line_i, projected_i))
@@ -200,13 +200,13 @@ def plot_bin(projected, grass_no_cb,
     lines_arr = []
     line_err = []
     for i in range(0,len(lines)):
-        if i == 10:
+        if i == 10 or i == 11:
             continue
 
         projected_i = jld2_read(projected_file, projected, vb, i)
         grass_no_cb_i = jld2_read(grass_no_cb_file, grass_no_cb, vb, i)
         line_i = jld2_read(line_file, line_rv, vb, i)
-        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-25]))
+        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-28]))
 
         lines_arr.append(lines[i])
         projected_arr.append(rms(line_i, projected_i))
@@ -249,7 +249,7 @@ def plot_single_rms(line_file, line_rv, projected_file, projected, grass_cb_file
     SSD_3ext_grass_no_cb_pipeline = []
 
     for i in range(0,len(lines)):
-        if i == 10:
+        if i == 10 or i == 11:
             continue
 
         projected_i = jld2_read(projected_file, projected, vb, i)

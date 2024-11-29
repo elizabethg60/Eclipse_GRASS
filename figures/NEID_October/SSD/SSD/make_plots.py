@@ -32,19 +32,19 @@ for i in data["obsdate"][15:-150]:
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
 # line by line data
-line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline.jld2", "r")
+line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline_new.jld2", "r")
 line_rv  = line_data["rv"][()]
 rv_error_line = line_data["rv_error"][()]
 
-vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-25], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
+vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-28], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
 
-rv_obs = np.array(rv_obs[0:-25])
+rv_obs = np.array(rv_obs[0:-28])
 rv_obs -= rv_obs[-1]
 
-UTC_time = UTC_time[0:-25]
+UTC_time = UTC_time[0:-28]
 
 def jld2_read(jld2_file, variable, vb, index):
-    array = jld2_file[variable[index]][()][0:-25]
+    array = jld2_file[variable[index]][()][0:-28]
     array = np.array(array + vb)
     array -= array[-1]
     return array
@@ -73,13 +73,13 @@ def plot_line(UTC_time, rv_obs, line_rv_array, model, model_label, GRASS, GRASS_
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    plt.savefig("{}/rm_and_residuals_{}.png".format(path, save))
+    plt.savefig("{}/rm_and_residuals_{}_new.png".format(path, save))
     plt.clf()
 
-for i in range(0,len(lines)):
-    rv_error_GRASS_cb_array = grass_data[rv_error_GRASS_cb[i]][()][0:-25]
-    rv_error_GRASS_no_cb_array = grass_data_no_cb[rv_error_GRASS_no_cb[i]][()][0:-25]
-    rv_error_line_array = line_data[rv_error_line[i]][()][0:-25]
+for i in range(0, len(lines)):
+    rv_error_GRASS_cb_array = grass_data[rv_error_GRASS_cb[i]][()][0:-28]
+    rv_error_GRASS_no_cb_array = grass_data_no_cb[rv_error_GRASS_no_cb[i]][()][0:-28]
+    rv_error_line_array = line_data[rv_error_line[i]][()][0:-28]
     
     GRASS_rv_array = jld2_read(grass_data, GRASS_rv, vb, i)
     line_rv_array = jld2_read(line_data, line_rv, vb, i)

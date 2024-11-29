@@ -41,8 +41,8 @@ for i in data["obsdate"][15:-150]:
     dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S") + timedelta(seconds=27.5)
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
-vb_neid, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-25], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
-UTC_time = UTC_time[0:-25]
+vb_neid, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-28], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
+UTC_time = UTC_time[0:-28]
 
 def jld2_read(jld2_file, variable, vb, index):
     array = jld2_file[variable[index]][()][47:-20]
@@ -51,7 +51,7 @@ def jld2_read(jld2_file, variable, vb, index):
     return array
 
 def jld2_read_neid(jld2_file, variable, vb, index):
-    array = jld2_file[variable[index]][()][0:-25]
+    array = jld2_file[variable[index]][()][0:-28]
     array = np.array(array + vb)
     array -= array[-1]
     return array

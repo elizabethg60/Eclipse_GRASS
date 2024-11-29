@@ -30,10 +30,10 @@ for i in data["obsdate"][15:-150]:
     dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S") + timedelta(seconds=27.5)
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
-vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-25], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
-rv_obs = np.array(rv_obs[0:-25])
+vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-28], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
+rv_obs = np.array(rv_obs[0:-28])
 rv_obs -= rv_obs[-1]
-UTC_time = UTC_time[0:-25]
+UTC_time = UTC_time[0:-28]
 
 # line by line data
 line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline.jld2", "r")
@@ -42,7 +42,7 @@ line_rv  = line_data["rv"][()]
 rv_error_line = line_data["rv_error"][()]
 
 def jld2_read(jld2_file, variable, vb, index):
-    array = jld2_file[variable[index]][()][0:-25]
+    array = jld2_file[variable[index]][()][0:-28]
     array = np.array(array + vb)
     array -= array[-1]
     return array
@@ -96,9 +96,9 @@ def bin_array(arr, bin_size):
 line_rv_array_18 = jld2_read(line_data, line_rv, vb, 18)
 line_rv_array_19 = jld2_read(line_data, line_rv, vb, 19)
 plot_line(UTC_time, line_rv_array_18, line_rv_array_19, lines[18], lines[19], "unbinned")
-plot_line(range(0, len(bin_array(line_rv_array_18,6))), bin_array(line_rv_array_18,6), bin_array(line_rv_array_19,6), lines[18], lines[19], "binned")
+plot_line(range(0, len(bin_array(line_rv_array_18,5))), bin_array(line_rv_array_18,5), bin_array(line_rv_array_19,5), lines[18], lines[19], "binned")
 
-rv_error_line_array18 = line_data[rv_error_line[18]][()][0:-25]
-rv_error_line_array19 = line_data[rv_error_line[19]][()][0:-25]
+rv_error_line_array18 = line_data[rv_error_line[18]][()][0:-28]
+rv_error_line_array19 = line_data[rv_error_line[19]][()][0:-28]
 plot_line(UTC_time, rv_error_line_array18, rv_error_line_array19, lines[18], lines[19], "unbinned_err")
-plot_line(range(0, len(bin_array(rv_error_line_array18,6))), bin_array(rv_error_line_array18,6), bin_array(rv_error_line_array19,6), lines[18], lines[19], "binned_err")
+plot_line(range(0, len(bin_array(rv_error_line_array18,5))), bin_array(rv_error_line_array18,5), bin_array(rv_error_line_array19,5), lines[18], lines[19], "binned_err")
