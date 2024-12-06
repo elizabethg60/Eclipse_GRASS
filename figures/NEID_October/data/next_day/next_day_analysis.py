@@ -99,8 +99,8 @@ def plot_3(projected, grass_cb, grass_no_cb, grass_cb_err,
     plt.scatter(lines_arr, projected_arr_pipe, color = 'b', facecolors='none', label = label1)
     plt.scatter(lines_arr, grass_cb_arr_pipe, color = 'r', facecolors='none', label = label2)
     plt.scatter(lines_arr, grass_no_cb_arr_pipe, color = 'g', facecolors='none', label = label3)
-    plt.scatter(lines_arr, line_rv_pipe, color = 'y', facecolors='none', label = "line rv")
-    plt.scatter(lines_arr, residuals, color = 'pink', facecolors='none', label = "line rv - label3")
+    plt.scatter(lines_arr, line_rv_pipe, color = 'y', facecolors='none', label = "Line RV")
+    # plt.scatter(lines_arr, residuals, color = 'pink', facecolors='none', label = "line rv - CCF RV no var")
     plt.scatter(lines_arr, line_err, color = 'k', marker='x')
     plt.xlabel("Line Wavelength (Å)", fontsize=12)
     plt.ylabel("RV RMS (m/s)", fontsize=12)
@@ -114,4 +114,4 @@ def plot_3(projected, grass_cb, grass_no_cb, grass_cb_err,
     lines_combined_avg = np.mean(lines_combined, axis=0)
     print(rms(bin_array(lines_combined_avg,5)))
 
-plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "next_day_analysis", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "next_day_analysis.pdf", line_data, line_rv, 'Projected RV (no granulation mitigation)', 'GRASS (no temporal variability)', 'GRASS')

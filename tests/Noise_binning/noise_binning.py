@@ -50,36 +50,38 @@ for i in data["obsdate"][15:-150]:
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
 
-vb, warnings, flag = get_BC_vel(JDUTC=time_julian[48:-28], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
+vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-28], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
 
-UTC_time = UTC_time[48:-28]
+UTC_time = UTC_time[0:-28]
 print(len(UTC_time))
+print(UTC_time[0], UTC_time[4])
+print(UTC_time[5], UTC_time[9])
 
-path_october = "/storage/group/ebf11/default/pipeline/neid_solar/data/v1.3/L2/2023/10/15/"
-directory = os.fsencode(path_october)
-RV_array_15 = []
-nxt_day_time = []
-for file in os.listdir(directory):
-    filename = os.fsdecode(file)
-    if filename.endswith(".fits"):
-        inputSpectrum = fits.open('{}/{}'.format(path_october, filename))
-        RV_array_15.append(inputSpectrum[12].header["CCFRVMOD"] * 1000)
-        nxt_day_time.append(datetime.strptime(inputSpectrum[0].header["DATE-OBS"], "%Y-%m-%dT%H:%M:%S.%f"))
-# 0-83 roughly 2023-10-14 16:32:53.500000 2023-10-14 18:28:38.500000
+# path_october = "/storage/group/ebf11/default/pipeline/neid_solar/data/v1.3/L2/2023/10/15/"
+# directory = os.fsencode(path_october)
+# RV_array_15 = []
+# nxt_day_time = []
+# for file in os.listdir(directory):
+#     filename = os.fsdecode(file)
+#     if filename.endswith(".fits"):
+#         inputSpectrum = fits.open('{}/{}'.format(path_october, filename))
+#         RV_array_15.append(inputSpectrum[12].header["CCFRVMOD"] * 1000)
+#         nxt_day_time.append(datetime.strptime(inputSpectrum[0].header["DATE-OBS"], "%Y-%m-%dT%H:%M:%S.%f"))
+# # 0-83 roughly 2023-10-14 16:32:53.500000 2023-10-14 18:28:38.500000
 
-path_october = "/storage/group/ebf11/default/pipeline/neid_solar/data/v1.3/L2/2023/10/16/"
-directory = os.fsencode(path_october)
-RV_array_16 = []
-nxt_day_time = []
-for file in os.listdir(directory):
-    filename = os.fsdecode(file)
-    if filename.endswith(".fits"):
-        inputSpectrum = fits.open('{}/{}'.format(path_october, filename))
-        RV_array_16.append(inputSpectrum[12].header["CCFRVMOD"] * 1000)
-        nxt_day_time.append(datetime.strptime(inputSpectrum[0].header["DATE-OBS"], "%Y-%m-%dT%H:%M:%S.%f"))
+# path_october = "/storage/group/ebf11/default/pipeline/neid_solar/data/v1.3/L2/2023/10/16/"
+# directory = os.fsencode(path_october)
+# RV_array_16 = []
+# nxt_day_time = []
+# for file in os.listdir(directory):
+#     filename = os.fsdecode(file)
+#     if filename.endswith(".fits"):
+#         inputSpectrum = fits.open('{}/{}'.format(path_october, filename))
+#         RV_array_16.append(inputSpectrum[12].header["CCFRVMOD"] * 1000)
+#         nxt_day_time.append(datetime.strptime(inputSpectrum[0].header["DATE-OBS"], "%Y-%m-%dT%H:%M:%S.%f"))
 
 def jld2_read(jld2_file, variable, vb, index):
-    array = jld2_file[variable[index]][()][48:-28]
+    array = jld2_file[variable[index]][()][0:-28]
     array = np.array(array + vb)
     array -= array[-1]
     return array
@@ -93,7 +95,8 @@ ax1 = fig.add_subplot()
 norm = mcolors.Normalize(vmin=np.min(lines), vmax=np.max(lines) + 100)
 # Create a colormap from blue to red
 cmap = plt.get_cmap('coolwarm')  # or 'RdYlBu' or any other suitable colormap
-
+sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+sm.set_array([])
 for i, value in enumerate(lines):
     if i == 10:
         continue
@@ -113,24 +116,25 @@ for i, value in enumerate(lines):
     ax1.scatter(bin_arr, RMS_array_eclipse_day, color = color)
     ax1.plot(bin_arr, RMS_array_eclipse_day, color = color)
 
-RMS_array_15 = []
-for i in range(0, len(bin_arr)):
-        binned_data = bin_array(RV_array_15[0:83], int(bin_arr[i]))
-        RMS_array_15.append(rms(binned_data, np.mean(binned_data)))
-ax1.scatter(bin_arr, RMS_array_15, color = 'g', label = "10/15")
-ax1.plot(bin_arr, RMS_array_15, color = 'g')
+# # RMS_array_15 = []
+# # for i in range(0, len(bin_arr)):
+# #         binned_data = bin_array(RV_array_15[0:83], int(bin_arr[i]))
+# #         RMS_array_15.append(rms(binned_data, np.mean(binned_data)))
+# # ax1.scatter(bin_arr, RMS_array_15, color = 'g', label = "10/15")
+# # ax1.plot(bin_arr, RMS_array_15, color = 'g')
 
-RMS_array_16 = []
-for i in range(0, len(bin_arr)):
-        binned_data = bin_array(RV_array_16[0:83], int(bin_arr[i]))
-        RMS_array_16.append(rms(binned_data, np.mean(binned_data)))
-ax1.scatter(bin_arr, RMS_array_16, color = 'y', label = "10/16")
-ax1.plot(bin_arr, RMS_array_16, color = 'y')
+# # RMS_array_16 = []
+# # for i in range(0, len(bin_arr)):
+# #         binned_data = bin_array(RV_array_16[0:83], int(bin_arr[i]))
+# #         RMS_array_16.append(rms(binned_data, np.mean(binned_data)))
+# # ax1.scatter(bin_arr, RMS_array_16, color = 'y', label = "10/16")
+# # ax1.plot(bin_arr, RMS_array_16, color = 'y')
 
 ax1.set_xlabel("bin size")
-ax1.set_ylabel("RMS (m/s)") 
-plt.legend()
+ax1.set_ylabel("log RMS (m/s)") 
+# plt.legend()
 plt.yscale('log')
-plt.savefig("noise_binning.png")
+cbar = fig.colorbar(sm, ax=ax1, orientation='vertical')  # or 'horizontal' for horizontal colorbar
+cbar.set_label('Wavelength (Å)')
+plt.savefig("noise_binning_project.pdf")
 plt.clf()
-

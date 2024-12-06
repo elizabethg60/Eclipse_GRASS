@@ -591,7 +591,7 @@ def rms_comp(line_file, line_rv, title):
 plot_line_bin(RV_list_no_cb_SSD_3ext, GRASS_rv_SSD_3ext, GRASS_no_cb_v_SSD_3ext, file_regular_SSD_3ext, grass_data_SSD_3ext, grass_data_no_cb_SSD_3ext, "Bins/SSD_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 
 # plot_model_bin(RV_list_no_cb_NL94, RV_list_no_cb_SSD, RV_list_no_cb_HD, RV_list_no_cb_300, file_regular_NL94, file_regular_SSD, file_regular_HD, file_regular_300, "Bins/Projected", line_data, line_rv, "NL94", "SSD", "HD", "300")
-# plot_model_bin(GRASS_rv_NL94, GRASS_rv_SSD, GRASS_rv_HD, GRASS_rv_300, grass_data_NL94, grass_data_SSD, grass_data_HD, grass_data_300, "Bins/GRASS_cb", line_data, line_rv, "NL94", "SSD", "HD", "300")
+# plot_model_bin(GRASS_rv_NL94, GRASS_rv_SSD, GRASS_rv_HD, GRASS_rv_300, grass_data_NL94, grass_data_SSD, grass_data_HD, grass_data_300, "Bins/GRASS_cb.pdf", line_data, line_rv, "NL94", "SSD", "HD", "300")
 # plot_model_bin(GRASS_no_cb_v_NL94, GRASS_no_cb_v_SSD, GRASS_no_cb_v_HD, GRASS_no_cb_v_300, grass_data_no_cb_NL94, grass_data_no_cb_SSD, grass_data_no_cb_HD, grass_data_no_cb_300, "Bins/GRASS_no_cb", line_data, line_rv, "NL94", "SSD", "HD", "300")
 
 # plot_3(RV_list_no_cb_NL94, GRASS_rv_NL94, GRASS_no_cb_v_NL94, 0, file_regular_NL94, grass_data_NL94, grass_data_no_cb_NL94, "LD_comp/NL94", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')

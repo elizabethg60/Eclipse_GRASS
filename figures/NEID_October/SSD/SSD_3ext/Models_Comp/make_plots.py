@@ -49,8 +49,8 @@ def jld2_read(jld2_file, variable, vb, index):
 
 def plot_line(UTC_time, line_rv_array_7, line_rv_array_8, label1, label2, save):
     fig, axs = plt.subplots(2, sharex=True, sharey=False, gridspec_kw={'hspace': 0, 'height_ratios': [3, 1]})
-    axs[0].scatter(UTC_time, line_rv_array_7, color = 'k', marker = "x", s = 18, label = label1)
-    axs[0].scatter(UTC_time, line_rv_array_8, color = 'y', marker = "x", s = 18, label = label2) 
+    axs[0].scatter(UTC_time, line_rv_array_7, color = 'k', marker = "x", s = 18, label = "Fe I {}".format(label1))
+    axs[0].scatter(UTC_time, line_rv_array_8, color = 'y', marker = "x", s = 18, label = "Fe I {}".format(label2))
     axs[0].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     axs[0].set_xlabel("Time (UTC)", fontsize=12)
     axs[0].set_ylabel("RV [m/s]", fontsize=12)
@@ -59,16 +59,16 @@ def plot_line(UTC_time, line_rv_array_7, line_rv_array_8, label1, label2, save):
     plt.yticks(fontsize=12)
     # residuals
     axs[1].scatter(UTC_time, line_rv_array_7 - line_rv_array_8, color = 'k', marker = "x", s = 3) 
-    rms_model_no_cb = round(np.sqrt((np.nansum((line_rv_array_7 - line_rv_array_8)**2))/len(line_rv_array_7)),2)
-    axs[1].text(UTC_time[-23], -5, "RMS {}".format(rms_model_no_cb))
-    rms_grass_no_cb = round(np.sqrt((np.nansum((line_rv_array_7[-4:-1] - line_rv_array_8[-4:-1])**2))/len(line_rv_array_7[-4:-1])),2)
-    axs[1].text(UTC_time[-23], 10, "Out of Transit RMS {}".format(rms_grass_no_cb))
+    # rms_model_no_cb = round(np.sqrt((np.nansum((line_rv_array_7 - line_rv_array_8)**2))/len(line_rv_array_7)),2)
+    # axs[1].text(UTC_time[-23], -5, "RMS {}".format(rms_model_no_cb))
+    # rms_grass_no_cb = round(np.sqrt((np.nansum((line_rv_array_7[-4:-1] - line_rv_array_8[-4:-1])**2))/len(line_rv_array_7[-4:-1])),2)
+    # axs[1].text(UTC_time[-23], 10, "Out of Transit RMS {}".format(rms_grass_no_cb))
     axs[1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     axs[1].set_xlabel("Time (UTC)", fontsize=12)
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    plt.savefig("{}.png".format(save))
+    plt.savefig("{}.pdf".format(save))
     plt.clf()
 
 def bin_array(arr, bin_size):
@@ -95,10 +95,10 @@ def bin_array(arr, bin_size):
 
 line_rv_array_18 = jld2_read(line_data, line_rv, vb, 18)
 line_rv_array_19 = jld2_read(line_data, line_rv, vb, 19)
-plot_line(UTC_time, line_rv_array_18, line_rv_array_19, lines[18], lines[19], "unbinned")
-plot_line(range(0, len(bin_array(line_rv_array_18,5))), bin_array(line_rv_array_18,5), bin_array(line_rv_array_19,5), lines[18], lines[19], "binned")
+plot_line(UTC_time, line_rv_array_18, line_rv_array_19, lines[18], lines[19], "unbinned_trace")
+# plot_line(range(0, len(bin_array(line_rv_array_18,5))), bin_array(line_rv_array_18,5), bin_array(line_rv_array_19,5), lines[18], lines[19], "binned")
 
-rv_error_line_array18 = line_data[rv_error_line[18]][()][0:-28]
-rv_error_line_array19 = line_data[rv_error_line[19]][()][0:-28]
-plot_line(UTC_time, rv_error_line_array18, rv_error_line_array19, lines[18], lines[19], "unbinned_err")
-plot_line(range(0, len(bin_array(rv_error_line_array18,5))), bin_array(rv_error_line_array18,5), bin_array(rv_error_line_array19,5), lines[18], lines[19], "binned_err")
+# rv_error_line_array18 = line_data[rv_error_line[18]][()][0:-28]
+# rv_error_line_array19 = line_data[rv_error_line[19]][()][0:-28]
+# plot_line(UTC_time, rv_error_line_array18, rv_error_line_array19, lines[18], lines[19], "unbinned_err")
+# plot_line(range(0, len(bin_array(rv_error_line_array18,5))), bin_array(rv_error_line_array18,5), bin_array(rv_error_line_array19,5), lines[18], lines[19], "binned_err")

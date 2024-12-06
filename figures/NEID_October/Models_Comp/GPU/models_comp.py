@@ -50,38 +50,19 @@ lines = line_data["name"][()]
 line_rv = line_data["rv"][()]
 line_rv_err = line_data["rv_error"][()]
 
-# NL94
+# SSD + 3ext
 # GRASS CB
-grass_data_NL94 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/NL94/GPU/data/neid_all_lines_rv_regular_NL94_gpu.jld2", "r")
-GRASS_rv_NL94  = grass_data_NL94["rv"][()]
-# GRASS no CB
-grass_data_no_cb_NL94 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/NL94/GPU/data/neid_all_lines_rv_off_NL94_gpu.jld2", "r")
-GRASS_no_cb_v_NL94  = grass_data_no_cb_NL94["rv"][()]
-
-# 300
-# GRASS CB
-grass_data_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/300/300/GPU/data/neid_all_lines_rv_regular_300_gpu.jld2", "r")
-GRASS_rv_300  = grass_data_300["rv"][()]
-# GRASS no CB
-grass_data_no_cb_300 = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/300/300/GPU/data/neid_all_lines_rv_off_300_gpu.jld2", "r")
-GRASS_no_cb_v_300  = grass_data_no_cb_300["rv"][()]
-
-# SSD
-# GRASS CB
-grass_data_SSD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD/GPU/data/neid_all_lines_rv_regular_SSD_gpu.jld2", "r")
+grass_data_SSD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_regular_SSD_gpu.jld2", "r")
 GRASS_rv_SSD  = grass_data_SSD["rv"][()]
-rv_error_GRASS_cb  = grass_data_SSD["rv_error"][()]
 # GRASS no CB
-grass_data_no_cb_SSD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD/GPU/data/neid_all_lines_rv_off_SSD_gpu.jld2", "r")
+grass_data_no_cb_SSD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_off_SSD_gpu.jld2", "r")
 GRASS_no_cb_v_SSD  = grass_data_no_cb_SSD["rv"][()]
 
-# HD
-# GRASS CB
-grass_data_HD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/HD/GPU/data/neid_all_lines_rv_regular_HD_gpu.jld2", "r")
-GRASS_rv_HD  = grass_data_HD["rv"][()]
+grass_data_SSD_first = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_regular_SSD_gpu_first.jld2", "r")
+GRASS_rv_SSD_first  = grass_data_SSD_first["rv"][()]
 # GRASS no CB
-grass_data_no_cb_HD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/HD/GPU/data/neid_all_lines_rv_off_HD_gpu.jld2", "r")
-GRASS_no_cb_v_HD  = grass_data_no_cb_HD["rv"][()]
+grass_data_no_cb_SSD_first = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_off_SSD_gpu_first.jld2", "r")
+GRASS_no_cb_v_SSD_first  = grass_data_no_cb_SSD_first["rv"][()]
 
 def jld2_read(jld2_file, variable, vb, index):
     array = jld2_file[variable[index]][()][0:-28]
@@ -104,8 +85,6 @@ def plot_4_4(projected, grass_cb, grass_no_cb, data_300,
     arr_300_pipe = []
     line_err = []
     for i in range(0,len(lines)):
-        if i == 10 or i == 11:
-            continue
 
         projected_i = jld2_read(projected_file, projected, vb, i)
         grass_cb_i = jld2_read(grass_cb_file, grass_cb, vb, i)
@@ -148,7 +127,8 @@ def plot_4_4(projected, grass_cb, grass_no_cb, data_300,
     plt.clf() 
 
 def plot_2_2(projected, grass_no_cb, 
-                 projected_file, grass_no_cb_file, title, 
+                 projected_file, grass_no_cb_file, projected_first, grass_no_cb_first, 
+                 projected_file_first, grass_no_cb_file_first, title, 
                  line_file, line_rv, label1, label3):
     
     projected_arr = []
@@ -157,9 +137,21 @@ def plot_2_2(projected, grass_no_cb,
     grass_no_cb_arr_pipe = []
     lines_arr = []
     line_err = []
-    for i in range(0,len(lines)):
-        if i == 10 or i == 11:
-            continue
+    for i in range(0,11):
+
+        projected_i = jld2_read(projected_file_first, projected_first, vb, i)
+        grass_no_cb_i = jld2_read(grass_no_cb_file_first, grass_no_cb_first, vb, i)
+        line_i = jld2_read(line_file, line_rv, vb, i)
+        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-28]))
+
+        lines_arr.append(lines[i])
+        projected_arr.append(rms(line_i, projected_i))
+        grass_no_cb_arr.append(rms(line_i, grass_no_cb_i))
+
+        projected_arr_pipe.append(rms(rv_obs, projected_i))
+        grass_no_cb_arr_pipe.append(rms(rv_obs, grass_no_cb_i))
+
+    for i in range(11,22):
 
         projected_i = jld2_read(projected_file, projected, vb, i)
         grass_no_cb_i = jld2_read(grass_no_cb_file, grass_no_cb, vb, i)
@@ -200,8 +192,6 @@ def plot_bin(projected, grass_no_cb,
     lines_arr = []
     line_err = []
     for i in range(0,len(lines)):
-        if i == 10 or i == 11:
-            continue
 
         projected_i = jld2_read(projected_file, projected, vb, i)
         grass_no_cb_i = jld2_read(grass_no_cb_file, grass_no_cb, vb, i)
@@ -249,8 +239,6 @@ def plot_single_rms(line_file, line_rv, projected_file, projected, grass_cb_file
     SSD_3ext_grass_no_cb_pipeline = []
 
     for i in range(0,len(lines)):
-        if i == 10 or i == 11:
-            continue
 
         projected_i = jld2_read(projected_file, projected, vb, i)
         grass_cb_i = jld2_read(grass_cb_file, grass_cb, vb, i)
@@ -313,9 +301,5 @@ def plot_single_rms(line_file, line_rv, projected_file, projected, grass_cb_file
     plt.savefig(title, bbox_inches='tight')
     plt.clf() 
 
-       
-plot_2_2(GRASS_rv_NL94, GRASS_no_cb_v_NL94, grass_data_NL94, grass_data_no_cb_NL94, "plot_NL94", line_data, line_rv, 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_2_2(GRASS_rv_SSD, GRASS_no_cb_v_SSD, grass_data_SSD, grass_data_no_cb_SSD, "plot_SSD", line_data, line_rv, 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_2_2(GRASS_rv_HD, GRASS_no_cb_v_HD, grass_data_HD, grass_data_no_cb_HD, "plot_HD", line_data, line_rv, 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_2_2(GRASS_rv_300, GRASS_no_cb_v_300, grass_data_300, grass_data_no_cb_300, "plot_300", line_data, line_rv, 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_4_4(GRASS_rv_NL94, GRASS_rv_SSD, GRASS_rv_HD, GRASS_rv_300, grass_data_NL94, grass_data_SSD, grass_data_HD, grass_data_300, "plot_LD_comp", line_data, line_rv, "NL94", "SSD", "HD", "300")
+plot_2_2(GRASS_rv_SSD, GRASS_no_cb_v_SSD, grass_data_SSD, grass_data_no_cb_SSD,
+         GRASS_rv_SSD_first, GRASS_no_cb_v_SSD_first, grass_data_SSD_first, grass_data_no_cb_SSD_first, "plot_SSD", line_data, line_rv, 'CCF RV - GRASS var', 'CCF RV - no var')
