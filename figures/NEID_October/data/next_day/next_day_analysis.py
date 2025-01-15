@@ -40,20 +40,20 @@ for i in neid_1015:
 vb, warnings, flag = get_BC_vel(JDUTC=time_julian[0:-1], lat=31.9583 , longi=-111.5967, alt=209.7938, SolSystemTarget='Sun', predictive=False,zmeas=0.0)
 
 #line by line data
-line_data = h5py.File("neid_RVlinebyline_nxt_day.jld2", "r")
+line_data = h5py.File("data/neid_RVlinebyline_nxt_day.jld2", "r")
 lines = line_data["name"][()]
 line_rv = line_data["rv"][()]
 line_rv_err = line_data["rv_error"][()]
 
 #projected rv model - regular
-file_regular_SSD = h5py.File("neid_october_N_50_nxt_day_SSD.jld2", "r")
+file_regular_SSD = h5py.File("data/neid_october_N_50_nxt_day_SSD.jld2", "r")
 RV_list_no_cb_SSD = file_regular_SSD["RV_list_no_cb"][()]
 #GRASS CB
-grass_data_KSSD = h5py.File("neid_all_lines_rv_regular_SSD_nxt_day.jld2", "r")
+grass_data_KSSD = h5py.File("data/neid_all_lines_rv_regular_SSD_nxt_day.jld2", "r")
 GRASS_rv_KSSD  = grass_data_KSSD["rv"][()]
 rv_error_GRASS_cb  = grass_data_KSSD["rv_error"][()]
 #GRASS no CB
-grass_data_no_cb_KSSD = h5py.File("neid_all_lines_rv_off_SSD_nxt_day.jld2", "r")
+grass_data_no_cb_KSSD = h5py.File("data/neid_all_lines_rv_off_SSD_nxt_day.jld2", "r")
 GRASS_no_cb_v_KSSD  = grass_data_no_cb_KSSD["rv"][()]
 
 def jld2_read(jld2_file, variable, vb, index):
@@ -114,4 +114,20 @@ def plot_3(projected, grass_cb, grass_no_cb, grass_cb_err,
     lines_combined_avg = np.mean(lines_combined, axis=0)
     print(rms(bin_array(lines_combined_avg,5)))
 
-plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "next_day_analysis.pdf", line_data, line_rv, 'Projected RV (no granulation mitigation)', 'GRASS (no temporal variability)', 'GRASS')
+    temp_refline_rvs = pd.read_csv("halverson_line_rv/test_rvs.csv")
+    wavelength = [5250.2084, 5250.6453, 5379.5734, 5381.0216, 5382.2562, 5383.368, 5432.546, 5432.947, 5434.5232, 5435.8577, 5436.2945, 5436.5875, 5576.0881, 5578.718, 6149.246, 6151.617, 6169.042, 6169.563, 6170.5056, 6173.3344, 6301.5008, 6302.4932]
+    plt.figure(figsize=(12, 6))
+    new_line_rv = []
+    for i in range(0, len(lines)): 
+        subset = temp_refline_rvs.loc[temp_refline_rvs['wavelength'] == "{}".format(wavelength[i])]
+        new_line_rv.append(rms(bin_array(subset['rv'],5)))
+    plt.scatter(lines, np.array(line_rv_pipe) - np.array(new_line_rv))
+    plt.xlabel("Line Wavelength (Å)", fontsize=12)
+    plt.ylabel("Difference in RV RMS (m/s)", fontsize=12)
+    plt.xticks(rotation=60)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.savefig("compute_line_rv_comp", bbox_inches='tight')
+    plt.clf()
+
+plot_3(RV_list_no_cb_SSD, GRASS_rv_KSSD, GRASS_no_cb_v_KSSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_KSSD, grass_data_no_cb_KSSD, "next_day_analysis.png", line_data, line_rv, 'Projected RV (no granulation mitigation)', 'GRASS (no temporal variability)', 'GRASS')

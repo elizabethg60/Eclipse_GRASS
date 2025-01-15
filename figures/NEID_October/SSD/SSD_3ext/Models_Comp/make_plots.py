@@ -68,7 +68,7 @@ def plot_line(UTC_time, line_rv_array_7, line_rv_array_8, label1, label2, save):
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    plt.savefig("{}.pdf".format(save))
+    plt.savefig("{}.png".format(save))
     plt.clf()
 
 def bin_array(arr, bin_size):
@@ -96,9 +96,9 @@ def bin_array(arr, bin_size):
 line_rv_array_18 = jld2_read(line_data, line_rv, vb, 18)
 line_rv_array_19 = jld2_read(line_data, line_rv, vb, 19)
 plot_line(UTC_time, line_rv_array_18, line_rv_array_19, lines[18], lines[19], "unbinned_trace")
-# plot_line(range(0, len(bin_array(line_rv_array_18,5))), bin_array(line_rv_array_18,5), bin_array(line_rv_array_19,5), lines[18], lines[19], "binned")
+plot_line(range(0, len(bin_array(line_rv_array_18,5))), bin_array(line_rv_array_18,5), bin_array(line_rv_array_19,5), lines[18], lines[19], "binned")
 
-# rv_error_line_array18 = line_data[rv_error_line[18]][()][0:-28]
-# rv_error_line_array19 = line_data[rv_error_line[19]][()][0:-28]
-# plot_line(UTC_time, rv_error_line_array18, rv_error_line_array19, lines[18], lines[19], "unbinned_err")
-# plot_line(range(0, len(bin_array(rv_error_line_array18,5))), bin_array(rv_error_line_array18,5), bin_array(rv_error_line_array19,5), lines[18], lines[19], "binned_err")
+rv_error_line_array18 = line_data[rv_error_line[18]][()][0:-28]
+rv_error_line_array19 = line_data[rv_error_line[19]][()][0:-28]
+plot_line(UTC_time, rv_error_line_array18, rv_error_line_array19, lines[18], lines[19], "unbinned_err")
+plot_line(range(0, len(bin_array(rv_error_line_array18,5))), bin_array(rv_error_line_array18,5), bin_array(rv_error_line_array19,5), lines[18], lines[19], "binned_err")

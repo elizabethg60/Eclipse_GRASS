@@ -3,14 +3,16 @@ files_and_dirs = readdir(path_october)
 files = filter(f -> isfile(joinpath(path_october, f)), files_and_dirs)
 files = files[4:length(files)-145]
 
-final_time = Vector{String}(undef, length(files))
+print(files)
+println(length(files))
+# final_time = Vector{String}(undef, length(files))
 
-using Dates
-for i in 1:length(final_time)
-    timestamp_str = split(files[i], '_')[2][1:end-5]
-    timestamp = DateTime(timestamp_str, "yyyymmddTHHMMSS")
-    new_timestamp = timestamp + Millisecond(27500)
-    final_time[i] = string(new_timestamp)
-end
-println(files)
-println(final_time)
+# using Dates
+# for i in 1:length(final_time)
+#     timestamp_str = split(files[i], '_')[2][1:end-5]
+#     timestamp = DateTime(timestamp_str, "yyyymmddTHHMMSS")
+#     new_timestamp = timestamp + Millisecond(27500)
+#     final_time[i] = string(new_timestamp)
+# end
+# println(files)
+# println(final_time)

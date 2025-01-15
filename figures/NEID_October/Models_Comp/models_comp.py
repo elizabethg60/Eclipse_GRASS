@@ -107,10 +107,22 @@ RV_list_no_cb_SSD_3ext = file_regular_SSD_3ext["RV_list_no_cb"][()]
 # GRASS CB
 grass_data_SSD_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/data/neid_all_lines_rv_regular_SSD_3ext.jld2", "r")
 GRASS_rv_SSD_3ext  = grass_data_SSD_3ext["rv"][()]
+GRASS_rv_SSD_3ext_var  = grass_data_SSD_3ext["rv_var"][()]
+GRASS_rv_SSD_3ext_var_lsf  = grass_data_SSD_3ext["rv_var_lsf"][()]
+GRASS_rv_SSD_3ext_lsf  = grass_data_SSD_3ext["rv_lsf"][()]
 rv_error_GRASS_cb_3ext  = grass_data_SSD_3ext["rv_error"][()]
 # GRASS no CB
 grass_data_no_cb_SSD_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/data/neid_all_lines_rv_off_SSD_3ext.jld2", "r")
 GRASS_no_cb_v_SSD_3ext  = grass_data_no_cb_SSD_3ext["rv"][()]
+GRASS_no_cb_v_SSD_3ext_var  = grass_data_no_cb_SSD_3ext["rv_var"][()]
+GRASS_no_cb_v_SSD_3ext_var_lsf  = grass_data_no_cb_SSD_3ext["rv_var_lsf"][()]
+GRASS_no_cb_v_SSD_3ext_lsf  = grass_data_no_cb_SSD_3ext["rv_lsf"][()]
+# GRASS no CB - fine time
+grass_data_no_cb_SSD_3ext_fine_time = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_off_SSD_gpu_15s_time.jld2", "r")
+GRASS_no_cb_v_SSD_3ext_fine_time  = grass_data_no_cb_SSD_3ext_fine_time["rv"][()]
+GRASS_no_cb_v_SSD_3ext_var_fine_time  = grass_data_no_cb_SSD_3ext_fine_time["rv_var"][()]
+GRASS_no_cb_v_SSD_3ext_var_lsf_fine_time  = grass_data_no_cb_SSD_3ext_fine_time["rv_var_lsf"][()]
+GRASS_no_cb_v_SSD_3ext_lsf_fine_time  = grass_data_no_cb_SSD_3ext_fine_time["rv_lsf"][()]
 
 # HD
 # projected rv model - regular
@@ -125,6 +137,11 @@ GRASS_no_cb_v_HD  = grass_data_no_cb_HD["rv"][()]
 
 def jld2_read(jld2_file, variable, vb, index):
     array = jld2_file[variable[index]][()][0:-28]
+    array = np.array(array + vb)
+    array -= array[-1]
+    return array
+def jld2_read_fine(jld2_file, variable, vb, index):
+    array = jld2_file[variable[index]][()][0:130]
     array = np.array(array + vb)
     array -= array[-1]
     return array
@@ -333,7 +350,7 @@ def plot_3(projected, grass_cb, grass_no_cb, grass_cb_err,
     plt.savefig(title, bbox_inches='tight')
     plt.clf() 
 
-def plot_4_4(projected, grass_cb, grass_no_cb, data_300, grass_cb_err, 
+def plot_4(projected, grass_cb, grass_no_cb, data_300, grass_cb_err, 
                  projected_file, grass_cb_file, grass_no_cb_file, file_300, title, 
                  line_file, line_rv, label1, label2, label3, label4):
     
@@ -584,11 +601,117 @@ def rms_comp(line_file, line_rv, title):
     plt.savefig(title, bbox_inches='tight')
     plt.clf() 
 
+def plot_4(projected, grass_cb, grass_no_cb, data_300, file, title, 
+                 line_file, line_rv, label1, label2, label3, label4):
+    
+    projected_arr = []
+    grass_cb_arr = []
+    grass_no_cb_arr = []
+    lines_arr = []
+    arr_300 = []
+    line_err = []
+    for i in range(0,len(lines)):
+        if i == 10 or i == 14:
+            continue
+
+        projected_i = jld2_read(file, projected, vb, i)
+        grass_cb_i = jld2_read(file, grass_cb, vb, i)
+        grass_no_cb_i = jld2_read(file, grass_no_cb, vb, i)
+        data_300_i = jld2_read(file, data_300, vb, i)
+        
+        line_i = jld2_read(line_file, line_rv, vb, i)
+        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-28]))
+
+        lines_arr.append(lines[i])
+        projected_arr.append(rms(line_i, projected_i))
+        grass_cb_arr.append(rms(line_i, grass_cb_i))
+        grass_no_cb_arr.append(rms(line_i, grass_no_cb_i))
+        arr_300.append(rms(line_i, data_300_i))
+
+    plt.figure(figsize=(12, 6))
+    plt.scatter(lines_arr, projected_arr, label = label1, color = 'b')
+    plt.scatter(lines_arr, grass_cb_arr, label = label2, color = 'r')
+    plt.scatter(lines_arr, grass_no_cb_arr, label = label3, color = 'g')
+    plt.scatter(lines_arr, arr_300, label = label4, color = 'k')
+    plt.scatter(lines_arr, line_err, color = 'k', marker='x')
+
+    plt.title("solid - line rms & circle - pipeline rms")
+    plt.xlabel("Line Wavelength (Å)", fontsize=12)
+    plt.ylabel("RV RMS (m/s)", fontsize=12)
+    plt.xticks(rotation=60)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(fontsize=12)
+    plt.savefig(title, bbox_inches='tight')
+    plt.clf() 
+
+def plot_4_fine(projected, grass_cb, grass_no_cb, data_300,
+                projected_fine, grass_cb_fine, grass_no_cb_fine, data_300_fine, file, file_fine, title, 
+                 line_file, line_rv, label1, label2, label3, label4):
+    
+    projected_arr = []
+    grass_cb_arr = []
+    grass_no_cb_arr = []
+    arr_300 = []
+    projected_arr_fine = []
+    grass_cb_arr_fine = []
+    grass_no_cb_arr_fine = []
+    arr_300_fine = []
+    lines_arr = []
+    line_err = []
+    for i in range(0,len(lines)):
+        if i == 10 or i == 14 or i == 16:
+            continue
+
+        projected_i = jld2_read(file, projected, vb, i)
+        grass_cb_i = jld2_read(file, grass_cb, vb, i)
+        grass_no_cb_i = jld2_read(file, grass_no_cb, vb, i)
+        data_300_i = jld2_read(file, data_300, vb, i)
+
+        projected_i_fine = jld2_read_fine(file_fine, projected_fine, vb, i)
+        grass_cb_i_fine = jld2_read_fine(file_fine, grass_cb_fine, vb, i)
+        grass_no_cb_i_fine = jld2_read_fine(file_fine, grass_no_cb_fine, vb, i)
+        data_300_i_fine = jld2_read_fine(file_fine, data_300_fine, vb, i)
+        
+        line_i = jld2_read(line_file, line_rv, vb, i)
+        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-28]))
+
+        lines_arr.append(lines[i])
+        projected_arr.append(rms(line_i, projected_i))
+        grass_cb_arr.append(rms(line_i, grass_cb_i))
+        grass_no_cb_arr.append(rms(line_i, grass_no_cb_i))
+        arr_300.append(rms(line_i, data_300_i))
+        projected_arr_fine.append(rms(line_i, projected_i_fine))
+        grass_cb_arr_fine.append(rms(line_i, grass_cb_i_fine))
+        grass_no_cb_arr_fine.append(rms(line_i, grass_no_cb_i_fine))
+        arr_300_fine.append(rms(line_i, data_300_i_fine))
+
+    plt.figure(figsize=(12, 6))
+    plt.scatter(lines_arr, projected_arr, label = label1, color = 'b')
+    plt.scatter(lines_arr, grass_cb_arr, label = label2, color = 'r')
+    plt.scatter(lines_arr, grass_no_cb_arr, label = label3, color = 'g')
+    plt.scatter(lines_arr, arr_300, label = label4, color = 'k')
+    plt.scatter(lines_arr, projected_arr_fine, color = 'b', facecolors='none')
+    plt.scatter(lines_arr, grass_cb_arr_fine, color = 'r', facecolors='none')
+    plt.scatter(lines_arr, grass_no_cb_arr_fine, color = 'g', facecolors='none')
+    plt.scatter(lines_arr, arr_300_fine, color = 'k', facecolors='none')
+    plt.scatter(lines_arr, line_err, color = 'k', marker='x')
+
+    plt.title("line rms solid - mid exposure  & circle - sec sim")
+    plt.xlabel("Line Wavelength (Å)", fontsize=12)
+    plt.ylabel("RV RMS (m/s)", fontsize=12)
+    plt.xticks(rotation=60)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(fontsize=12)
+    plt.savefig(title, bbox_inches='tight')
+    plt.clf() 
+
 # plot_line_bin(RV_list_no_cb_NL94, GRASS_rv_NL94, GRASS_no_cb_v_NL94, file_regular_NL94, grass_data_NL94, grass_data_no_cb_NL94, "Bins/NL94", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 # plot_line_bin(RV_list_no_cb_SSD, GRASS_rv_SSD, GRASS_no_cb_v_SSD, file_regular_SSD, grass_data_SSD, grass_data_no_cb_SSD, "Bins/SSD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 # plot_line_bin(RV_list_no_cb_HD, GRASS_rv_HD, GRASS_no_cb_v_HD, file_regular_HD, grass_data_HD, grass_data_no_cb_HD, "Bins/HD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 # plot_line_bin(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, file_regular_300, grass_data_300, grass_data_no_cb_300, "Bins/300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-plot_line_bin(RV_list_no_cb_SSD_3ext, GRASS_rv_SSD_3ext, GRASS_no_cb_v_SSD_3ext, file_regular_SSD_3ext, grass_data_SSD_3ext, grass_data_no_cb_SSD_3ext, "Bins/SSD_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
+# plot_line_bin(RV_list_no_cb_SSD_3ext, GRASS_rv_SSD_3ext, GRASS_no_cb_v_SSD_3ext, file_regular_SSD_3ext, grass_data_SSD_3ext, grass_data_no_cb_SSD_3ext, "Bins/SSD_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 
 # plot_model_bin(RV_list_no_cb_NL94, RV_list_no_cb_SSD, RV_list_no_cb_HD, RV_list_no_cb_300, file_regular_NL94, file_regular_SSD, file_regular_HD, file_regular_300, "Bins/Projected", line_data, line_rv, "NL94", "SSD", "HD", "300")
 # plot_model_bin(GRASS_rv_NL94, GRASS_rv_SSD, GRASS_rv_HD, GRASS_rv_300, grass_data_NL94, grass_data_SSD, grass_data_HD, grass_data_300, "Bins/GRASS_cb.pdf", line_data, line_rv, "NL94", "SSD", "HD", "300")
@@ -598,7 +721,7 @@ plot_line_bin(RV_list_no_cb_SSD_3ext, GRASS_rv_SSD_3ext, GRASS_no_cb_v_SSD_3ext,
 # plot_3(RV_list_no_cb_SSD, GRASS_rv_SSD, GRASS_no_cb_v_SSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_SSD, grass_data_no_cb_SSD, "LD_comp/SSD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 # plot_3(RV_list_no_cb_HD, GRASS_rv_HD, GRASS_no_cb_v_HD, 0, file_regular_HD, grass_data_HD, grass_data_no_cb_HD, "LD_comp/HD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 # plot_3(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, 0, file_regular_300, grass_data_300, grass_data_no_cb_300, "LD_comp/300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
-# plot_4_4(GRASS_rv_NL94, GRASS_rv_SSD, GRASS_rv_HD, GRASS_rv_300, rv_error_GRASS_cb, grass_data_NL94, grass_data_SSD, grass_data_HD, grass_data_300, "LD_comp/LD_comp", line_data, line_rv, "NL94", "SSD", "HD", "300")
+# plot_4(GRASS_rv_NL94, GRASS_rv_SSD, GRASS_rv_HD, GRASS_rv_300, rv_error_GRASS_cb, grass_data_NL94, grass_data_SSD, grass_data_HD, grass_data_300, "LD_comp/LD_comp", line_data, line_rv, "NL94", "SSD", "HD", "300")
 
 # plot_3(RV_list_no_cb_SSD, GRASS_rv_SSD, GRASS_no_cb_v_SSD, rv_error_GRASS_cb, file_regular_SSD, grass_data_SSD, grass_data_no_cb_SSD, "SSD_comp/SSD", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 # plot_3(RV_list_no_cb_SSD_3ext, GRASS_rv_SSD_3ext, GRASS_no_cb_v_SSD_3ext, rv_error_GRASS_cb_3ext, file_regular_SSD_3ext, grass_data_SSD_3ext, grass_data_no_cb_SSD_3ext, "SSD_comp/SSD_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
@@ -607,6 +730,10 @@ plot_line_bin(RV_list_no_cb_SSD_3ext, GRASS_rv_SSD_3ext, GRASS_no_cb_v_SSD_3ext,
 # plot_single_rms(line_data, line_rv, file_regular_SSD, RV_list_no_cb_SSD, grass_data_SSD, GRASS_rv_SSD, grass_data_no_cb_SSD, GRASS_no_cb_v_SSD,
 #                 file_regular_SSD_3ext, RV_list_no_cb_SSD_3ext, grass_data_SSD_3ext, GRASS_rv_SSD_3ext, grass_data_no_cb_SSD_3ext, GRASS_no_cb_v_SSD_3ext,
 #                 "SSD_comp/single_rms")
+# plot_4(GRASS_rv_SSD_3ext, GRASS_rv_SSD_3ext_var, GRASS_rv_SSD_3ext_var_lsf, GRASS_rv_SSD_3ext_lsf, grass_data_SSD_3ext, "SSD_ext_LSF_comp", line_data, line_rv, "Original", "Var Weighted", "Var Weighted + NEID LSF", "NEID LSF")
+plot_4_fine(GRASS_no_cb_v_SSD_3ext, GRASS_no_cb_v_SSD_3ext_var, GRASS_no_cb_v_SSD_3ext_var_lsf, GRASS_no_cb_v_SSD_3ext_lsf,
+       GRASS_no_cb_v_SSD_3ext_fine_time, GRASS_no_cb_v_SSD_3ext_var_fine_time, GRASS_no_cb_v_SSD_3ext_var_lsf_fine_time, GRASS_no_cb_v_SSD_3ext_lsf_fine_time,
+       grass_data_no_cb_SSD_3ext, grass_data_no_cb_SSD_3ext_fine_time, "SSD_ext_LSF_comp_no_cb", line_data, line_rv, "Original", "Var Weighted", "Var Weighted + NEID LSF", "NEID LSF")
 
 # plot_3(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, rv_error_GRASS_cb, file_regular_300, grass_data_300, grass_data_no_cb_300, "300_comp/300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 # plot_3(RV_list_no_cb_300_3ext, GRASS_rv_300_3ext, GRASS_no_cb_v_300_3ext, rv_error_GRASS_cb_3ext, file_regular_300_3ext, grass_data_300_3ext, grass_data_no_cb_300_3ext, "300_comp/300_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
@@ -619,3 +746,4 @@ plot_line_bin(RV_list_no_cb_SSD_3ext, GRASS_rv_SSD_3ext, GRASS_no_cb_v_SSD_3ext,
 # plot_2_2(GRASS_rv_300_3ext, GRASS_rv_SSD_3ext, rv_error_GRASS_cb, grass_data_300_3ext, grass_data_SSD_3ext, "LD_comp/ext_comp", line_data, line_rv, "300+3ext", "SSD+3ext")
 
 # rms_comp(line_data, line_rv, "RMS_comp")
+

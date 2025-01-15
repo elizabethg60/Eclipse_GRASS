@@ -32,7 +32,7 @@ for i in data["obsdate"][15:-150]:
     UTC_time.append(dt)
     time_julian.append((Time(dt)).jd)
 # line by line data
-line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline_new.jld2", "r")
+line_data = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/data/neid_RVlinebyline.jld2", "r")
 line_rv  = line_data["rv"][()]
 rv_error_line = line_data["rv_error"][()]
 
@@ -73,7 +73,7 @@ def plot_line(UTC_time, rv_obs, line_rv_array, model, model_label, GRASS, GRASS_
     axs[1].set_ylabel("Residuals", fontsize=12) 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    plt.savefig("{}/rm_and_residuals_{}_new.png".format(path, save))
+    plt.savefig("{}/rm_and_residuals_{}.png".format(path, save))
     plt.clf()
 
 for i in range(0, len(lines)):

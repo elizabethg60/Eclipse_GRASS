@@ -58,12 +58,6 @@ GRASS_rv_SSD  = grass_data_SSD["rv"][()]
 grass_data_no_cb_SSD = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_off_SSD_gpu.jld2", "r")
 GRASS_no_cb_v_SSD  = grass_data_no_cb_SSD["rv"][()]
 
-grass_data_SSD_first = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_regular_SSD_gpu_first.jld2", "r")
-GRASS_rv_SSD_first  = grass_data_SSD_first["rv"][()]
-# GRASS no CB
-grass_data_no_cb_SSD_first = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_off_SSD_gpu_first.jld2", "r")
-GRASS_no_cb_v_SSD_first  = grass_data_no_cb_SSD_first["rv"][()]
-
 def jld2_read(jld2_file, variable, vb, index):
     array = jld2_file[variable[index]][()][0:-28]
     array = np.array(array + vb)
@@ -127,8 +121,7 @@ def plot_4_4(projected, grass_cb, grass_no_cb, data_300,
     plt.clf() 
 
 def plot_2_2(projected, grass_no_cb, 
-                 projected_file, grass_no_cb_file, projected_first, grass_no_cb_first, 
-                 projected_file_first, grass_no_cb_file_first, title, 
+                 projected_file, grass_no_cb_file,  title, 
                  line_file, line_rv, label1, label3):
     
     projected_arr = []
@@ -137,21 +130,7 @@ def plot_2_2(projected, grass_no_cb,
     grass_no_cb_arr_pipe = []
     lines_arr = []
     line_err = []
-    for i in range(0,11):
-
-        projected_i = jld2_read(projected_file_first, projected_first, vb, i)
-        grass_no_cb_i = jld2_read(grass_no_cb_file_first, grass_no_cb_first, vb, i)
-        line_i = jld2_read(line_file, line_rv, vb, i)
-        line_err.append(np.mean(line_file[line_rv_err[i]][()][0:-28]))
-
-        lines_arr.append(lines[i])
-        projected_arr.append(rms(line_i, projected_i))
-        grass_no_cb_arr.append(rms(line_i, grass_no_cb_i))
-
-        projected_arr_pipe.append(rms(rv_obs, projected_i))
-        grass_no_cb_arr_pipe.append(rms(rv_obs, grass_no_cb_i))
-
-    for i in range(11,22):
+    for i in range(0,len(lines)):
 
         projected_i = jld2_read(projected_file, projected, vb, i)
         grass_no_cb_i = jld2_read(grass_no_cb_file, grass_no_cb, vb, i)
@@ -301,5 +280,4 @@ def plot_single_rms(line_file, line_rv, projected_file, projected, grass_cb_file
     plt.savefig(title, bbox_inches='tight')
     plt.clf() 
 
-plot_2_2(GRASS_rv_SSD, GRASS_no_cb_v_SSD, grass_data_SSD, grass_data_no_cb_SSD,
-         GRASS_rv_SSD_first, GRASS_no_cb_v_SSD_first, grass_data_SSD_first, grass_data_no_cb_SSD_first, "plot_SSD", line_data, line_rv, 'CCF RV - GRASS var', 'CCF RV - no var')
+plot_2_2(GRASS_rv_SSD, GRASS_no_cb_v_SSD, grass_data_SSD, grass_data_no_cb_SSD, "plot_SSD_new", line_data, line_rv, 'CCF RV - GRASS var', 'CCF RV - no var')
