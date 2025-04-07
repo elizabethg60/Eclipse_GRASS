@@ -1,19 +1,103 @@
 using SPICE
 using LinearAlgebra 
+using GRASS
+import PyPlot
+plt = PyPlot
+mpl = plt.matplotlib
+
+GRASS.get_kernels()
+
+obs_lat = 31.9583 
+obs_long = -111.5967  
+alt = 2.097938
 
 UTC_time = ["2023-10-14T15:00:00", "2023-10-14T15:05:00", "2023-10-14T15:10:00", "2023-10-14T15:15:00", "2023-10-14T15:20:00","2023-10-14T15:25:00", "2023-10-14T15:30:00", "2023-10-14T15:35:00", "2023-10-14T15:40:00", "2023-10-14T15:45:00","2023-10-14T15:50:00","2023-10-14T15:55:00","2023-10-14T16:00:00", "2023-10-14T16:05:00", "2023-10-14T16:10:00", "2023-10-14T16:15:00", "2023-10-14T16:20:00","2023-10-14T16:25:00", "2023-10-14T16:30:00", "2023-10-14T16:35:00", "2023-10-14T16:40:00", "2023-10-14T16:45:00","2023-10-14T16:50:00","2023-10-14T16:55:00", "2023-10-14T17:00:00", "2023-10-14T17:05:00", "2023-10-14T17:10:00", "2023-10-14T17:15:00", "2023-10-14T17:20:00","2023-10-14T17:25:00", "2023-10-14T17:30:00", "2023-10-14T17:35:00", "2023-10-14T17:40:00", "2023-10-14T17:45:00","2023-10-14T17:50:00","2023-10-14T17:55:00", "2023-10-14T18:00:00", "2023-10-14T18:05:00"]
 epoch = utc2et.(UTC_time)
 
+earth_radius = bodvrd("EARTH", "RADII")[1]	
+earth_radius_pole = bodvrd("EARTH", "RADII")[3]	
 sun_radius = bodvrd("SUN","RADII")[1]
+
 sun_axis_sun = [0.0,0.0,sun_radius]
 
-angle_list = Vector{Float64}[]
+solar_north = [[(0.96331055, 0.22081269, 0.15255998)], 
+[(0.96070574, 0.22908195, 0.15673527)], 
+[(0.95800581, 0.23724158, 0.16106303)], 
+[(0.95521206, 0.24528767, 0.16554119)], 
+[(0.95232581, 0.25321639, 0.17016761)], 
+[(0.94934845, 0.26102393, 0.17494007)], 
+[(0.94628141, 0.26870655, 0.17985629)], 
+[(0.94312615, 0.27626059, 0.18491391)], 
+[(0.93988418, 0.28368242, 0.19011052)], 
+[(0.93655706, 0.29096849, 0.19544364)], 
+[(0.93314637, 0.29811532, 0.20091069)], 
+[(0.92965375, 0.30511949, 0.20650908)], 
+[(0.92608087, 0.31197764, 0.21223613)], 
+[(0.92242944, 0.31868649, 0.21808908)], 
+[(0.91870121, 0.32524284, 0.22406514)], 
+[(0.91489795, 0.33164354, 0.23016146)], 
+[(0.9110215, 0.33788553, 0.2363751)], 
+[(0.90707371, 0.34396583, 0.24270311)], 
+[(0.90305646, 0.34988152, 0.24914244)], 
+[(0.89897168, 0.35562977, 0.25569003)], 
+[(0.89482132, 0.36120783, 0.26234273)], 
+[(0.89060737, 0.36661304, 0.26909737)], 
+[(0.88633184, 0.37184281, 0.2759507)], 
+[(0.88199679, 0.37689463, 0.28289946)], 
+[(0.87760428, 0.38176608, 0.28994031)], 
+[(0.87315642, 0.38645484, 0.29706989)], 
+[(0.86865534, 0.39095866, 0.30428478)], 
+[(0.86410319, 0.39527539, 0.31158153)], 
+[(0.85950215, 0.39940295, 0.31895665)], 
+[(0.85485441, 0.40333938, 0.32640661)], 
+[(0.85016222, 0.4070828, 0.33392784)], 
+[(0.8454278, 0.4106314, 0.34151675)], 
+[(0.84065343, 0.41398349, 0.3491697)], 
+[(0.83584139, 0.41713747, 0.35688304)], 
+[(0.83099399, 0.42009182, 0.36465306)], 
+[(0.82611354, 0.42284514, 0.37247605)], 
+[(0.82120237, 0.42539611, 0.38034828)], 
+[(0.81626285, 0.4277435, 0.38826596)]]
+
+# determine xyz earth coordinates for lat/long of observatory
+flat_coeff = (earth_radius - earth_radius_pole) / earth_radius
+zenith = georec(deg2rad(obs_long), deg2rad(obs_lat), alt, earth_radius, flat_coeff)
+
+spice_original = Vector{Float64}[]
+true_full = Vector{Float64}[]
+spice_phi = Vector{Float64}[]
 for i in 1:length(epoch)
-    sun_axis_earth = pxform("IAU_SUN", "IAU_Earth", epoch[i])*sun_axis_sun
-    bary_axis_earth = pxform("J2000", "IAU_Earth", epoch[i])*sun_axis_sun
-    
-    angle = acos(dot(sun_axis_earth, bary_axis_earth) / (norm(sun_axis_earth) * norm(bary_axis_earth)))
-    push!(angle_list, [rad2deg(angle)])
+
+    # get rotation matrix for sun
+    sun_rot_mat = pxform("IAU_SUN", "IAU_Earth", epoch[i])
+    sun_axis_earth = sun_rot_mat * sun_axis_sun
+
+    angle = acos(dot(sun_axis_earth, zenith) / (norm(sun_axis_earth) * norm(zenith)))
+    push!(spice_original, [90 - rad2deg(angle)])
+
+    sun_axis_earth = sun_rot_mat * collect(solar_north[i][1])
+    angle = acos(dot(sun_axis_earth, zenith) / (norm(sun_axis_earth) * norm(zenith)))
+    push!(true_full, [90 - rad2deg(angle)])
+
+    sun_axis_earth = sun_rot_mat * sun_axis_sun
+    # sun_axis_earth = sun_axis_earth .- (dot(sun_axis_earth, [0,1.0,0]) / (norm([0,1.0,0]) * norm([0,1.0,0]))).*[0,1.0,0]
+    sun_axis_earth = sun_axis_earth .- (dot(sun_axis_earth, [1.0,0,0]) / (norm([1.0,0,0]) * norm([1.0,0,0]))).*[1.0,0,0]
+    angle = acos(dot(sun_axis_earth, zenith) / (norm(sun_axis_earth) * norm(zenith)))
+    push!(spice_phi, [90 - rad2deg(angle)])
 end
 
-print(angle_list)
+true_phi = [11.20225883, 11.62952018, 12.07376153, 12.53543969, 13.01503276, 13.51304018,
+14.02998264, 14.56640191, 15.1228606 , 15.69994166, 16.29824778, 16.91840058,
+17.56103952, 18.22682059, 18.91641465, 19.63050542, 20.36978708, 21.13496144,
+21.92673459, 22.74581301, 23.59289907, 24.46868587, 25.37385145, 26.30905211,
+27.27491509, 28.27203032, 29.30094137, 30.3621356,  31.4560334 , 32.58297676,
+33.74321704, 34.93690226, 36.16406386, 37.42460329 ,38.71827859, 40.04469124,
+41.4032737,  42.79327794]
+
+plt.scatter(1:length(spice_original), spice_original, color = "r", label = "SPICE Full Angle")
+# plt.plot(1:length(angle_list), true_full, color = "r", label = "True Full Angle")
+plt.scatter(1:length(spice_original), spice_phi, color = "b", label = "SPICE Phi Angle")
+plt.plot(1:length(spice_original), true_phi, color = "b", label = "True Phi Angle")
+plt.legend()
+plt.savefig("spice_angles")
+plt.clf()

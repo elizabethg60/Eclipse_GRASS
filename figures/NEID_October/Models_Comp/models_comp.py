@@ -111,12 +111,28 @@ GRASS_rv_SSD_3ext_var  = grass_data_SSD_3ext["rv_var"][()]
 GRASS_rv_SSD_3ext_var_lsf  = grass_data_SSD_3ext["rv_var_lsf"][()]
 GRASS_rv_SSD_3ext_lsf  = grass_data_SSD_3ext["rv_lsf"][()]
 rv_error_GRASS_cb_3ext  = grass_data_SSD_3ext["rv_error"][()]
+grass_data_SSD_3ext_gpu = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_regular_SSD_gpu.jld2", "r")
+GRASS_rv_SSD_3ext_gpu  = grass_data_SSD_3ext_gpu["rv"][()]
+GRASS_rv_SSD_3ext_var_gpu  = grass_data_SSD_3ext_gpu["rv_var"][()]
+GRASS_rv_SSD_3ext_var_lsf_gpu  = grass_data_SSD_3ext_gpu["rv_var_lsf"][()]
+GRASS_rv_SSD_3ext_lsf_gpu  = grass_data_SSD_3ext_gpu["rv_lsf"][()]
+rv_error_GRASS_cb_3ext_gpu  = grass_data_SSD_3ext_gpu["rv_error"][()]
+grass_data_SSD_3ext_fine_time = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_on_SSD_gpu_15s_time.jld2", "r")
+GRASS_rv_SSD_3ext_fine_time  = grass_data_SSD_3ext_fine_time["rv"][()]
+GRASS_rv_SSD_3ext_var_fine_time  = grass_data_SSD_3ext_fine_time["rv_var"][()]
+GRASS_rv_SSD_3ext_var_lsf_fine_time  = grass_data_SSD_3ext_fine_time["rv_var_lsf"][()]
+GRASS_rv_SSD_3ext_lsf_fine_time  = grass_data_SSD_3ext_fine_time["rv_lsf"][()]
 # GRASS no CB
 grass_data_no_cb_SSD_3ext = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/data/neid_all_lines_rv_off_SSD_3ext.jld2", "r")
 GRASS_no_cb_v_SSD_3ext  = grass_data_no_cb_SSD_3ext["rv"][()]
 GRASS_no_cb_v_SSD_3ext_var  = grass_data_no_cb_SSD_3ext["rv_var"][()]
 GRASS_no_cb_v_SSD_3ext_var_lsf  = grass_data_no_cb_SSD_3ext["rv_var_lsf"][()]
 GRASS_no_cb_v_SSD_3ext_lsf  = grass_data_no_cb_SSD_3ext["rv_lsf"][()]
+grass_data_no_cb_SSD_3ext_gpu = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_off_SSD_gpu.jld2", "r")
+GRASS_no_cb_v_SSD_3ext_gpu  = grass_data_no_cb_SSD_3ext_gpu["rv"][()]
+GRASS_no_cb_v_SSD_3ext_var_gpu  = grass_data_no_cb_SSD_3ext_gpu["rv_var"][()]
+GRASS_no_cb_v_SSD_3ext_var_lsf_gpu  = grass_data_no_cb_SSD_3ext_gpu["rv_var_lsf"][()]
+GRASS_no_cb_v_SSD_3ext_lsf_gpu  = grass_data_no_cb_SSD_3ext_gpu["rv_lsf"][()]
 # GRASS no CB - fine time
 grass_data_no_cb_SSD_3ext_fine_time = h5py.File("/storage/home/efg5335/work/Eclipse_GRASS/figures/NEID_October/SSD/SSD_3ext/GPU/data/neid_all_lines_rv_off_SSD_gpu_15s_time.jld2", "r")
 GRASS_no_cb_v_SSD_3ext_fine_time  = grass_data_no_cb_SSD_3ext_fine_time["rv"][()]
@@ -660,8 +676,8 @@ def plot_4_fine(projected, grass_cb, grass_no_cb, data_300,
     lines_arr = []
     line_err = []
     for i in range(0,len(lines)):
-        if i == 10 or i == 14 or i == 16:
-            continue
+        # if i == 10 or i == 14 or i == 16:
+        #     continue
 
         projected_i = jld2_read(file, projected, vb, i)
         grass_cb_i = jld2_read(file, grass_cb, vb, i)
@@ -688,12 +704,13 @@ def plot_4_fine(projected, grass_cb, grass_no_cb, data_300,
 
     plt.figure(figsize=(12, 6))
     plt.scatter(lines_arr, projected_arr, label = label1, color = 'b')
-    plt.scatter(lines_arr, grass_cb_arr, label = label2, color = 'r')
-    plt.scatter(lines_arr, grass_no_cb_arr, label = label3, color = 'g')
+    print(projected_arr)
+    # plt.scatter(lines_arr, grass_cb_arr, label = label2, color = 'r')
+    # plt.scatter(lines_arr, grass_no_cb_arr, label = label3, color = 'g')
     plt.scatter(lines_arr, arr_300, label = label4, color = 'k')
     plt.scatter(lines_arr, projected_arr_fine, color = 'b', facecolors='none')
-    plt.scatter(lines_arr, grass_cb_arr_fine, color = 'r', facecolors='none')
-    plt.scatter(lines_arr, grass_no_cb_arr_fine, color = 'g', facecolors='none')
+    # plt.scatter(lines_arr, grass_cb_arr_fine, color = 'r', facecolors='none')
+    # plt.scatter(lines_arr, grass_no_cb_arr_fine, color = 'g', facecolors='none')
     plt.scatter(lines_arr, arr_300_fine, color = 'k', facecolors='none')
     plt.scatter(lines_arr, line_err, color = 'k', marker='x')
 
@@ -731,9 +748,12 @@ def plot_4_fine(projected, grass_cb, grass_no_cb, data_300,
 #                 file_regular_SSD_3ext, RV_list_no_cb_SSD_3ext, grass_data_SSD_3ext, GRASS_rv_SSD_3ext, grass_data_no_cb_SSD_3ext, GRASS_no_cb_v_SSD_3ext,
 #                 "SSD_comp/single_rms")
 # plot_4(GRASS_rv_SSD_3ext, GRASS_rv_SSD_3ext_var, GRASS_rv_SSD_3ext_var_lsf, GRASS_rv_SSD_3ext_lsf, grass_data_SSD_3ext, "SSD_ext_LSF_comp", line_data, line_rv, "Original", "Var Weighted", "Var Weighted + NEID LSF", "NEID LSF")
-plot_4_fine(GRASS_no_cb_v_SSD_3ext, GRASS_no_cb_v_SSD_3ext_var, GRASS_no_cb_v_SSD_3ext_var_lsf, GRASS_no_cb_v_SSD_3ext_lsf,
+plot_4_fine(GRASS_no_cb_v_SSD_3ext_gpu, GRASS_no_cb_v_SSD_3ext_var_gpu, GRASS_no_cb_v_SSD_3ext_var_lsf_gpu, GRASS_no_cb_v_SSD_3ext_lsf_gpu,
        GRASS_no_cb_v_SSD_3ext_fine_time, GRASS_no_cb_v_SSD_3ext_var_fine_time, GRASS_no_cb_v_SSD_3ext_var_lsf_fine_time, GRASS_no_cb_v_SSD_3ext_lsf_fine_time,
-       grass_data_no_cb_SSD_3ext, grass_data_no_cb_SSD_3ext_fine_time, "SSD_ext_LSF_comp_no_cb", line_data, line_rv, "Original", "Var Weighted", "Var Weighted + NEID LSF", "NEID LSF")
+       grass_data_no_cb_SSD_3ext_gpu, grass_data_no_cb_SSD_3ext_fine_time, "SSD_ext_LSF_comp_no_cb_15s_no_var_gpu", line_data, line_rv, "Original", "Var Weighted", "Var Weighted + NEID LSF", "NEID LSF")
+plot_4_fine(GRASS_rv_SSD_3ext_gpu, GRASS_rv_SSD_3ext_var_gpu, GRASS_rv_SSD_3ext_var_lsf_gpu, GRASS_rv_SSD_3ext_lsf_gpu,
+       GRASS_rv_SSD_3ext_fine_time, GRASS_rv_SSD_3ext_var_fine_time, GRASS_rv_SSD_3ext_var_lsf_fine_time, GRASS_rv_SSD_3ext_lsf_fine_time,
+       grass_data_SSD_3ext_gpu, grass_data_SSD_3ext_fine_time, "SSD_ext_LSF_comp_cb_15s_no_var_gpu", line_data, line_rv, "Original", "Var Weighted", "Var Weighted + NEID LSF", "NEID LSF")
 
 # plot_3(RV_list_no_cb_300, GRASS_rv_300, GRASS_no_cb_v_300, rv_error_GRASS_cb, file_regular_300, grass_data_300, grass_data_no_cb_300, "300_comp/300", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
 # plot_3(RV_list_no_cb_300_3ext, GRASS_rv_300_3ext, GRASS_no_cb_v_300_3ext, rv_error_GRASS_cb_3ext, file_regular_300_3ext, grass_data_300_3ext, grass_data_no_cb_300_3ext, "300_comp/300_3ext", line_data, line_rv, 'Projected RV - no cb', 'CCF RV - GRASS var', 'CCF RV - no var')
